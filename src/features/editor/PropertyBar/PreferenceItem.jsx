@@ -104,7 +104,7 @@ function PreferenceItem({
                 onClose={handleCloseConfirmDialog}
                 onConfirm={handleConfirmDelete}
                 title={t('preferences.alerts.confirmDeleteTitle', 'Odstranit preferenci?')}
-                message={t('preferences.alerts.confirmDeleteMessage', `Opravdu si přejete odstranit preferenci "${displayLabel}"?`)}
+                message={t('preferences.alerts.confirmDeleteMessage', { displayLabel })}
                 confirmButtonText={t('common.delete', 'Smazat')}
                 confirmButtonColor="error"
             />

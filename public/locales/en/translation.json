@@ -206,7 +206,9 @@
       "allDeleted": "All preferences have been removed.",
       "updated": "Preference has been updated.",
       "priorityChanged": "Preference priority has been adjusted.",
-      "activityChanged": "Preference activity has been changed."
+      "activityChanged": "Preference activity has been changed.",
+      "confirmDeleteTitle": "Delete preference?",
+      "confirmDeleteMessage": "Are you sure you want to delete the preference \"{{displayLabel}}\"?"
     }
   },
   "Dialogs": {
