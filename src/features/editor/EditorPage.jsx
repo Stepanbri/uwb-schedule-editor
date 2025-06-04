@@ -58,8 +58,8 @@ const EditorLayoutDesktop = styled(Box)(({ theme }) => ({
     display: 'flex',
     flexGrow: 1,
     overflow: 'hidden',
-    gap: theme.spacing(1.5),
-    padding: theme.spacing(1.5),
+    // gap: theme.spacing(1.5),
+    // padding: theme.spacing(1.5),
     backgroundColor: theme.palette.background.default,
 }));
 
@@ -73,7 +73,7 @@ const SidebarWrapper = styled(Box, {
     flexDirection: 'column',
     overflow: 'hidden',
     backgroundColor: theme.palette.background.paper,
-    borderRadius: theme.shape.borderRadius,
+    //borderRadius: theme.shape.borderRadius,
     boxShadow: theme.shadows[1],
 }));
 
@@ -233,7 +233,7 @@ function EditorPage() {
                         open={mobileDrawerOpen}
                         onClose={() => setMobileDrawerOpen(false)}
                         onOpen={() => setMobileDrawerOpen(true)}
-                        PaperProps={{ sx: { height: '100vh', width: { xs: '85vw', sm: LEFT_SIDEBAR_WIDTH_DESKTOP },  borderRight: `1px solid ${theme.palette.divider}` } }}
+                        PaperProps={{ sx: { overflow: 'hidden' ,height: '100vh', width: { xs: '85vw', sm: LEFT_SIDEBAR_WIDTH_DESKTOP },  borderRight: `1px solid ${theme.palette.divider}` } }}
                         disableBackdropTransition={true} // Pro plynulejší animaci na mobilu
                     >
                         {drawerContent}
@@ -252,7 +252,7 @@ function EditorPage() {
                             onOpenLoadCoursesFromStudentDialog={stagStudentPlanLoader.openLoadCoursesFromStudentDialog}
                         />
                     </SidebarWrapper>
-                    <MainContentWrapper sx={{position: 'relative'}}>
+                    <MainContentWrapper sx={{position: 'relative', flexShrink: 1, border: `1px solid ${theme.palette.divider}`, marginTop: theme.spacing(1.5), marginX: theme.spacing(1.5)}}>
                         {isGloballyLoading && (
                             <Box sx={{position: 'absolute', top:0,left:0,right:0,bottom:0, display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center', backgroundColor: alpha(theme.palette.background.paper, 0.85), zIndex: 10}}>
                                 <CircularProgress />
@@ -267,7 +267,7 @@ function EditorPage() {
                         }
                     </MainContentWrapper>
                     <SidebarWrapper customWidth={RIGHT_SIDEBAR_WIDTH_DESKTOP}>
-                        <PropertiesBar /* Ponecháváme prozatím, bude refaktorováno */ />
+                        <PropertiesBar/>
                     </SidebarWrapper>
                 </EditorLayoutDesktop>
             )}

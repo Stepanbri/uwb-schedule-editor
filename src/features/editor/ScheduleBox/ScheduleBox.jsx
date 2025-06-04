@@ -31,7 +31,7 @@ const TOTAL_SCHEDULE_DURATION_MINUTES = SCHEDULE_END_TIME_MINUTES - SCHEDULE_STA
 
 const DAY_CELL_WIDTH = 100;
 const TIME_HEADER_HEIGHT = 60;
-const MIN_EVENT_HEIGHT = 40;
+const MIN_EVENT_HEIGHT = 50;
 
 const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
     maxHeight: `calc(100vh - ${theme.mixins.toolbar.minHeight}px - 48px - ${TIME_HEADER_HEIGHT}px)`,
@@ -159,16 +159,16 @@ function ScheduleBox() {
     };
 
     return (
-        <Paper elevation={1} sx={{ height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        <Paper elevation={1} sx={{ height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column'}}>
             <StyledTableContainer component={Paper}>
                 <Table stickyHeader size="small">
                     <TableHead>
-                        <TableRow sx={{ height: TIME_HEADER_HEIGHT }}>
+                        <TableRow sx={{ height: TIME_HEADER_HEIGHT}}>
                             <StickyTableCell stickytype="corner">
                                 {t('schedule.dayTime', 'Den/Čas')}
                             </StickyTableCell>
                             {TIME_BLOCKS.map((block, index) => (
-                                <StickyTableCell key={index} stickytype="time">
+                                <StickyTableCell key={index} stickytype="time" sx={{ height: TIME_HEADER_HEIGHT, background: "linear-gradient(-90deg,rgba(37, 105, 106, 0) 0%, rgba(18, 218, 222, 0.02) 100%);" }}>
                                     <Typography variant="caption" display="block" fontWeight="bold">{block.label}</Typography>
                                     {block.start} - {block.end}
                                 </StickyTableCell>
@@ -181,7 +181,7 @@ function ScheduleBox() {
                             const rowHeight = Math.max(1, levelsForDay.length) * (MIN_EVENT_HEIGHT + 4) - 4;
 
                             return (
-                                <TableRow key={dayKey} sx={{ height: `${rowHeight}px` }}>
+                                <TableRow key={dayKey} sx={{ height: `${rowHeight}px`}}>
                                     <StickyTableCell stickytype="day" component="th" scope="row" variant="head">
                                         <Typography fontWeight="bold">{t(dayKey)}</Typography>
                                     </StickyTableCell>

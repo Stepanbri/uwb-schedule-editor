@@ -29,13 +29,13 @@ const CourseNodeHeader = ({ course, enrolledCounts, neededEnrollmentsDisplay, ar
     return (
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', py: '4px' }}>
             <Stack direction="column" spacing={0.5} flexGrow={1} overflow="hidden" pr={1}>
-                <Tooltip title={`${course.name} (${course.departmentCode}/${course.courseCode})`}>
+                <Tooltip disableInteractive title={`${course.name} (${course.departmentCode}/${course.courseCode})`}>
                     <Typography variant="subtitle1" sx={{ fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: 500 }}>
                         {course.courseCode} - {course.name}
                     </Typography>
                 </Tooltip>
                 <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
-                    <Chip label={t('labels.credits', { count: course.credits })} size="small" variant="outlined" sx={{ fontSize: '0.7rem', cursor: 'default' }} />
+                    {/*<Chip label={t('labels.credits', { count: course.credits })} size="small" variant="outlined" sx={{ fontSize: '0.7rem', cursor: 'default' }} />*/}
                     <Tooltip title={t('tooltips.requiredEnrollments', { enrolledReqStr: enrolledReqStr } )}>
                         <Chip
                             icon={areAllRequirementsMet ? <CheckCircleOutlineIcon fontSize="small" /> : <HourglassEmptyIcon fontSize="small" />}
@@ -46,12 +46,12 @@ const CourseNodeHeader = ({ course, enrolledCounts, neededEnrollmentsDisplay, ar
                             size="small"
                             color={areAllRequirementsMet ? "success" : "warning"}
                             variant="outlined"
-                            sx={{ fontSize: '0.7rem', cursor: 'default' }}
+                            sx={{fontSize: '0.7rem', cursor: 'default' }}
                         />
                     </Tooltip>
                 </Stack>
             </Stack>
-            <Tooltip title={t('tooltips.removeCourse', 'Odstranit předmět z pracovní plochy')}>
+            <Tooltip disableInteractive title={t('tooltips.removeCourse', 'Odstranit předmět z pracovní plochy')}>
                 <IconButton
                     onClick={handleRemoveClick}
                     size="small"

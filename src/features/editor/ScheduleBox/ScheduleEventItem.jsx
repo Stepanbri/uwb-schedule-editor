@@ -9,20 +9,11 @@ import { ENROLLMENT_KEY_TO_SHORT_I18N_KEY } from '../../../constants/constants.j
 // import EventDetailPopover from './EventDetailPopover'; // Vytvoříme později
 
 const getEventTypeThemeColor = (eventType, theme) => {
-    const typeKey = EVENT_TYPE_TO_KEY_MAP[eventType?.toLowerCase()] || 'default';
-    // Rozšíření theme.js o barvy pro eventTypes by bylo ideální
-    // např. theme.palette.eventTypes.lecture, theme.palette.eventTypes.practical, atd.
-    // (zmínka o theme.jsx)
-    // (zmínka o barevném odlišení)
-
-    // Prozatímní fallback barvy
-    const colors = {
-        lecture: theme.palette.mode === 'dark' ? theme.palette.error.dark : theme.palette.error.light, // červená pro přednášky
-        practical: theme.palette.mode === 'dark' ? theme.palette.success.dark : theme.palette.success.light, // zelená pro cvičení
-        seminar: theme.palette.mode === 'dark' ? theme.palette.warning.dark : theme.palette.warning.light, // žlutá pro semináře
-        default: theme.palette.mode === 'dark' ? theme.palette.grey[700] : theme.palette.grey[300],
+    const typeKey = EVENT_TYPE_TO_KEY_MAP[eventType?.toLowerCase()] || 'other'; // 'other' jako fallback
+    return {
+        backgroundColor: theme.palette.eventTypes[typeKey] || theme.palette.eventTypes.other,
+        borderColor: theme.palette.eventTypes[`${typeKey}Border`] || theme.palette.eventTypes.otherBorder,
     };
-    return colors[typeKey] || colors.default;
 };
 
 
@@ -44,7 +35,8 @@ function ScheduleEventItem({ eventData, course, style }) {
 
     if (!eventData || !course) return null;
 
-    const backgroundColor = getEventTypeThemeColor(eventData.type, theme);
+    const eventStyleColors = getEventTypeThemeColor(eventData.type, theme);
+
     const shortTypeKey = EVENT_TYPE_TO_KEY_MAP[eventData.type?.toLowerCase()];
     const typeDisplay = shortTypeKey ? t(ENROLLMENT_KEY_TO_SHORT_I18N_KEY[shortTypeKey], eventData.type.substring(0,2).toUpperCase()) : eventData.type.substring(0,2).toUpperCase();
 
@@ -73,8 +65,8 @@ function ScheduleEventItem({ eventData, course, style }) {
                     onClick={handleClick}
                     sx={{
                         ...style, // position, left, width, top, height z ScheduleBox
-                        backgroundColor,
-                        border: `1px solid ${theme.palette.divider}`,
+                        backgroundColor: eventStyleColors.backgroundColor,
+                        border: `1px solid ${eventStyleColors.borderColor}`,
                         borderRadius: '4px',
                         padding: '2px 4px',
                         overflow: 'hidden',
@@ -87,11 +79,11 @@ function ScheduleEventItem({ eventData, course, style }) {
                             borderColor: theme.palette.primary.main,
                             boxShadow: theme.shadows[2],
                         },
-                        color: theme.palette.getContrastText(backgroundColor),
+                        color: theme.palette.getContrastText(eventStyleColors.backgroundColor),
                     }}
                 >
-                    <Typography variant="caption" fontWeight="bold" noWrap sx={{ lineHeight: 1.2 }}>
-                        {courseShortCode} <Chip label={typeDisplay} size="small" variant="outlined" sx={{ ml: 0.5, height: '16px', fontSize: '0.65rem', backgroundColor: alpha(theme.palette.common.white, 0.2)}} />
+                    <Typography variant="caption" fontWeight="bold" noWrap sx={{ lineHeight: 1.2, overflow: "visible" }}>
+                        {courseShortCode} <Chip label={typeDisplay} size="small" variant="outlined" sx={{ ml: 0.5, height: '12px', fontSize: '0.65rem', backgroundColor: alpha(theme.palette.common.white, 0.2)}} />
                     </Typography>
                     <Typography variant="caption" noWrap sx={{ fontSize: '0.7rem', lineHeight: 1.1 }}>
                         {roomText}
@@ -134,7 +126,7 @@ function ScheduleEventItem({ eventData, course, style }) {
                     <Typography variant="subtitle1">{course.name} ({courseShortCode})</Typography>
                     <Typography variant="subtitle2">{t(`courseEvent.${eventData.type.toLowerCase()}`, eventData.type)}</Typography>
                     <Divider sx={{ my: 1 }} />
-                    <Typography variant="body2">{t('labels.time', 'Čas')}: {eventData.startTime} - {eventData.endTime}}</Typography>
+                    <Typography variant="body2">{t('labels.time', 'Čas')}: {`${eventData.startTime} - ${eventData.endTime}`}</Typography>
                     <Typography variant="body2">{t('labels.room', 'Místnost')}: {roomText}</Typography>
                     <Typography variant="body2">{t('labels.instructor', 'Vyučující')}: {instructorName || t('common.notSpecified')}</Typography>
                     <Typography variant="body2">{t('labels.capacity', 'Kapacita')}: {capacityText}</Typography>

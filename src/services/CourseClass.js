@@ -51,6 +51,20 @@ class CourseClass {
         this.year = year;
     }
 
+    _hasEventsOfType(typeKeyToCheck) {
+        if (!this.events || this.events.length === 0) return false;
+        return this.events.some(event => {
+            const key = EVENT_TYPE_TO_KEY_MAP[event.type?.toLowerCase()];
+            return key === typeKeyToCheck;
+        });
+    }
+
+    // Metoda pro určení, zda se jedná o speciální případ substituce
+    // (přednáška/přednášky jsou potřeba k zapsání pro řádný zápis, ale nejsou k dispozici, takže se cvičení počítají jako přednášky)
+    isSpecialLectureSubstitutionCase() {
+        return (this.neededEnrollments.lecture > 0 && !this._hasEventsOfType('lecture') && this._hasEventsOfType('practical'));
+    }
+
     getShortCode() {
         return `${this.departmentCode}/${this.courseCode}`; // Např. KMA/MA2 [cite: 14]
     }
@@ -114,13 +128,25 @@ class CourseClass {
      */
     getEnrolledCounts(allEnrolledEventIdsInSchedule) {
         const counts = { lecture: 0, practical: 0, seminar: 0, total: 0 };
-        if (!allEnrolledEventIdsInSchedule) return counts;
+        if (!allEnrolledEventIdsInSchedule || allEnrolledEventIdsInSchedule.size === 0) { // Kontrola i velikosti Setu
+            return counts;
+        }
+
+        const useSubstitution = this.isSpecialLectureSubstitutionCase();
 
         this.events.forEach(event => {
             if (allEnrolledEventIdsInSchedule.has(event.id)) {
-                const key = EVENT_TYPE_TO_KEY_MAP[event.type?.toLowerCase()];
-                if (key && counts.hasOwnProperty(key)) {
-                    counts[key]++;
+                let countAsKey = EVENT_TYPE_TO_KEY_MAP[event.type?.toLowerCase()];
+
+                if (useSubstitution && countAsKey === 'practical') {
+                    // V tomto speciálním případě se cvičení počítá jako přednáška
+                    countAsKey = 'lecture';
+                }
+                // Pokud je i tak countAsKey 'practical' (tj. neededEnrollments.practical > 0 a nejedná se o substituci),
+                // nebo 'seminar', započítá se normálně.
+
+                if (countAsKey && counts.hasOwnProperty(countAsKey)) {
+                    counts[countAsKey]++;
                 }
                 counts.total++;
             }

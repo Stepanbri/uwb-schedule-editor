@@ -1,10 +1,10 @@
 {
   "appTitle": "Plánovač Rozvrhu ZČU",
-  "appTitleShort": "Plánovač ZČU",
+  "appTitleShort": "Plánovač Rozvrhu",
   "nav": {
-    "landing": "Úvod",
     "editor": "Editor Rozvrhu",
-    "faq": "FAQ"
+    "faq": "FAQ",
+    "landing": "Úvod"
   },
   "languageToggle": "Jazyk",
   "themeToggle": {
@@ -13,69 +13,67 @@
     "lightTooltip": "Přepnout na světlý režim",
     "darkTooltip": "Přepnout na tmavý režim"
   },
-  "landingPage": {
-    "hero": {
-      "title": "Plánovač Rozvrhu pro ZČU",
-      "description": "Vytvořte si perfektní studentský rozvrh snadno a rychle. Naše aplikace vám pomůže optimalizovat váš čas na Západočeské univerzitě ještě před oficiálním zápisem do IS/STAG.",
-      "editorButton": "Spustit Editor Rozvrhu",
-      "universityButton": "Web ZČU"
-    },
-    "functions": {
-      "sectionTitle": "Co Vám Aplikace Nabízí?",
-      "intro": "Aplikace Plánovač Rozvrhu ZČU vám pomůže optimalizovat váš čas a připravit se na semestr s následujícími možnostmi:",
-      "func1": {
-        "title": "Plánování Před Zápisem",
-        "desc": "Sestavte si svůj rozvrh ještě před oficiálním termínem zápisu do univerzitního systému IS/STAG. Získejte tak výhodu lepšího plánování a optimalizace vašeho času."
-      },
-      "func2": {
-        "title": "Intuitivní Vizualizace Rozvrhu",
-        "desc": "Zobrazte si přehledně všechny zapsané předměty a jejich rozvrhové akce v průběhu celého týdne. Aplikace klade důraz na srozumitelné uživatelské rozhraní."
-      },
-      "func3": {
-        "title": "Import Předmětů z IS/STAG",
-        "desc": "Načtěte si snadno aktuální data o předmětech a jejich rozvrhových akcích přímo z IS/STAG. Možnost importu dle kódu předmětu nebo vašeho studijního plánu."
-      },
-      "func4": {
-        "title": "Generátor Optimálního Rozvrhu",
-        "desc": "Nechte si automaticky vygenerovat návrhy možných variant rozvrhu. Stačí zvolit vaše preference, jako například volný den, a systém se pokusí najít nejlepší řešení."
-      },
-      "func5": {
-        "title": "Správa Pracovní Plochy",
-        "desc": "Uložte si všechny načtené předměty, aktuálně sestavený rozvrh i vaše osobní preference. Kdykoliv se můžete vrátit a pokračovat v plánování."
-      },
-      "func6": {
-        "title": "Export a Tisk Rozvrhu",
-        "desc": "Vytvořený rozvrh si můžete jednoduše uložit jako obrázek ve formátu PNG pro snadné sdílení, nebo si jej přímo vytisknout pro offline použití."
-      }
-    },
-    "tech": {
-      "sectionTitle": "Postaveno na Moderních Technologiích",
-      "versionLabel": "Verze",
-      "reactDesc": "JavaScriptová knihovna pro dynamická uživatelská rozhraní, zajišťující plynulost a interaktivitu aplikace.",
-      "muiDesc": "Knihovna komponent pro React, která poskytuje robustní a přizpůsobitelné prvky v souladu s Material Designem.",
-      "viteDesc": "Nástroj nové generace pro frontend development, který nabízí bleskurychlé sestavení a okamžitou zpětnou vazbu při vývoji.",
-      "i18nextDesc": "Flexibilní framework pro internacionalizaci, umožňující snadný překlad aplikace do více jazyků."
-    },
-    "author": {
-      "sectionTitle": "O Projektu",
-      "namePlaceholder": "Štěpán Bříza",
-      "summary": "Tento Plánovač Rozvrhu vznikl jako semestrální práce předmětu KIV/UUR s cílem zjednodušit studentům organizaci jejich studijního života a naučení Reactu.",
-      "githubButton": "Projekt na GitHubu"
-    }
+  "common": {
+    "loading": "Načítání...",
+    "saving": "Ukládání...",
+    "processing": "Zpracovávám...",
+    "processingStudentPlan": "Zpracovávám data studenta...",
+    "processingCourse": "Zpracovávám předmět...",
+    "loadingApp": "Načítání pracovní plochy...",
+    "error": "Chyba",
+    "success": "Úspěch",
+    "warning": "Varování",
+    "info": "Informace",
+    "cancel": "Zrušit",
+    "add": "Přidat",
+    "save": "Uložit",
+    "delete": "Smazat",
+    "confirm": "Potvrdit",
+    "continue": "Pokračovat",
+    "close": "Zavřít",
+    "notSpecified": "Nezadáno",
+    "unknownType": "Neznámý typ",
+    "noAdditionalInfo": "Bez dalších informací",
+    "scheduleNotAvailable": "Rozvrh není k dispozici nebo se načítá."
   },
-  "faqPage": {
-    "title": "Často Kladené Otázky",
-    "q1": "Jaký je cíl této aplikace?",
-    "a1": "Aplikace umožňuje studentům ZČU plánovat si rozvrh předmětů před oficiálním zápisem a optimalizovat tak svůj čas.",
-    "q2": "Pro koho je aplikace určena?",
-    "a2": "Primárně pro studenty Západočeské univerzity v Plzni, kteří si mohou svůj rozvrh sestavovat sami."
+  "alerts": {
+    "workspaceSaved": "Pracovní plocha uložena.",
+    "loadedDummyData": "Byla načtena ukázková data.",
+    "workspaceLoadedFromLocalStorage": "Pracovní plocha načtena z Local Storage.",
+    "stagLoginSuccessful": "Přihlášení do STAGu proběhlo úspěšně.",
+    "stagLoginNoRoles": "Přihlášení proběhlo, ale nebyly nalezeny žádné role nebo chybí informace o uživateli.",
+    "courseRemoved": "Předmět {{courseId}} byl odstraněn.",
+    "allCoursesRemoved": "Všechny předměty byly odstraněny.",
+    "confirmRemoveAllCourses": "Opravdu chcete odstranit všechny načtené předměty a jejich zapsané akce z rozvrhu? Tato akce je nevratná.",
+    "internalError": "Interní chyba aplikace.",
+    "eventFull": "Kapacita akce '{{eventType}}' předmětu {{courseCode}} je plná.",
+    "typeRequirementMet": "Požadovaný počet akcí typu '{{eventType}}' pro předmět {{courseCode}} je již naplněn.",
+    "eventEnrolled": "Akce '{{eventType}}' předmětu {{courseCode}} byla zapsána.",
+    "eventUnenrolled": "Akce '{{eventType}}' předmětu {{courseCode}} byla odepsána.",
+    "courseOverwritten": "Předmět {{courseCode}} byl přepsán novými daty.",
+    "courseAdded": "Předmět {{courseCode}} byl přidán.",
+    "stagSubjectNotFound": "Předmět {{subjectCode}} nebyl v systému STAG nalezen.",
+    "stagLoadError": "Chyba při komunikaci se STAG API.",
+    "identitySelectedLog": "Role/Identita {{stagUser}} byla vybrána.",
+    "fetchStudentInfoErrorNoStudyDetails": "Nepodařilo se získat ID oboru studenta ze STAGu.",
+    "fetchStudentInfoErrorNoData": "Nepodařilo se získat kompletní informace o studentovi ze STAGu.",
+    "fetchStudentInfoError": "Nepodařilo se načíst detaily studenta.",
+    "loadingStudyPlanSubjects": "Načítám předměty studijního plánu...",
+    "noStudentContextForPlan": "Chybí kontext studenta (ID oboru) pro načtení předmětů.",
+    "noSubjectsFoundForField": "Pro daný obor a verzi plánu nebyly nalezeny žádné předměty.",
+    "noSubjectsMatchCriteria": "Nebyly nalezeny žádné předměty odpovídající zadaným kritériím ročníku, semestru a statutu.",
+    "fetchingSubjectDetailsCount": "Načítám detaily a rozvrhové akce pro {{count}} předmětů...",
+    "studyPlanLoadSummary_one": "Byl přidán {{added}} předmět, přepsán {{overwritten}} předmět. {{failed}} se nepodařilo zpracovat.",
+    "studyPlanLoadSummary_few": "Byly přidány {{added}} předměty, přepsány {{overwritten}} předměty. {{failed}} se nepodařilo zpracovat.",
+    "studyPlanLoadSummary_many": "Bylo přidáno {{added}} předmětů, přepsáno {{overwritten}} předmětů. {{failed}} se nepodařilo zpracovat.",
+    "studyPlanLoadSummary_other": "Bylo přidáno {{added}} předmětů, přepsáno {{overwritten}} předmětů. {{failed}} se nepodařilo zpracovat.",
+    "studyPlanLoadError": "Chyba při načítání předmětů studijního plánu.",
+    "identitySelectionCancelledAndTicketCleared": "Výběr identity byl zrušen. STAG session byla ukončena.",
+    "studyParamsSelectionCancelled": "Výběr parametrů studia byl zrušen. STAG session byla ukončena.",
+    "confirmRemoveCourse": "Opravdu chcete odstranit předmět {{courseName}} ({{courseStagId}}) a odepsat všechny jeho zapsané akce z aktuálního rozvrhu?",
+    "workspaceCleared": "Pracovní plocha byla vymazána."
   },
   "courseEvent": {
-    "lecture": "Přednáška",
-    "practical": "Cvičení",
-    "seminar": "Seminář",
-    "exam": "Zkouška",
-    "credit": "Zápočet",
     "monday": "Pondělí",
     "tuesday": "Úterý",
     "wednesday": "Středa",
@@ -83,17 +81,259 @@
     "friday": "Pátek",
     "saturday": "Sobota",
     "sunday": "Neděle",
-    "everyWeek": "Každý týden",
-    "evenWeek": "Sudý týden",
-    "oddWeek": "Lichý týden"
+    "lecture": "Přednáška",
+    "practical": "Cvičení",
+    "seminar": "Seminář",
+    "exam": "Zkouška",
+    "credit": "Zápočet",
+    "block": "Bloková výuka",
+    "unknown": "Neznámý typ",
+    "recurrence": "Opakování",
+    "recurrenceShort": {
+      "každýtýden": "KT",
+      "sudýtýden": "ST",
+      "lichýtýden": "LT",
+      "jednorázově": "Jedn."
+    },
+    "každýtýden": "Každý týden",
+    "sudýtýden": "Sudý týden",
+    "lichýtýden": "Lichý týden",
+    "jednorázově": "Jednorázově"
+  },
+  "enrollmentShort": {
+    "lecture": "P",
+    "practical": "C",
+    "seminar": "S"
+  },
+  "labels": {
+    "credits": "{{count}} kredit",
+    "credits_plural": "{{count}} kredity",
+    "requirementsMet": "Požadavky splněny ({{count}})",
+    "remaining": "Zbývá: {{needed}} (Zaps: {{enrolledCount}})",
+    "eventType": "Typ akce",
+    "enrolled": "Zapsáno",
+    "enroll": "Zapsat",
+    "room": "Místnost",
+    "virtualEvent": "Virtuální akce",
+    "capacity": "Kapacita",
+    "full": "Plno",
+    "instructor": "Vyučující",
+    "notes": "Poznámka",
+    "recurrence": "Opakování",
+    "loadingCourses": "Načítání předmětů...",
+    "unknownDepartment": "Neznámá katedra",
+    "noCoursesToDisplay": "Žádné předměty k zobrazení. Přidejte předmět nebo načtěte uložený stav.",
+    "noEventsForCourse": "Tento předmět nemá žádné rozvrhové akce."
+  },
+  "tooltips": {
+    "removeCourse": "Odstranit předmět {{courseName}} z pracovní plochy",
+    "requiredEnrollments": "Požadované zápisy: {{enrolledReqStr}}",
+    "enrollAction": "Zapsat akci do svého rozvrhu",
+    "unenrollAction": "Odzapsat akci ze svého rozvrhu",
+    "enrollDisabledCapacityFull": "Kapacita této akce je plná.",
+    "enrollDisabledTypeMet": "Požadovaný počet akcí typu \"{{eventType}}\" pro tento předmět je již naplněn."
+  },
+  "propertiesBar": {
+    "title": "Nastavení Generování",
+    "addPreferenceButton": "Přidat preferenci",
+    "generateButton": "Vygenerovat Rozvrh",
+    "generateScheduleLog": "Generuji rozvrh s preferencemi...",
+    "generateScheduleAlert": "Generování rozvrhu bylo spuštěno s {{count}} aktivními preferencemi.",
+    "generateScheduleSuccess": "Rozvrhy byly úspěšně vygenerovány.",
+    "generateScheduleFailure": "Nepodařilo se vygenerovat žádné rozvrhy splňující zadaná kritéria.",
+    "addDialog": {
+      "title": "Přidat novou preferenci",
+      "preferenceType": "Typ preference"
+    },
+    "preferenceList": {
+      "noPreferences": "Zatím nebyly přidány žádné preference."
+    },
+    "preferenceItem": {
+      "increasePriority": "Zvýšit prioritu",
+      "decreasePriority": "Snížit prioritu",
+      "toggleActive": "Aktivovat/deaktivovat preferenci",
+      "deletePreference": "Smazat preferenci"
+    }
+  },
+  "preferences": {
+    "types": {
+      "FREE_DAY": {
+        "label": "Volný den v týdnu",
+        "shortLabel": "Volný den"
+      },
+      "AVOID_TIMES": {
+        "label": "Vyhnout se časovému bloku",
+        "shortLabel": "Volno v časovém obdodí"
+      },
+      "PREFER_INSTRUCTOR": {
+        "label": "Preferovat vyučujícího",
+        "shortLabel": "Prefer. vyučující"
+      }
+    },
+    "params": {
+      "day": "Den",
+      "startTime": "Čas od",
+      "endTime": "Čas do",
+      "courseCode": "Kód předmětu",
+      "instructorName": "Jméno vyučujícího"
+    },
+    "displayLabels": {
+      "freeDay": "Volný den: {{day}}",
+      "avoidTimes": "Nevolno {{day}}: {{startTime}} - {{endTime}}",
+      "preferInstructor": "Preferovat {{instructorName}} pro {{courseCode}}"
+    },
+    "dayOptions": {
+      "PO": "Pondělí",
+      "UT": "Úterý",
+      "ST": "Středa",
+      "CT": "Čtvrtek",
+      "PA": "Pátek",
+      "SO": "Sobota",
+      "NE": "Neděle"
+    },
+    "alerts": {
+      "added": "Preference úspěšně přidána.",
+      "deleted": "Preference byla odstraněna.",
+      "updated": "Preference byla aktualizována.",
+      "priorityChanged": "Priorita preference byla upravena.",
+      "activityChanged": "Aktivita preference byla změněna."
+    }
+  },
+  "Dialogs": {
+    "selectStudyParams": {
+      "title": "Parametry pro načtení předmětů oboru",
+      "studentInfo": "Načítání pro:",
+      "studyProgram": "Program/Obor:",
+      "studyYearNumLabel": "Ročník studia předmětů",
+      "scheduleAcademicYearLabel": "Akademický rok rozvrhu",
+      "semesterLabel": "Semestr předmětů",
+      "semesterZS": "Zimní (ZS)",
+      "semesterLS": "Letní (LS)",
+      "semesterBoth": "Oba (ZS i LS)",
+      "subjectStatusesTitle": "Statuty předmětů k načtení:",
+      "statusAll": "Všechny",
+      "statusA": "A (Povinný)",
+      "statusB": "B (Povinně vol.)",
+      "statusC": "C (Volitelný)",
+      "submitButton": "Načíst předměty",
+      "errorNoStatusSelected": "Musíte vybrat alespoň jeden status předmětu.",
+      "errorStudyYearInvalid": "Ročník studia musí být číslo (např. 1-5).",
+      "errorScheduleYearInvalid": "Akademický rok pro rozvrhové akce je neplatný (formát RRRR/RRRR).",
+      "errorSemesterRequired": "Semestr je povinný."
+    },
+    "selectIdentity": {
+      "title": "Výběr STAG Identity/Role",
+      "loadingRoles": "Načítání rolí...",
+      "errorNoTicket": "Chybí platný STAG ticket pro načtení rolí. Zkuste se přihlásit znovu.",
+      "noValidRolesFound": "Nebyly nalezeny žádné validní STAG role/identity.",
+      "noRolesFound": "Nebyly nalezeny žádné STAG role/identity pro váš účet.",
+      "errorFetchingRoles": "Nepodařilo se načíst STAG role.",
+      "pleaseSelectRole": "Prosím, vyberte jednu roli.",
+      "noRolesAvailable": "Pro váš účet nejsou aktuálně k dispozici žádné STAG role nebo se je nepodařilo načíst."
+    },
+    "loadFromStudentRedirect": {
+      "title": "Načtení předmětů z plánu studenta",
+      "p1": "Pro načtení předmětů dle vašeho studijního plánu je nutné se přihlásit do informačního systému STAG.",
+      "p2": "Po kliknutí na \"Pokračovat\" budete přesměrováni na přihlašovací stránku ZČU (Orion login). Po úspěšném přihlášení budete automaticky vráceni zpět do aplikace Plánovač Rozvrhu.",
+      "p3": "Tato aplikace neukládá vaše přihlašovací údaje. Získaný dočasný přístupový klíč (ticket) se použije pouze pro komunikaci se STAG API během této relace.",
+      "faqLink": "Více informací o bezpečnosti a fungování přihlášení",
+      "continueButton": "Pokračovat na přihlášení"
+    },
+    "loadCourseFromSTAG": {
+      "title": "Načíst předmět ze STAGu",
+      "courseCodeLabel": "Kód předmětu (např. KIV/PPA1)",
+      "academicYearLabel": "Akademický rok",
+      "semesterLabel": "Semestr",
+      "semesterZS": "Zimní (ZS)",
+      "semesterLS": "Letní (LS)",
+      "submitButton": "Načíst",
+      "errorCourseCodeRequired": "Kód předmětu je povinný.",
+      "errorCourseCodeFormat": "Neplatný formát kódu (např. KIV/PPA1).",
+      "errorYearRequired": "Akademický rok je povinný.",
+      "errorYearFormat": "Neplatný formát roku (např. 2023/2024).",
+      "errorSemesterRequired": "Semestr je povinný."
+    },
+    "existingCourseWarning": {
+      "title": "Předmět již existuje",
+      "message": "Předmět \"{{courseIdentifier}}\" již máte načtený. Přejete si přepsat jeho stávající data novými daty ze STAGu?",
+      "confirmButton": "Přepsat"
+    },
+    "loadingProcess": {
+      "defaultMessage": "Zpracovávám požadavek..."
+    }
+  },
+  "courseBar": {
+    "loadSingleFromSTAG": "Načíst předmět ze STAGu",
+    "loadFromStudentPlan": "Předměty z plánu studenta",
+    "removeAllCourses": "Odstranit všechny předměty",
+    "removeAllCoursesTooltip": "Odstranit všechny načtené předměty a jejich zapsané akce z rozvrhu."
   },
   "editorPage": {
-    "title": "Editor Rozvrhu",
     "mobileDrawer": {
       "coursesTitle": "Kurzy",
       "propertiesTitle": "Preference",
       "coursesTab": "Kurzy",
       "propertiesTab": "Preference"
     }
+  },
+  "schedule": {
+    "dayTime": "Den/Čas"
+  },
+  "landingPage": {
+    "hero": {
+      "title": "Plánovač Rozvrhu pro ZČU",
+      "description": "Snadno si naplánujte svůj semestrální rozvrh, optimalizujte svůj čas a buďte připraveni na zápisy. Intuitivní nástroj pro studenty Západočeské univerzity.",
+      "editorButton": "Spustit Plánovač",
+      "universityButton": "Web ZČU"
+    },
+    "functions": {
+      "sectionTitle": "Klíčové Funkce",
+      "intro": "Objevte nástroje, které vám usnadní plánování semestru a maximalizují vaši efektivitu.",
+      "func1": {
+        "title": "Načítání ze STAGu",
+        "desc": "Importujte předměty a jejich rozvrhové akce přímo z univerzitního systému IS/STAG podle kódu předmětu nebo vašeho studijního plánu."
+      },
+      "func2": {
+        "title": "Vizuální Editor Rozvrhu",
+        "desc": "Přehledně si sestavte a upravujte svůj rozvrh v intuitivním tabulkovém zobrazení českého formátu."
+      },
+      "func3": {
+        "title": "Správa Preferencí",
+        "desc": "Definujte si své priority – volné dny, časy, kterým se chcete vyhnout, nebo preferované vyučující."
+      },
+      "func4": {
+        "title": "Automatické Generování",
+        "desc": "Nechte aplikaci navrhnout optimální varianty rozvrhu na základě vašich předmětů a nastavených preferencí."
+      },
+      "func5": {
+        "title": "Uložení a Export",
+        "desc": "Uložte si svou práci v prohlížeči, exportujte pracovní plochu do souboru nebo stáhněte hotový rozvrh jako obrázek."
+      },
+      "func6": {
+        "title": "Responzivní Design",
+        "desc": "Plánujte svůj rozvrh pohodlně na počítači, tabletu i mobilním telefonu."
+      }
+    },
+    "tech": {
+      "sectionTitle": "Použité Technologie",
+      "versionLabel": "Verze",
+      "reactDesc": "Moderní JavaScriptová knihovna pro tvorbu uživatelských rozhraní.",
+      "muiDesc": "Rozsáhlá sada React komponent implementujících Material Design.",
+      "viteDesc": "Rychlý buildovací nástroj nové generace pro webové projekty.",
+      "i18nextDesc": "Výkonný framework pro internacionalizaci JavaScriptových aplikací."
+    },
+    "author": {
+      "sectionTitle": "O Projektu",
+      "namePlaceholder": "Štěpán Bříza",
+      "summary": "Tento Plánovač Rozvrhu byl vytvořen jako součást bakalářské práce na Fakultě aplikovaných věd Západočeské univerzity v Plzni. Cílem bylo vytvořit moderní a uživatelsky přívětivý nástroj pro studenty.",
+      "githubButton": "Zdrojový kód na GitHubu"
+    }
+  },
+  "faqPage": {
+    "title": "Často Kladené Otázky (FAQ)",
+    "q1": "Je používání aplikace bezpečné?",
+    "a1": "Ano, aplikace komunikuje se STAG API pouze pro načítání veřejně dostupných dat o předmětech nebo dat vašeho studijního plánu po vašem explicitním přihlášení přes oficiální bránu ZČU. Vaše přihlašovací údaje se v aplikaci nikdy neukládají.",
+    "q2": "Musím být online, abych mohl aplikaci používat?",
+    "a2": "Pro načítání dat ze STAGu je nutné připojení k internetu. Již načtená data a váš rozpracovaný rozvrh se ukládají lokálně ve vašem prohlížeči, takže k nim máte přístup i offline. Pro export a některé další funkce může být opět vyžadováno připojení."
   }
 }

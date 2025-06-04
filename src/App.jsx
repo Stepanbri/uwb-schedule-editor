@@ -36,7 +36,8 @@ import { SnackbarProvider } from './contexts/SnackbarContext';
 import LandingPage from './features/landing/LandingPage.jsx';
 import FAQPage from './features/faq/FAQPage.jsx';
 import EditorPage from './features/editor/EditorPage.jsx';
-// import Logo from './components/common/Logo.jsx';
+import Logo from './Logo.jsx';
+
 
 // noinspection JSCheckFunctionSignatures
 const MainAppContent = () => {
@@ -79,7 +80,7 @@ const MainAppContent = () => {
     const drawerContent = (
         <Box onClick={handleDrawerToggle} sx={{ textAlign: 'center', width: {xs: '80vw', sm: 280} }} role="presentation">
             <Box sx={{ my: 2, display: 'flex', justifyContent: 'center' }}>
-                {/*<Logo inDrawer={true} />*/}
+                <Logo inDrawer={true} />
             </Box>
             <Divider />
             <List>
@@ -128,8 +129,12 @@ const MainAppContent = () => {
                                     <MenuIcon />
                                 </IconButton>
                             )}
-                            <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
-                                {/*<Logo />*/}
+                            <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center'}}>
+                                <Logo />
+
+
+
+
                             </Box>
 
                             {!isMobileOrSmaller && (

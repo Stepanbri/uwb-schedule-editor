@@ -76,6 +76,12 @@ function PropertiesBar() {
                 flexDirection: 'column',
                 height: '100%',
                 backgroundColor: (theme) => theme.palette.background.paper,
+
+
+                flexGrow: 1,
+                overflowY: 'auto',
+                minHeight: 0,
+
             }}
         >
             <Typography variant="h6" gutterBottom component="div" sx={{ px: { xs: 1, sm: 0 } }}>
