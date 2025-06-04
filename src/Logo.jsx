@@ -31,8 +31,8 @@ const Logo = ({ inDrawer = false }) => {
                     height: inDrawer ? 32 : 40,
                     width: 'auto',
                     mr: 1,
-                    // filtr připraven pro tmavý režim - přepínaní
-                    filter: (theme) => (theme.palette.mode === 'dark' && !inDrawer ? 'invert(1) brightness(1.5)' : 'none'),
+                    // filtr připraven pro tmavý režim - přepínaní...
+                    //filter: (theme) => (theme.palette.mode === 'dark' && !inDrawer ? 'invert(1) brightness(1.5)' : 'none'),
                 }}
             />
             {!inDrawer && (

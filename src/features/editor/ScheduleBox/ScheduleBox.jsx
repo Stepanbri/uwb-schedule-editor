@@ -37,7 +37,8 @@ const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
     maxHeight: `calc(100vh - ${theme.mixins.toolbar.minHeight}px - 48px - ${TIME_HEADER_HEIGHT}px)`,
     overflow: 'auto',
     position: 'relative',
-})); // <-- Přidán středník pro jistotu
+    border: `1px solid ${theme.palette.divider}`
+}));
 
 const StickyTableCell = styled(TableCell)(({ theme, stickytype }) => ({
     position: 'sticky',

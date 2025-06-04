@@ -49,8 +49,8 @@ const EditorLayoutDesktop = styled(Box)(({ theme }) => ({
     flexGrow: 1,
     overflow: 'hidden',
     backgroundColor: theme.palette.background.default,
-    padding: theme.spacing(1.5),
-    gap: theme.spacing(1.5),
+    // padding: theme.spacing(1.5),
+    //gap: theme.spacing(1.5),
 }));
 
 const SidebarWrapper = styled(Box, {
@@ -63,8 +63,10 @@ const SidebarWrapper = styled(Box, {
     flexDirection: 'column',
     overflow: 'hidden',
     backgroundColor: theme.palette.background.paper,
-    borderRadius: theme.shape.borderRadius,
+    // borderRadius: theme.shape.borderRadius,
     boxShadow: theme.shadows[1],
+    borderRight: `1px solid ${theme.palette.divider}`,
+    borderLeft: `1px solid ${theme.palette.divider}`,
 }));
 
 const MainContentArea = styled(Box)(({ theme }) => ({
@@ -73,6 +75,8 @@ const MainContentArea = styled(Box)(({ theme }) => ({
     display: 'flex',
     flexDirection: 'column',
     overflow: 'hidden',
+    padding: theme.spacing(1.5),
+    //gap: theme.spacing(1.5)
 }));
 
 const ScheduleBoxWrapper = styled(Box)(({ theme }) => ({
@@ -135,10 +139,9 @@ function EditorPage() {
     }, [location.pathname, isWorkspaceInitialized, initializeWorkspace, isLoadingWorkspace]);
 
     useEffect(() => {
-        // Tento useEffect by měl spustit dialog identity POUZE pokud:
         // 1. STAG login callback byl zpracován.
         // 2. Máme platný ticket.
-        // 3. Žádná část procesu načítání plánu studenta již neběží (ani dialogy ani loading stavy).
+        // 3. Žádná část procesu načítání plánu studenta již neběží
         if (!isProcessingLoginCallback &&
             stagUserTicket && stagUserTicket !== 'anonymous' &&
             !stagStudentPlanLoader.isStudentPlanLoadingActive && // Hlavní kontrola celého flow
@@ -294,7 +297,7 @@ function EditorPage() {
                             onResetWorkspace={confirmAndResetWorkspace}
                         />
                     </Box>
-                    <ScheduleBoxWrapper ref={scheduleBoxRef} sx={{ height: scheduleBoxWrapperHeight, m:1, mt:0, borderRadius: theme.shape.borderRadius, flexGrow: 1 }}>
+                    <ScheduleBoxWrapper ref={scheduleBoxRef} sx={{ height: scheduleBoxWrapperHeight, m:1, mt:0, flexGrow: 1 }}>
                         {isEffectivelyLoading && (
                             <Box sx={{position: 'absolute', top:0,left:0,right:0,bottom:0, display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center', backgroundColor: alpha(theme.palette.background.paper, 0.85), zIndex: 10}}>
                                 <CircularProgress />
@@ -350,7 +353,7 @@ function EditorPage() {
                                 onResetWorkspace={confirmAndResetWorkspace}
                             />
                         </Box>
-                        <ScheduleBoxWrapper ref={scheduleBoxRef} sx={{ height: scheduleBoxWrapperHeight }}>
+                        <ScheduleBoxWrapper ref={scheduleBoxRef} sx={{ maxHeight: scheduleBoxWrapperHeight }}>
                             {isEffectivelyLoading && (
                                 <Box sx={{position: 'absolute', top:0,left:0,right:0,bottom:0, display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center', backgroundColor: alpha(theme.palette.background.paper, 0.85), zIndex: 10}}>
                                     <CircularProgress />

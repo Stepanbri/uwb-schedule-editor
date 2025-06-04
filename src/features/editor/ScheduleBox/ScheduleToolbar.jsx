@@ -55,39 +55,10 @@ const ScheduleToolbar = ({
                 flexWrap: 'wrap',
                 gap: 1,
                 alignItems: 'center',
-                borderRadius: theme.shape.borderRadius,
+                //borderRadius: theme.shape.borderRadius,
                 border: `1px solid ${theme.palette.divider}`,
             }}
         >
-            {/* Toggle Buttons - Příklad, upravte dle reálné potřeby */}
-            {/* <ToggleButtonGroup
-                value={isCompactView ? 'compact' : 'normal'}
-                exclusive
-                onChange={onToggleCompactView} // Handler by měl být předán z EditorPage
-                aria-label="Schedule view mode"
-                size="small"
-            >
-                <ToggleButton value="compact" aria-label={t('scheduleToolbar.compactView')}>
-                    <Tooltip title={t('scheduleToolbar.compactViewTooltip')}>
-                        <ViewCompactIcon />
-                    </Tooltip>
-                </ToggleButton>
-            </ToggleButtonGroup>
-             <ToggleButtonGroup
-                value={showWeekends ? 'weekends' : 'no-weekends'}
-                exclusive
-                onChange={onToggleWeekends} // Handler by měl být předán z EditorPage
-                aria-label="Toggle weekends"
-                size="small"
-            >
-                <ToggleButton value="weekends" aria-label={t('scheduleToolbar.fullWeekView')}>
-                    <Tooltip title={t('scheduleToolbar.fullWeekViewTooltip')}>
-                        <CalendarViewWeekIcon />
-                    </Tooltip>
-                </ToggleButton>
-            </ToggleButtonGroup> */}
-
-
             {/* Akční tlačítka */}
             <Tooltip title={t('scheduleToolbar.downloadImageTooltip')}>
                 <IconButton size="medium" onClick={onDownloadScheduleImage} color="primary">

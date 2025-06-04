@@ -19,7 +19,7 @@ import {
     Divider,
     Container
 } from '@mui/material';
-import { useTheme } from '@mui/material/styles'; // <-- Importujte useTheme
+import { useTheme } from '@mui/material/styles';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -39,12 +39,11 @@ import EditorPage from './features/editor/EditorPage.jsx';
 import Logo from './Logo.jsx';
 
 
-// noinspection JSCheckFunctionSignatures
 const MainAppContent = () => {
     const { t, i18n } = useTranslation();
     const location = useLocation();
-    const { mode, toggleColorMode } = useAppContextTheme(); // Stále používáme pro mode a toggle
-    const theme = useTheme(); // <-- Získání celého objektu tématu přímo z MUI kontextu
+    const { mode, toggleColorMode } = useAppContextTheme();
+    const theme = useTheme();
 
     const [currentLanguage, setCurrentLanguage] = useState(() => {
         const storedLang = localStorage.getItem('i18nextLng');
@@ -61,8 +60,7 @@ const MainAppContent = () => {
         }
     }, [i18n]);
 
-    // Nyní 'theme' je definovaný objekt tématu z MUI
-    const isMobileOrSmaller = useMediaQuery(theme.breakpoints.down('sm')); // <-- Řádek 65, nyní by měl fungovat
+    const isMobileOrSmaller = useMediaQuery(theme.breakpoints.down('sm'));
 
     const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
 
@@ -118,27 +116,18 @@ const MainAppContent = () => {
                 <AppBar position="static">
                     <Container maxWidth="xl" disableGutters>
                         <Toolbar>
-                            {isMobileOrSmaller && (
-                                <IconButton
-                                    color="inherit"
-                                    aria-label="open drawer"
-                                    edge="start"
-                                    onClick={handleDrawerToggle}
-                                    sx={{ mr: 1 }}
-                                >
-                                    <MenuIcon />
-                                </IconButton>
-                            )}
-                            <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center'}}>
+                            {/* Logo a název aplikace - bude se roztahovat, pokud není desktopové menu */}
+                            <Box sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                flexGrow: isMobileOrSmaller ? 1 : 0, // Na mobilu zabere místo, na desktopu ne (aby se vešlo menu)
+                            }}>
                                 <Logo />
-
-
-
-
                             </Box>
 
+                            {/* Desktopové navigační tlačítka */}
                             {!isMobileOrSmaller && (
-                                <Box>
+                                <Box sx={{ ml: 'auto' }}> {/* Zarovnáme doprava */}
                                     {navItems.map((item) => (
                                         <Button
                                             key={item.textKey}
@@ -179,12 +168,26 @@ const MainAppContent = () => {
                                     </Tooltip>
                                 </Box>
                             )}
+
+                            {/* Mobilní "hamburger" menu tlačítko - nyní na pravé straně */}
+                            {isMobileOrSmaller && (
+                                <IconButton
+                                    color="inherit"
+                                    aria-label="open drawer"
+                                    edge="end" // Pro lepší zarovnání na konci (vpravo)
+                                    onClick={handleDrawerToggle}
+                                    // sx={{ ml: 'auto' }} // ml: 'auto' přesune úplně doprava, pokud je Logo flexGrow: 1
+                                >
+                                    <MenuIcon />
+                                </IconButton>
+                            )}
                         </Toolbar>
                     </Container>
                 </AppBar>
 
                 <Drawer
                     variant="temporary"
+                    anchor="right" // Změna anchor na "right"
                     open={mobileOpen && isMobileOrSmaller}
                     onClose={handleDrawerToggle}
                     ModalProps={{ keepMounted: true }}
@@ -201,7 +204,7 @@ const MainAppContent = () => {
                         flexDirection: 'column',
                         width: '100%',
                         overflowY: location.pathname === '/editor' ? 'hidden' : 'auto',
-                        height: location.pathname === '/editor' ? 'calc(100vh - 64px)' : 'auto'
+                        height: location.pathname === '/editor' ? 'calc(100vh - 64px)' : 'auto' // Předpoklad výšky Appbaru 64px
                     }}
                 >
                     <Routes>
@@ -214,7 +217,6 @@ const MainAppContent = () => {
         </>
     );
 }
-
 
 function App() {
     return (

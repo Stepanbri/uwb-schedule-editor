@@ -240,7 +240,6 @@ export const WorkspaceProvider = ({ children }) => {
     }, [workspaceService, syncStateFromService, showSnackbar, t, isWorkspaceInitialized]);
 
     const handleSaveScheduleImage = useCallback(async (scheduleElement) => {
-        // ... (jako dříve)
         if (!isWorkspaceInitialized) {
             showSnackbar(t('common.error') + ': ' + t('alerts.workspaceNotInitializedYet', 'Pracovní plocha ještě nebyla načtena.'), 'warning');
             return;
