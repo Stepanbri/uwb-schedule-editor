@@ -1,0 +1,203 @@
+// src/features/editor/ScheduleBox/ScheduleBox.jsx
+import React, { useMemo } from 'react';
+import { Box, Paper, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, styled } from '@mui/material';
+import { useTranslation } from 'react-i18next';
+import { useCourseManagement } from '../hooks/useCourseManagement';
+import { timeToMinutes } from '../../../utils/timeUtils';
+import { DAY_I18N_KEYS } from '../../../constants/constants';
+import ScheduleEventItem from './ScheduleEventItem';
+
+// Konstanty pro rozvrh
+export const TIME_BLOCKS = [
+    { label: '1.', start: '7:30', end: '8:15' },
+    { label: '2.', start: '8:25', end: '9:10' },
+    { label: '3.', start: '9:20', end: '10:05' },
+    { label: '4.', start: '10:15', end: '11:00' },
+    { label: '5.', start: '11:10', end: '11:55' },
+    { label: '6.', start: '12:05', end: '12:50' },
+    { label: '7.', start: '13:00', end: '13:45' },
+    { label: '8.', start: '13:55', end: '14:40' },
+    { label: '9.', start: '14:50', end: '15:35' },
+    { label: '10.', start: '15:45', end: '16:30' },
+    { label: '11.', start: '16:40', end: '17:25' },
+    { label: '12.', start: '17:35', end: '18:20' },
+    { label: '13.', start: '18:30', end: '19:15' },
+    { label: '14.', start: '19:25', end: '20:10' },
+];
+
+const SCHEDULE_START_TIME_MINUTES = timeToMinutes(TIME_BLOCKS[0].start);
+const SCHEDULE_END_TIME_MINUTES = timeToMinutes(TIME_BLOCKS[TIME_BLOCKS.length - 1].end);
+const TOTAL_SCHEDULE_DURATION_MINUTES = SCHEDULE_END_TIME_MINUTES - SCHEDULE_START_TIME_MINUTES;
+
+const DAY_CELL_WIDTH = 100;
+const TIME_HEADER_HEIGHT = 60;
+const MIN_EVENT_HEIGHT = 40;
+
+const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
+    maxHeight: `calc(100vh - ${theme.mixins.toolbar.minHeight}px - 48px - ${TIME_HEADER_HEIGHT}px)`,
+    overflow: 'auto',
+    position: 'relative',
+})); // <-- Přidán středník pro jistotu
+
+const StickyTableCell = styled(TableCell)(({ theme, stickytype }) => ({
+    position: 'sticky',
+    backgroundColor: theme.palette.background.paper,
+    zIndex: stickytype === 'day' ? theme.zIndex.appBar + 1 : theme.zIndex.appBar,
+    borderBottom: `1px solid ${theme.palette.divider}`,
+    ...(stickytype === 'day' && {
+        left: 0,
+        minWidth: DAY_CELL_WIDTH,
+        width: DAY_CELL_WIDTH,
+        borderRight: `1px solid ${theme.palette.divider}`,
+    }),
+    ...(stickytype === 'time' && {
+        top: 0,
+        textAlign: 'center',
+        padding: '4px',
+        fontSize: '0.75rem',
+        minWidth: '60px',
+    }),
+    ...(stickytype === 'corner' && {
+        left: 0,
+        top: 0,
+        zIndex: theme.zIndex.appBar + 2,
+        minWidth: DAY_CELL_WIDTH,
+        width: DAY_CELL_WIDTH,
+        borderRight: `1px solid ${theme.palette.divider}`,
+    }) // <-- Odstraněna čárka zde, pokud je toto poslední vlastnost v objektu
+})); // <-- Přidán středník
+
+// Definice DayRowCell (řádek 99 dle vašeho číslování by měl začínat zde nebo poblíž)
+const DayRowCell = styled(TableCell)(({ theme }) => ({
+    position: 'relative',
+    height: MIN_EVENT_HEIGHT,
+    padding: 0,
+    borderBottom: `1px solid ${theme.palette.divider}`,
+})); // <-- Přidán středník
+
+export const layoutEvents = (eventsForDay) => {
+    // ... (kód funkce layoutEvents zůstává stejný) ...
+    if (!eventsForDay || eventsForDay.length === 0) return [];
+
+    const sortedEvents = [...eventsForDay].sort((a, b) => {
+        const startA = timeToMinutes(a.startTime);
+        const startB = timeToMinutes(b.startTime);
+        if (startA !== startB) return startA - startB;
+        const endA = timeToMinutes(a.endTime);
+        const endB = timeToMinutes(b.endTime);
+        return endA - endB;
+    });
+
+    const levels = [];
+
+    sortedEvents.forEach(event => {
+        let placed = false;
+        for (let i = 0; i < levels.length; i++) {
+            const level = levels[i];
+            const collidesWithLevelEvent = level.some(placedEvent => {
+                const eventStart = timeToMinutes(event.startTime);
+                const eventEnd = timeToMinutes(event.endTime);
+                const placedEventStart = timeToMinutes(placedEvent.startTime);
+                const placedEventEnd = timeToMinutes(placedEvent.endTime);
+                return eventStart < placedEventEnd && placedEventStart < eventEnd;
+            });
+
+            if (!collidesWithLevelEvent) {
+                level.push(event);
+                placed = true;
+                break;
+            }
+        }
+
+        if (!placed) {
+            levels.push([event]);
+        }
+    });
+    return levels;
+};
+
+function ScheduleBox() {
+    // ... (kód funkce ScheduleBox zůstává stejný) ...
+    const { t } = useTranslation();
+    const { activeSchedule, courses } = useCourseManagement();
+
+    const scheduledEvents = activeSchedule ? activeSchedule.getAllEnrolledEvents() : [];
+
+    const eventsByDay = useMemo(() => {
+        const grouped = Array(7).fill(null).map(() => []);
+        scheduledEvents.forEach(event => {
+            if (event.day >= 0 && event.day < 7) {
+                const course = courses.find(c => c.id === event.courseId || c.stagId === event.courseId);
+                grouped[event.day].push({ ...event, course });
+            }
+        });
+        return grouped.map(dayEvents => layoutEvents(dayEvents));
+    }, [scheduledEvents, courses]);
+
+
+    const renderEvent = (eventData, levelIndex, dayIndex) => {
+        const eventStartMinutes = timeToMinutes(eventData.startTime);
+        const eventEndMinutes = timeToMinutes(eventData.endTime);
+
+        const leftPercent = ((eventStartMinutes - SCHEDULE_START_TIME_MINUTES) / TOTAL_SCHEDULE_DURATION_MINUTES) * 100;
+        const widthPercent = ((eventEndMinutes - eventStartMinutes) / TOTAL_SCHEDULE_DURATION_MINUTES) * 100;
+
+        return (
+            <ScheduleEventItem
+                key={eventData.id + '-' + levelIndex}
+                eventData={eventData}
+                course={eventData.course}
+                style={{
+                    position: 'absolute',
+                    left: `${leftPercent}%`,
+                    width: `${widthPercent}%`,
+                    top: `${levelIndex * (MIN_EVENT_HEIGHT + 4)}px`,
+                    height: `${MIN_EVENT_HEIGHT}px`,
+                }}
+            />
+        );
+    };
+
+    return (
+        <Paper elevation={1} sx={{ height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            <StyledTableContainer component={Paper}>
+                <Table stickyHeader size="small">
+                    <TableHead>
+                        <TableRow sx={{ height: TIME_HEADER_HEIGHT }}>
+                            <StickyTableCell stickytype="corner">
+                                {t('schedule.dayTime', 'Den/Čas')}
+                            </StickyTableCell>
+                            {TIME_BLOCKS.map((block, index) => (
+                                <StickyTableCell key={index} stickytype="time">
+                                    <Typography variant="caption" display="block" fontWeight="bold">{block.label}</Typography>
+                                    {block.start} - {block.end}
+                                </StickyTableCell>
+                            ))}
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {DAY_I18N_KEYS.map((dayKey, dayIndex) => {
+                            const levelsForDay = eventsByDay[dayIndex] || [];
+                            const rowHeight = Math.max(1, levelsForDay.length) * (MIN_EVENT_HEIGHT + 4) - 4;
+
+                            return (
+                                <TableRow key={dayKey} sx={{ height: `${rowHeight}px` }}>
+                                    <StickyTableCell stickytype="day" component="th" scope="row" variant="head">
+                                        <Typography fontWeight="bold">{t(dayKey)}</Typography>
+                                    </StickyTableCell>
+                                    <DayRowCell colSpan={TIME_BLOCKS.length}>
+                                        {levelsForDay.map((levelEvents, levelIndex) => (
+                                            levelEvents.map(eventData => renderEvent(eventData, levelIndex, dayIndex))
+                                        ))}
+                                    </DayRowCell>
+                                </TableRow>
+                            );
+                        })}
+                    </TableBody>
+                </Table>
+            </StyledTableContainer>
+        </Paper>
+    );
+}
+
+export default ScheduleBox;

@@ -1,11 +1,10 @@
 // src/App.jsx
-import React, { useState, useEffect } from 'react'; // Odebráno useMemo z App.jsx
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, Link as RouterLink, useLocation } from 'react-router-dom';
 import {
     CssBaseline,
     AppBar,
     Toolbar,
-    Typography,
     Button,
     Box,
     IconButton,
@@ -20,6 +19,7 @@ import {
     Divider,
     Container
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles'; // <-- Importujte useTheme
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -28,7 +28,6 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import LanguageIcon from '@mui/icons-material/Language';
 import { useTranslation } from 'react-i18next';
 
-// Import nových contextů a providerů
 import { AppThemeProvider, useAppContextTheme } from './contexts/ThemeContext';
 import { WorkspaceProvider } from './contexts/WorkspaceContext';
 import { StagApiProvider } from './contexts/StagApiContext';
@@ -37,14 +36,14 @@ import { SnackbarProvider } from './contexts/SnackbarContext';
 import LandingPage from './features/landing/LandingPage.jsx';
 import FAQPage from './features/faq/FAQPage.jsx';
 import EditorPage from './features/editor/EditorPage.jsx';
-import Logo from './components/common/Logo.jsx'; // Přesunuto do common
+// import Logo from './components/common/Logo.jsx';
 
-// Komponentu MainAppContent vytvoříme, aby měla přístup k useAppContextTheme
+// noinspection JSCheckFunctionSignatures
 const MainAppContent = () => {
     const { t, i18n } = useTranslation();
     const location = useLocation();
-    const { mode, toggleColorMode } = useAppContextTheme(); // Použití kontextu pro téma
-    const muiTheme = useAppContextTheme(); // Celý Mui theme objekt pro isMobileOrSmaller
+    const { mode, toggleColorMode } = useAppContextTheme(); // Stále používáme pro mode a toggle
+    const theme = useTheme(); // <-- Získání celého objektu tématu přímo z MUI kontextu
 
     const [currentLanguage, setCurrentLanguage] = useState(() => {
         const storedLang = localStorage.getItem('i18nextLng');
@@ -52,7 +51,6 @@ const MainAppContent = () => {
     });
     const [mobileOpen, setMobileOpen] = useState(false);
 
-    // useEffect pro jazyk zůstává, protože i18n je spravován trochu jinak
     useEffect(() => {
         const savedLang = localStorage.getItem('i18nextLng')?.split('-')[0];
         const targetLang = (savedLang && ['cs', 'en'].includes(savedLang)) ? savedLang : 'cs';
@@ -62,8 +60,8 @@ const MainAppContent = () => {
         }
     }, [i18n]);
 
-    const isMobileOrSmaller = useMediaQuery(muiTheme.theme.breakpoints.down('sm'));
-
+    // Nyní 'theme' je definovaný objekt tématu z MUI
+    const isMobileOrSmaller = useMediaQuery(theme.breakpoints.down('sm')); // <-- Řádek 65, nyní by měl fungovat
 
     const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
 
@@ -81,7 +79,7 @@ const MainAppContent = () => {
     const drawerContent = (
         <Box onClick={handleDrawerToggle} sx={{ textAlign: 'center', width: {xs: '80vw', sm: 280} }} role="presentation">
             <Box sx={{ my: 2, display: 'flex', justifyContent: 'center' }}>
-                <Logo inDrawer={true} />
+                {/*<Logo inDrawer={true} />*/}
             </Box>
             <Divider />
             <List>
@@ -113,8 +111,8 @@ const MainAppContent = () => {
     );
 
     return (
-        <> {/* CssBaseline je nyní v AppThemeProvideru, pokud jej tam vložíme */}
-            <CssBaseline /> {/* Nebo jej nechat zde, pokud není v AppThemeProvider */}
+        <>
+            <CssBaseline />
             <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
                 <AppBar position="static">
                     <Container maxWidth="xl" disableGutters>
@@ -131,7 +129,7 @@ const MainAppContent = () => {
                                 </IconButton>
                             )}
                             <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
-                                <Logo />
+                                {/*<Logo />*/}
                             </Box>
 
                             {!isMobileOrSmaller && (
@@ -185,7 +183,7 @@ const MainAppContent = () => {
                     open={mobileOpen && isMobileOrSmaller}
                     onClose={handleDrawerToggle}
                     ModalProps={{ keepMounted: true }}
-                    slotProps={{ paper: { sx: { width: { xs: '80vw', sm: 280 } }}}} // opraveno slotProps
+                    slotProps={{ paper: { sx: { width: { xs: '80vw', sm: 280 } }}}}
                 >
                     {drawerContent}
                 </Drawer>
@@ -215,11 +213,11 @@ const MainAppContent = () => {
 
 function App() {
     return (
-        <AppThemeProvider> {/* Poskytuje téma a toggle funkci */}
-            <SnackbarProvider> {/* Poskytuje showSnackbar funkci */}
-                <StagApiProvider> {/* Poskytuje stagApiService a stav přihlášení */}
-                    <WorkspaceProvider> {/* Poskytuje workspaceService a stav workspace */}
-                        <MainAppContent /> {/* Zbytek aplikace, který může konzumovat kontexty */}
+        <AppThemeProvider>
+            <SnackbarProvider>
+                <StagApiProvider>
+                    <WorkspaceProvider>
+                        <MainAppContent />
                     </WorkspaceProvider>
                 </StagApiProvider>
             </SnackbarProvider>

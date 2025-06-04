@@ -1,5 +1,5 @@
 // src/contexts/ThemeContext.jsx
-import React, { createContext, useContext, useState, useMemo, useEffect } from 'react';
+import React, {createContext, useContext, useState, useMemo, useEffect, useCallback} from 'react';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
 import { createAppTheme } from '../styles/theme'; // Předpokládáme, že theme.js je v src/styles/
 

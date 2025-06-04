@@ -1,29 +1,32 @@
-// PROJEKT/NEW/src/services/WorkspaceService.js
+// src/services/WorkspaceService.js
 import CourseClass from './CourseClass';
 import ScheduleClass from './ScheduleClass';
-import CourseEventClass from './CourseEventClass';
+import CourseEventClass from './CourseEventClass'; // Přidáno pro úplnost
+// eslint-disable-next-line no-unused-vars
+import { EVENT_TYPE_TO_KEY_MAP } from './CourseClass'; // Použito v generateSchedule
 
-const MAX_GENERATED_SCHEDULES = 10; // Maximální počet generovaných rozvrhů
-const LOCAL_STORAGE_KEY = 'schedulePlannerWorkspace_v2'; // Updated key to avoid conflicts with old versions
-import { EVENT_TYPE_TO_KEY_MAP } from './CourseClass'; // Assuming export from CourseClass.js
+
+const MAX_GENERATED_SCHEDULES = 10;
+export const LOCAL_STORAGE_KEY = 'schedulePlannerWorkspace_v2'; // Exportováno pro případné použití jinde
+
+// Helper pro generování unikátních ID pro preference
+const generatePreferenceId = () => `pref_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
 
 
 class WorkspaceService {
     constructor() {
-        this.semester = ''; // např. ZS, LS
-        this.year = '';     // např. 2023/2024
-        this.courses = [];  // Všechny načtené předměty (instance CourseClass)
-        this.preferences = {}; // Uživatelské preference pro generování { priority: { type, params, isActive } }
+        this.semester = '';
+        this.year = '';
+        this.courses = [];
+        // preferences je nyní objekt, klíčované podle ID preference
+        // Příklad: { pref_abc123: { id: 'pref_abc123', type: 'FREE_DAY', priority: 1, isActive: true, params: { day: 'PO' } } }
+        this.preferences = {};
 
-        this.primarySchedule = new ScheduleClass(); // Primární, ručně upravovaný rozvrh
-        this.generatedSchedules = []; // Pole vygenerovaných alternativ (ScheduleClass instance)
-        this.activeScheduleIndex = -1; // -1 znamená, že aktivní je primarySchedule, jinak index v generatedSchedules
+        this.primarySchedule = new ScheduleClass();
+        this.generatedSchedules = [];
+        this.activeScheduleIndex = -1;
     }
 
-    /**
-     * Vrátí aktuálně aktivní rozvrh (buď primární, nebo jeden z vygenerovaných).
-     * @returns {ScheduleClass}
-     */
     getActiveSchedule() {
         if (this.activeScheduleIndex >= 0 && this.activeScheduleIndex < this.generatedSchedules.length) {
             return this.generatedSchedules[this.activeScheduleIndex];
@@ -31,41 +34,29 @@ class WorkspaceService {
         return this.primarySchedule;
     }
 
-    /**
-     * Nastaví aktivní rozvrh.
-     * @param {number} index - Index v poli generatedSchedules, nebo -1 pro primární rozvrh.
-     */
     setActiveScheduleIndex(index) {
         if (index >= -1 && index < this.generatedSchedules.length) {
             this.activeScheduleIndex = index;
         } else {
             console.error("Neplatný index pro aktivní rozvrh:", index);
-            this.activeScheduleIndex = -1; // Fallback na primární
+            this.activeScheduleIndex = -1;
         }
     }
 
-    /**
-     * Přidá kurz do workspace. Pokud kurz již existuje (dle stagId nebo kombinace kódů, roku a semestru),
-     * aktualizuje jeho události. Jinak přidá nový kurz.
-     * @param {object} courseData - Data pro vytvoření kurzu. Může obsahovat 'events' pole pro události.
-     * @returns {CourseClass} Přidaný nebo aktualizovaný kurz.
-     */
     addCourse(courseData) {
         const existingCourse = this.courses.find(c =>
-            (courseData.stagId && c.stagId === courseData.stagId) || // Preferujeme stagId pokud je
+            (courseData.stagId && c.stagId === courseData.stagId) ||
             (c.departmentCode === courseData.departmentCode && c.courseCode === courseData.courseCode && c.year === courseData.year && c.semester === courseData.semester)
         );
 
         if (existingCourse) {
             console.warn("Předmět již existuje ve workspace, aktualizuji:", existingCourse.getShortCode());
-            // Aktualizace existujícího kurzu, např. událostí
-            if (courseData.events && courseData.events.length > 0) {
-                existingCourse.events = []; // Vyčistit staré, pokud přicházejí nové
+            if (courseData.events && Array.isArray(courseData.events)) {
+                existingCourse.events = [];
                 courseData.events.forEach(eventData => {
-                    // Zajistíme, že courseId, courseCode atd. jsou správně nastaveny pro CourseEventClass
                     existingCourse.addCourseEvent(new CourseEventClass({
                         ...eventData,
-                        courseId: existingCourse.id, // Link to existing course's local ID
+                        courseId: existingCourse.id,
                         courseCode: existingCourse.getShortCode(),
                         departmentCode: existingCourse.departmentCode,
                         year: existingCourse.year,
@@ -73,32 +64,26 @@ class WorkspaceService {
                     }));
                 });
             }
+            // Aktualizace dalších vlastností, pokud je potřeba (např. name, credits)
+            existingCourse.name = courseData.name || existingCourse.name;
+            existingCourse.credits = courseData.credits !== undefined ? courseData.credits : existingCourse.credits;
+            existingCourse.neededEnrollments = courseData.neededEnrollments || existingCourse.neededEnrollments;
             return existingCourse;
         }
 
-        // Pokud kurz neexistuje, vytvoříme nový
-        // Konstruktor CourseClass by měl sám zpracovat pole `events` a vytvořit instance CourseEventClass
-        const course = new CourseClass({
-            ...courseData // events pole je předáno konstruktoru CourseClass, který vytvoří instance CourseEventClass
-        });
+        const course = new CourseClass(courseData);
         this.courses.push(course);
         return course;
     }
 
-
-    removeCourse(courseIdentifier) { // courseIdentifier může být ID kurzu nebo stagId
+    removeCourse(courseIdentifier) {
         const courseToRemove = this.courses.find(c => c.id === courseIdentifier || c.stagId === courseIdentifier);
         if (courseToRemove) {
             const eventsToRemoveFromSchedule = courseToRemove.events.map(e => e.id);
-
-            // Odebrání z primárního rozvrhu
             eventsToRemoveFromSchedule.forEach(eventId => this.primarySchedule.removeEventById(eventId));
-
-            // Odebrání z generovaných rozvrhů
             this.generatedSchedules.forEach(schedule => {
                 eventsToRemoveFromSchedule.forEach(eventId => schedule.removeEventById(eventId));
             });
-
             this.courses = this.courses.filter(c => c.id !== courseToRemove.id);
             console.log(`Předmět ${courseToRemove.getShortCode()} odstraněn.`);
         } else {
@@ -123,11 +108,93 @@ class WorkspaceService {
     }
 
     // --- Metody pro práci s preferencemi ---
-    // (Zde by byla logika pro přidání, odebrání, úpravu preferencí, jak je naznačeno v PropertiesBar.jsx)
-    // Například:
-    // addPreference(preference) { this.preferences[preference.id] = preference; this.normalizePreferences(); }
-    // removePreference(preferenceId) { delete this.preferences[preferenceId]; this.normalizePreferences(); }
-    // updatePreference(preferenceId, newPriority) { ... }
+    _normalizePriorities() {
+        const sortedPreferences = Object.values(this.preferences)
+            .sort((a, b) => a.priority - b.priority);
+
+        const normalizedPreferences = {};
+        sortedPreferences.forEach((pref, index) => {
+            const newPriority = index + 1;
+            normalizedPreferences[pref.id] = { ...pref, priority: newPriority };
+        });
+        this.preferences = normalizedPreferences;
+    }
+
+    addPreference(preferenceData) {
+        const newId = preferenceData.id || generatePreferenceId();
+        const newPreference = {
+            ...preferenceData,
+            id: newId,
+            // Zajistíme, že priorita je číslo, pokud přichází jako string, nebo nastavíme výchozí
+            priority: parseInt(preferenceData.priority, 10) || (Object.keys(this.preferences).length + 1),
+            isActive: preferenceData.isActive !== undefined ? preferenceData.isActive : true,
+        };
+        this.preferences[newId] = newPreference;
+        this._normalizePriorities();
+        console.log("Preference added:", newPreference);
+    }
+
+    deletePreference(preferenceId) {
+        if (this.preferences[preferenceId]) {
+            delete this.preferences[preferenceId];
+            this._normalizePriorities();
+            console.log("Preference deleted:", preferenceId);
+        } else {
+            console.warn("Attempted to delete non-existent preference:", preferenceId);
+        }
+    }
+
+    updatePreference(preferenceId, updatedData) {
+        if (this.preferences[preferenceId]) {
+            this.preferences[preferenceId] = {
+                ...this.preferences[preferenceId],
+                ...updatedData,
+            };
+            // Pokud se mění priorita, normalizujeme
+            if (updatedData.priority !== undefined) {
+                this._normalizePriorities();
+            }
+            console.log("Preference updated:", this.preferences[preferenceId]);
+        } else {
+            console.warn("Attempted to update non-existent preference:", preferenceId);
+        }
+    }
+
+    updatePreferencePriority(preferenceId, direction) {
+        const prefsArray = Object.values(this.preferences).sort((a, b) => a.priority - b.priority);
+        const index = prefsArray.findIndex(p => p.id === preferenceId);
+
+        if (index === -1) return;
+
+        if (direction === 'up' && index > 0) {
+            // Prohodíme priority s předchozím prvkem
+            const currentPriority = prefsArray[index].priority;
+            prefsArray[index].priority = prefsArray[index - 1].priority;
+            prefsArray[index - 1].priority = currentPriority;
+        } else if (direction === 'down' && index < prefsArray.length - 1) {
+            // Prohodíme priority s následujícím prvkem
+            const currentPriority = prefsArray[index].priority;
+            prefsArray[index].priority = prefsArray[index + 1].priority;
+            prefsArray[index + 1].priority = currentPriority;
+        }
+
+        // Přestavíme this.preferences z upraveného pole a normalizujeme
+        const newPreferencesObject = {};
+        prefsArray.forEach(p => { newPreferencesObject[p.id] = p; });
+        this.preferences = newPreferencesObject;
+        this._normalizePriorities(); // Toto zajistí správné sekvenční priority 1, 2, 3...
+    }
+
+    togglePreferenceActive(preferenceId) {
+        if (this.preferences[preferenceId]) {
+            this.preferences[preferenceId].isActive = !this.preferences[preferenceId].isActive;
+            // Normalizace priorit není nutná při změně isActive
+            console.log("Preference active toggled:", this.preferences[preferenceId]);
+        } else {
+            console.warn("Attempted to toggle active on non-existent preference:", preferenceId);
+        }
+    }
+
 
     // --- Persistence ---
     saveWorkspace() {
@@ -135,39 +202,35 @@ class WorkspaceService {
             const workspaceData = {
                 semester: this.semester,
                 year: this.year,
-                courses: this.courses.map(course => ({ // Ukládáme jako plain objekty
+                courses: this.courses.map(course => ({
                     id: course.id,
                     stagId: course.stagId,
                     name: course.name,
                     departmentCode: course.departmentCode,
                     courseCode: course.courseCode,
                     credits: course.credits,
-                    neededEnrollments: course.neededEnrollments, // Ukládáme neededEnrollments
-                    events: course.events.map(event => ({ // Ukládáme všechny vlastnosti EventClass
-                        ...event, // Spread all properties of CourseEventClass instance
-                        instructor: typeof event.instructor === 'object' ? event.instructor.name : event.instructor, // Příklad serializace
-                        // courseId je již na eventu, ale nepotřebujeme course referenci
+                    neededEnrollments: course.neededEnrollments,
+                    events: course.events.map(event => ({
+                        ...event,
+                        instructor: typeof event.instructor === 'object' ? event.instructor.name : event.instructor,
                     })),
                     semester: course.semester,
                     year: course.year,
                 })),
-                primaryScheduleEvents: this.primarySchedule.getAllEnrolledEvents().map(event => ({ id: event.id })), // Ukládáme jen ID referencí
+                primaryScheduleEvents: this.primarySchedule.getAllEnrolledEvents().map(event => ({ id: event.id })),
                 generatedSchedules: this.generatedSchedules.map(schedule => ({
-                    enrolledEventIds: schedule.getAllEnrolledEvents().map(event => event.id) // Ukládáme jen ID referencí
+                    enrolledEventIds: schedule.getAllEnrolledEvents().map(event => event.id)
                 })),
                 activeScheduleIndex: this.activeScheduleIndex,
-                preferences: this.preferences, // Preference jsou již plain objekty
+                preferences: this.preferences, // Ukládáme celý objekt preferencí
             };
             localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(workspaceData));
+            // console.log("WorkspaceService: Workspace saved to localStorage.");
         } catch (error) {
             console.error("Failed to save workspace:", error);
         }
     }
 
-    /**
-     * Načte pracovní plochu z localStorage. Pokud se nepodaří, načte dummy data.
-     * @returns {boolean} True, pokud byla pracovní plocha úspěšně inicializována (buď z localStorage nebo dummy daty).
-     */
     loadWorkspace() {
         try {
             const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -175,50 +238,57 @@ class WorkspaceService {
                 const parsedData = JSON.parse(savedData);
                 this.semester = parsedData.semester || '';
                 this.year = parsedData.year || '';
-                this.preferences = parsedData.preferences || {};
+                this.preferences = parsedData.preferences || {}; // Načteme objekt preferencí
                 this.activeScheduleIndex = parsedData.activeScheduleIndex !== undefined ? parsedData.activeScheduleIndex : -1;
 
-                // Nejdříve vytvoříme všechny kurzy a jejich události
                 this.courses = (parsedData.courses || []).map(courseData => {
-                    // Konstruktor CourseClass by měl správně vytvořit instance CourseEventClass z pole courseData.events
-                    return new CourseClass(courseData);
+                    // courseData.events by měl obsahovat všechny potřebné vlastnosti pro CourseEventClass
+                    // a CourseClass konstruktor by měl vytvořit instance CourseEventClass
+                    const courseEvents = (courseData.events || []).map(eventData => new CourseEventClass(eventData));
+                    return new CourseClass({ ...courseData, events: courseEvents });
                 });
 
-                // Poté sestavíme rozvrhy s referencemi na již existující události
                 this.primarySchedule = new ScheduleClass();
                 if (parsedData.primaryScheduleEvents) {
-                    const eventRefs = parsedData.primaryScheduleEvents.map(eventRef => this.findEventByIdGlobal(eventRef.id)).filter(Boolean);
+                    const eventRefs = parsedData.primaryScheduleEvents
+                        .map(eventRef => this.findEventByIdGlobal(eventRef.id))
+                        .filter(Boolean); // Odstraní null hodnoty, pokud událost nebyla nalezena
                     this.primarySchedule.addEvents(eventRefs);
                 }
 
                 this.generatedSchedules = (parsedData.generatedSchedules || []).map(scheduleData => {
                     const schedule = new ScheduleClass();
                     if (scheduleData.enrolledEventIds) {
-                        const eventRefs = scheduleData.enrolledEventIds.map(eventId => this.findEventByIdGlobal(eventId)).filter(Boolean);
+                        const eventRefs = scheduleData.enrolledEventIds
+                            .map(eventId => this.findEventByIdGlobal(eventId))
+                            .filter(Boolean);
                         schedule.addEvents(eventRefs);
                     }
                     return schedule;
                 });
-                console.log("Workspace loaded from localStorage.");
-                return true; // Úspěšně načteno z localStorage
+                this._normalizePriorities(); // Zajistíme správné priority po načtení
+                console.log("WorkspaceService: Workspace loaded from localStorage.");
+                return true;
             } else {
-                return this._loadHardcodedDummyData(); // Načti dummy data, pokud v localStorage nic není
+                this._normalizePriorities(); // I pro dummy data
+                return this._loadHardcodedDummyData();
             }
         } catch (error) {
             console.error("Failed to load workspace from localStorage:", error);
-            this.clearWorkspace(false); // Vyčisti potenciálně poškozený stav
-            return this._loadHardcodedDummyData(); // Pokus se načíst dummy data jako fallback
+            this.clearWorkspace(false);
+            this._normalizePriorities(); // I pro dummy data po chybě
+            return this._loadHardcodedDummyData();
         }
     }
 
     _loadHardcodedDummyData() {
-        console.log("Loading hardcoded dummy data as no saved workspace was found.");
-        this.semester = 'ZS'; // Výchozí semestr
+        console.log("WorkspaceService: Loading hardcoded dummy data.");
+        this.semester = 'ZS';
         const currentYearNum = new Date().getFullYear();
-        this.year = `${currentYearNum}/${currentYearNum + 1}`; // např. 2023/2024
+        this.year = `${currentYearNum}/${currentYearNum + 1}`;
 
         const course1Data = {
-            id: 'dummyCourseKIVPPA1', // Unikátní ID pro CourseClass
+            id: 'dummyCourseKIVPPA1D', // ID je nyní KOD_KATEDRY/KOD_PREDMETU
             stagId: 'KIV/PPA1_DUMMY_STAG',
             name: 'Počítače a programování 1 (Dummy)',
             departmentCode: 'KIV',
@@ -227,15 +297,14 @@ class WorkspaceService {
             neededEnrollments: { lecture: 1, practical: 1, seminar: 0 },
             semester: this.semester,
             year: this.year,
-            // events: [] // Necháme generateDummyCourseEvents, aby je vytvořil
         };
-        const course1Instance = this.addCourse(course1Data); // addCourse nyní vrací instanci
+        const course1Instance = this.addCourse(course1Data);
         if (course1Instance && typeof course1Instance.generateDummyCourseEvents === 'function') {
-            course1Instance.generateDummyCourseEvents(2); // Vygeneruje 2 události každého typu (P, CV, S)
+            course1Instance.generateDummyCourseEvents(2);
         }
 
         const course2Data = {
-            id: 'dummyCourseKIVUUR', // Unikátní ID
+            id: 'dummyCourseKIVUURD',
             stagId: 'KIV/UUR_DUMMY_STAG',
             name: 'Uživatelská rozhraní (Dummy)',
             departmentCode: 'KIV',
@@ -244,18 +313,15 @@ class WorkspaceService {
             neededEnrollments: { lecture: 1, practical: 0, seminar: 1 },
             semester: this.semester,
             year: this.year,
-            events: [ // Explicitně definované události
+            events: [
                 {
-                    // id bude dogenerováno v CourseEventClass, pokud není specifikováno
-                    stagId: 'UUR_lec_dummy_1_stag',
-                    startTime: '10:00', endTime: '11:30', day: 0, // Pondělí
+                    stagId: 'UUR_lec_dummy_1_stag', startTime: '10:00', endTime: '11:30', day: 0,
                     recurrence: 'KAŽDÝ TÝDEN', type: 'PŘEDNÁŠKA', room: 'EP120',
                     instructor: 'Dr. Testovací', currentCapacity: 5, maxCapacity: 50,
                     note: 'Úvodní přednáška UURD'
                 },
                 {
-                    stagId: 'UUR_sem_dummy_1_stag',
-                    startTime: '14:00', endTime: '15:30', day: 2, // Středa
+                    stagId: 'UUR_sem_dummy_1_stag', startTime: '14:00', endTime: '15:30', day: 2,
                     recurrence: 'KAŽDÝ TÝDEN', type: 'SEMINÁŘ', room: 'UC305',
                     instructor: 'Ing. Dummy Data', currentCapacity: 2, maxCapacity: 20,
                 }
@@ -263,18 +329,21 @@ class WorkspaceService {
         };
         this.addCourse(course2Data);
 
-        // Příklad přidání jedné události do primárního rozvrhu pro testování
+        // Příklad preferencí pro dummy data
+        this.addPreference({ type: 'FREE_DAY', params: { day: 'ST' } }); // Středa volno
+        this.addPreference({ type: 'AVOID_TIMES', params: { day: 'PO', startTime: '08:00', endTime: '10:00' } });
+
+
         if (this.courses.length > 0 && this.courses[0].events.length > 0) {
             this.primarySchedule.addEvent(this.courses[0].events[0]);
         }
-        if (this.courses.length > 0 && this.courses[0].events.length > 1) { // Přidáme i druhou, pokud existuje
+        if (this.courses.length > 0 && this.courses[0].events.length > 1) {
             this.primarySchedule.addEvent(this.courses[0].events[1]);
         }
 
-
-        console.log("Dummy data loaded and initialized primary schedule with some events.");
-        this.saveWorkspace(); // Uložíme nově vygenerovaná dummy data do localStorage pro příští načtení
-        return true; // Indikuje, že workspace byl inicializován
+        console.log("WorkspaceService: Dummy data loaded and initialized primary schedule.");
+        this.saveWorkspace();
+        return true;
     }
 
 
@@ -285,12 +354,12 @@ class WorkspaceService {
         this.primarySchedule.clear();
         this.generatedSchedules = [];
         this.activeScheduleIndex = -1;
-        this.preferences = {};
+        this.preferences = {}; // Vymazání preferencí
         if (removeFromStorage) {
             localStorage.removeItem(LOCAL_STORAGE_KEY);
-            console.log("Workspace cleared from localStorage.");
+            console.log("WorkspaceService: Workspace cleared from localStorage.");
         }
-        console.log("Workspace data cleared from memory.");
+        console.log("WorkspaceService: Workspace data cleared from memory.");
     }
 
     // --- Schedule Generation Logic ---
@@ -298,50 +367,58 @@ class WorkspaceService {
         if (event1.day !== event2.day) {
             return false;
         }
+        // Jednoduchá kontrola času (měla by být robustnější pro různé formáty a délky)
         const start1 = parseInt(event1.startTime.replace(':', ''), 10);
         const end1 = parseInt(event1.endTime.replace(':', ''), 10);
         const start2 = parseInt(event2.startTime.replace(':', ''), 10);
         const end2 = parseInt(event2.endTime.replace(':', ''), 10);
 
+        // Překryv nastane, pokud start jednoho je před koncem druhého A start druhého je před koncem prvního
         if (start1 < end2 && start2 < end1) {
+            // Zohlednění týdenní recurrence
             if (event1.recurrence === 'KAŽDÝ TÝDEN' || event2.recurrence === 'KAŽDÝ TÝDEN') {
-                return true;
+                return true; // Jeden je každý týden, takže vždy kolidují, pokud se dny a časy shodují
             }
             if (event1.recurrence === event2.recurrence) {
-                return true;
+                return true; // Oba jsou sudé nebo oba liché a časy kolidují
             }
+            // Pokud jeden je sudý a druhý lichý, nekolidují v ten samý týden
             return false;
         }
         return false;
     }
 
+    // Zjednodušená implementace generateSchedule pro demonstraci
+    // Skutečný algoritmus by byl výrazně komplexnější (viz dokumentace)
     generateSchedule(coursesToSchedule = this.courses) { // [cite: 162, 176]
         this.generatedSchedules = [];
-        this.activeScheduleIndex = -1; // Po generování se primární rozvrh neaktivuje automaticky, ale první vygenerovaný
+        this.activeScheduleIndex = -1;
         const solutions = [];
 
-        // Získání aktivních preferencí seřazených dle priority
-        // Předpokládáme, že `this.preferences` je objekt, kde klíče jsou ID preferencí
-        // a hodnoty obsahují { priority: number, type: string, params: object, isActive: boolean }
-        const activePreferences = Object.values(this.preferences)
+        const activePreferencesList = Object.values(this.preferences)
             .filter(p => p.isActive)
-            .sort((a, b) => a.priority - b.priority); // [cite: 186] (implicitně, logika `PropertiesBar` by měla zajistit `isActive`)
+            .sort((a, b) => a.priority - b.priority); // [cite: 186]
 
+        // Placeholder pro velmi zjednodušenou logiku, která vezme první možné nekolidující akce
         const findSchedulesRecursive = (courseIdx, currentScheduleInProgress) => {
-            if (solutions.length >= MAX_GENERATED_SCHEDULES) {
-                return;
-            }
+            if (solutions.length >= MAX_GENERATED_SCHEDULES) return;
 
             if (courseIdx === coursesToSchedule.length) {
-                let allCoursesConditionsMet = true;
+                // Zkontroluj, zda jsou splněny všechny podmínky pro všechny předměty
+                let allCourseReqsMet = true;
                 for (const course of coursesToSchedule) {
-                    const enrolledForThisCourse = currentScheduleInProgress.getAllEnrolledEvents().filter(ev => ev.courseId === course.id);
-                    if (!course.areAllEnrollmentRequirementsMet(new Set(enrolledForThisCourse.map(e => e.id)))) { // Použití Set pro areAllEnrollmentRequirementsMet
-                        allCoursesConditionsMet = false;
+                    const enrolledEventIdsForCourse = new Set(
+                        currentScheduleInProgress.getAllEnrolledEvents()
+                            .filter(ev => ev.courseId === course.id)
+                            .map(ev => ev.id)
+                    );
+                    if (!course.areAllEnrollmentRequirementsMet(enrolledEventIdsForCourse)) {
+                        allCourseReqsMet = false;
                         break;
                     }
                 }
-                if (allCoursesConditionsMet) {
+
+                if (allCourseReqsMet) {
                     const finalSchedule = new ScheduleClass();
                     finalSchedule.addEvents(currentScheduleInProgress.getAllEnrolledEvents());
                     solutions.push(finalSchedule);
@@ -351,131 +428,89 @@ class WorkspaceService {
 
             const course = coursesToSchedule[courseIdx];
             const needed = course.neededEnrollments;
-            const availableEventsByType = {};
+            const eventTypeKeys = Object.keys(needed).filter(typeKey => needed[typeKey] > 0);
 
-            Object.keys(needed).forEach(typeKeyStandard => { // např. 'lecture', 'practical'
-                // Najdeme události, které odpovídají tomuto standardizovanému typu
-                availableEventsByType[typeKeyStandard] = course.events.filter(event => {
-                    const eventTypeStandard = Object.keys(EVENT_TYPE_TO_KEY_MAP).find(
-                        key => EVENT_TYPE_TO_KEY_MAP[key] === typeKeyStandard && event.type.toLowerCase() === key.toLowerCase()
-                    );
-                    if (!eventTypeStandard) return false; // Typ události neodpovídá
-
-                    // Aplikace preferencí zde
-                    let passesPreferences = true;
-                    for (const pref of activePreferences) {
-                        if (pref.type === 'FREE_DAY' && event.day === pref.params.day) { // [cite: 188]
-                            passesPreferences = false; break;
-                        }
-                        if (pref.type === 'AVOID_TIMES' && event.day === pref.params.day) { // [cite: 190]
-                            const eventStartMins = parseInt(event.startTime.replace(':', ''), 10);
-                            const eventEndMins = parseInt(event.endTime.replace(':', ''), 10);
-                            const prefStartMins = parseInt(pref.params.startTime.replace(':', ''), 10);
-                            const prefEndMins = parseInt(pref.params.endTime.replace(':', ''), 10);
-                            if (Math.max(eventStartMins, prefStartMins) < Math.min(eventEndMins, prefEndMins)) {
-                                passesPreferences = false; break;
-                            }
-                        }
-                        // Další typy preferencí (např. preferovaný vyučující [cite: 192])
-                        if (pref.type === 'PREFER_INSTRUCTOR' && course.getShortCode() === pref.params.courseCode) {
-                            // This preference is complex: it's a "preference", not a hard filter unless no other options.
-                            // For a simple hard filter variant for now:
-                            // if (event.instructor !== pref.params.instructorName) { passesPreferences = false; break; }
-                        }
-                    }
-                    return passesPreferences;
-                });
-            });
-
-            // ... (zbytek komplexní logiky generování kombinací a rekurze)
-            // Tato část zůstává jako placeholder, jelikož její plná implementace je velmi složitá
-            // a vyžaduje pokročilé algoritmy pro kombinatoriku a splňování omezení (CSP).
-
-            const generateCombinationsRecursive = (typeKeyIndex, tempSelectedEventsForCourse) => {
-                const typeKeys = Object.keys(needed).filter(key => needed[key] > 0); // Jen typy, které potřebujeme
-
-                if (typeKeyIndex === typeKeys.length) { // Všechny potřebné typy pro tento kurz jsou pokryty
+            // Rekurzivní funkce pro generování kombinací událostí pro jeden předmět
+            const generateEventCombinationsForCourse = (typeKeyIndex, tempEventsForCourse) => {
+                if (typeKeyIndex === eventTypeKeys.length) {
+                    // Máme vybrané události pro všechny potřebné typy tohoto kurzu
+                    // Přidáme je do currentScheduleInProgress (po kontrole konfliktů) a pokračujeme na další kurz
                     let conflict = false;
-                    for (const newEvent of tempSelectedEventsForCourse) {
-                        for (const existingEvent of currentScheduleInProgress.getAllEnrolledEvents()) {
-                            if (this._eventsConflict(newEvent, existingEvent)) {
-                                conflict = true;
-                                break;
+                    for(const newEvent of tempEventsForCourse) {
+                        for(const existingEvent of currentScheduleInProgress.getAllEnrolledEvents()) {
+                            if(this._eventsConflict(newEvent, existingEvent)) {
+                                conflict = true; break;
                             }
                         }
-                        if (conflict) break;
+                        if(conflict) break;
                     }
 
                     if (!conflict) {
-                        tempSelectedEventsForCourse.forEach(event => currentScheduleInProgress.addEvent(event));
+                        tempEventsForCourse.forEach(event => currentScheduleInProgress.addEvent(event));
                         findSchedulesRecursive(courseIdx + 1, currentScheduleInProgress);
-                        tempSelectedEventsForCourse.forEach(event => currentScheduleInProgress.removeEventById(event.id)); // Backtrack
+                        tempEventsForCourse.forEach(event => currentScheduleInProgress.removeEventById(event.id)); // Backtrack
                     }
                     return;
                 }
 
-                const currentTypeKey = typeKeys[typeKeyIndex];
-                const numNeededForType = needed[currentTypeKey];
-                const candidateEvents = availableEventsByType[currentTypeKey] || [];
+                const currentTypeKey = eventTypeKeys[typeKeyIndex]; // např. 'lecture'
+                const numNeeded = needed[currentTypeKey];
 
-                if (candidateEvents.length < numNeededForType) {
-                    return; // Nelze splnit požadavky pro tento typ
-                }
+                // Získání událostí daného typu, které splňují preference
+                const availableEventsOfType = course.events.filter(event => {
+                    const eventTypeMapped = Object.keys(EVENT_TYPE_TO_KEY_MAP).find(key => EVENT_TYPE_TO_KEY_MAP[key] === currentTypeKey && event.type.toLowerCase().includes(key));
+                    if(!eventTypeMapped) return false;
 
-                // Zde by měla být skutečná logika pro výběr `numNeededForType` událostí z `candidateEvents`
-                // Toto je velmi zjednodušený příklad - bere první možné události.
-                // Pro reálnou aplikaci byste potřebovali generátor kombinací.
-                function findCombinations(startIndex, currentCombination) {
-                    if (solutions.length >= MAX_GENERATED_SCHEDULES) return;
-
-                    if (currentCombination.length === numNeededForType) {
-                        // Máme platnou kombinaci pro aktuální typ, pokračujeme na další typ
-                        generateCombinationsRecursive(typeKeyIndex + 1, [...tempSelectedEventsForCourse, ...currentCombination]);
-                        return;
+                    for (const pref of activePreferencesList) {
+                        if (pref.type === 'FREE_DAY' && event.getDayAsString(d => d) === pref.params.day) return false; // [cite: 188]
+                        if (pref.type === 'AVOID_TIMES' && event.getDayAsString(d => d) === pref.params.day) { // [cite: 190]
+                            const eventStartMins = parseInt(event.startTime.replace(':', ''), 10);
+                            const eventEndMins = parseInt(event.endTime.replace(':', ''), 10);
+                            const prefStartMins = parseInt(pref.params.startTime.replace(':', ''), 10);
+                            const prefEndMins = parseInt(pref.params.endTime.replace(':', ''), 10);
+                            if (Math.max(eventStartMins, prefStartMins) < Math.min(eventEndMins, prefEndMins)) return false;
+                        }
+                        // Další preference...
                     }
-                    if (startIndex >= candidateEvents.length) {
-                        return; // Nemáme dostatek událostí k vytvoření kombinace
-                    }
+                    return true;
+                });
 
-                    // Varianta 1: Zahrneme candidateEvents[startIndex]
-                    // Ověření, zda nová událost nekoliduje s již vybranými v `currentCombination` pro tento typ
-                    let internalConflict = false;
-                    for(const evInComb of currentCombination) {
-                        if(this._eventsConflict(evInComb, candidateEvents[startIndex])) {
-                            internalConflict = true;
-                            break;
+
+                if (availableEventsOfType.length < numNeeded) return; // Nelze splnit
+
+                // Zde by byl skutečný generátor kombinací (např. n select k)
+                // Pro zjednodušení vezmeme prvních 'numNeeded' událostí
+                const selectedEventsForType = availableEventsOfType.slice(0, numNeeded);
+
+                // Zkontrolujeme, zda nově vybrané události pro tento typ nekolidují mezi sebou
+                for (let i = 0; i < selectedEventsForType.length; i++) {
+                    for (let j = i + 1; j < selectedEventsForType.length; j++) {
+                        if (this._eventsConflict(selectedEventsForType[i], selectedEventsForType[j])) {
+                            return; // Interní konflikt v rámci typu, tato větev je neplatná
                         }
                     }
-                    if(!internalConflict) {
-                        currentCombination.push(candidateEvents[startIndex]);
-                        findCombinations(startIndex + 1, currentCombination);
-                        currentCombination.pop(); // Backtrack
-                    }
-
-
-                    // Varianta 2: Nezačleníme candidateEvents[startIndex] (pokud ještě máme dostatek zbývajících kandidátů)
-                    if (candidateEvents.length - (startIndex + 1) >= numNeededForType - currentCombination.length) {
-                        findCombinations(startIndex + 1, currentCombination);
-                    }
                 }
 
-                findCombinations(0, []);
+                generateEventCombinationsForCourse(typeKeyIndex + 1, [...tempEventsForCourse, ...selectedEventsForType]);
             };
 
-            generateCombinationsRecursive(0, []); // Začneme s prvním typem požadavku
+            if (eventTypeKeys.length === 0) { // Předmět nemá žádné požadavky
+                findSchedulesRecursive(courseIdx + 1, currentScheduleInProgress);
+            } else {
+                generateEventCombinationsForCourse(0, []);
+            }
         };
-
 
         const initialSchedule = new ScheduleClass();
         findSchedulesRecursive(0, initialSchedule);
 
         this.generatedSchedules = solutions;
         if (solutions.length > 0) {
-            this.activeScheduleIndex = 0; // Aktivujeme první vygenerovaný
-            console.log(`Generated ${solutions.length} schedule variants.`);
+            this.activeScheduleIndex = 0;
+            console.log(`WorkspaceService: Generated ${solutions.length} schedule variants.`);
             return true;
         }
-        console.log("No valid schedule variants found meeting all criteria.");
+        console.log("WorkspaceService: No valid schedule variants found meeting all criteria.");
         return false;
     }
 }
