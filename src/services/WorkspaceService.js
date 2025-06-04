@@ -512,14 +512,14 @@ class WorkspaceService {
         return false;
     }
 
-    generateSchedule(coursesToSchedule = this.courses) { // [cite: 162, 176]
+    generateSchedule(coursesToSchedule = this.courses) {
         this.generatedSchedules = [];
         this.activeScheduleIndex = -1;
         const solutions = [];
 
         const activePreferencesList = Object.values(this.preferences)
             .filter(p => p.isActive)
-            .sort((a, b) => a.priority - b.priority); // [cite: 186]
+            .sort((a, b) => a.priority - b.priority);
 
         const findSchedulesRecursive = (courseIdx, currentScheduleInProgress) => {
             if (solutions.length >= MAX_GENERATED_SCHEDULES) return;

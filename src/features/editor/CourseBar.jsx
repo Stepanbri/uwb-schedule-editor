@@ -1,6 +1,6 @@
 // src/features/editor/CourseBar.jsx
 import React from 'react';
-import { Box, Typography, CircularProgress, Button, Stack, alpha, Tooltip, IconButton } from '@mui/material';
+import { Box, Typography, CircularProgress, Button, Stack, alpha, Tooltip } from '@mui/material';
 import { SimpleTreeView, TreeItem } from '@mui/x-tree-view';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -12,7 +12,6 @@ import { useTranslation } from 'react-i18next';
 import CourseNodeHeader from './CourseBar/CourseNodeHeader';
 import EventNode from './CourseBar/EventNode';
 import { EVENT_TYPE_TO_KEY_MAP } from '../../services/CourseClass';
-import ScheduleClass from '../../services/ScheduleClass';
 
 function CourseBar({
                        courses,
