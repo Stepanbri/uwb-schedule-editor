@@ -504,10 +504,8 @@ class WorkspaceService {
             if (event1.recurrence === 'KAŽDÝ TÝDEN' || event2.recurrence === 'KAŽDÝ TÝDEN') {
                 return true;
             }
-            if (event1.recurrence === event2.recurrence) {
-                return true;
-            }
-            return false;
+            return event1.recurrence === event2.recurrence;
+
         }
         return false;
     }
@@ -578,8 +576,8 @@ class WorkspaceService {
                     if(!eventTypeMapped) return false; // Ensure event type matches the needed type
 
                     for (const pref of activePreferencesList) {
-                        if (pref.type === 'FREE_DAY' && event.day === CourseEventClass.dayStringToNumber(pref.params.day)) return false; // [cite: 188] // Added conversion
-                        if (pref.type === 'AVOID_TIMES' && event.day === CourseEventClass.dayStringToNumber(pref.params.day)) { // [cite: 190] // Added conversion
+                        if (pref.type === 'FREE_DAY' && event.day === CourseEventClass.dayStringToNumber(pref.params.day)) return false;
+                        if (pref.type === 'AVOID_TIMES' && event.day === CourseEventClass.dayStringToNumber(pref.params.day)) {
                             const eventStartMins = parseInt(event.startTime.replace(':', ''), 10);
                             const eventEndMins = parseInt(event.endTime.replace(':', ''), 10);
                             const prefStartMins = parseInt(pref.params.startTime.replace(':', ''), 10);

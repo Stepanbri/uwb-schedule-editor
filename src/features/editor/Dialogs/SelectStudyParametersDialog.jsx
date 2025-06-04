@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import {
     Dialog, DialogTitle, DialogContent, DialogActions, Button,
     TextField, FormControl, InputLabel, Select, MenuItem, Grid,
-    FormGroup, FormControlLabel, Checkbox, FormHelperText, Typography, Box
+    FormGroup, FormControlLabel, Checkbox, FormHelperText, Typography, Box, Alert
 } from '@mui/material';
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import { useTranslation } from 'react-i18next';
@@ -130,6 +130,7 @@ const SelectStudyParametersDialog = ({ open, onClose, onSubmitParameters, studen
                                 value={scheduleAcademicYear}
                                 label={t('Dialogs.selectStudyParams.scheduleAcademicYearLabel', 'Akademický rok rozvrhu')}
                                 onChange={(e) => setScheduleAcademicYear(e.target.value)}
+                                variant={"filled"}
                             >
                                 {academicYearsSourceForSchedule().map(year => (
                                     <MenuItem key={year} value={year}>{year}</MenuItem>
@@ -146,6 +147,7 @@ const SelectStudyParametersDialog = ({ open, onClose, onSubmitParameters, studen
                                 value={semester}
                                 label={t('Dialogs.selectStudyParams.semesterLabel', 'Semestr předmětů')}
                                 onChange={(e) => setSemester(e.target.value)}
+                                variant={"filled"}
                             >
                                 <MenuItem value="ZS">{t('Dialogs.selectStudyParams.semesterZS', 'Zimní (ZS)')}</MenuItem>
                                 <MenuItem value="LS">{t('Dialogs.selectStudyParams.semesterLS', 'Letní (LS)')}</MenuItem>

@@ -16,7 +16,7 @@ class ScheduleClass {
      * @param {CourseEventClass} event - Instance CourseEventClass.
      * @returns {boolean} True, pokud byla akce úspěšně přidána, jinak false.
      */
-    addEvent(event) { // [cite: 154]
+    addEvent(event) {
         if (event && event.id && !this.enrolledEvents.find(e => e.id === event.id)) {
             this.enrolledEvents.push(event);
             return true;
@@ -28,7 +28,7 @@ class ScheduleClass {
      * Přidá pole instancí CourseEventClass do rozvrhu.
      * @param {CourseEventClass[]} eventList - Pole instancí CourseEventClass.
      */
-    addEvents(eventList) { // [cite: 154]
+    addEvents(eventList) {
         if (eventList && Array.isArray(eventList)) {
             eventList.forEach(event => this.addEvent(event));
         }
@@ -38,7 +38,7 @@ class ScheduleClass {
      * Odebere rozvrhovou akci z rozvrhu studenta podle jejího ID.
      * @param {string|number} eventId - ID akce k odebrání.
      */
-    removeEventById(eventId) { // Nahrazuje popEvent [cite: 155]
+    removeEventById(eventId) {
         this.enrolledEvents = this.enrolledEvents.filter(event => event.id !== eventId);
     }
 

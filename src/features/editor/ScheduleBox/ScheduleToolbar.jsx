@@ -1,24 +1,18 @@
 // src/features/editor/ScheduleBox/ScheduleToolbar.jsx
-import React, { useState, useRef } from 'react';
-import { Box, Paper, ToggleButtonGroup, ToggleButton, Tooltip, Button, Divider, IconButton } from '@mui/material';
+import React, { useRef } from 'react';
+import { Paper, Tooltip, Divider, IconButton } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 
 // Ikony pro toolbar
-import ViewCompactIcon from '@mui/icons-material/ViewCompact';
-import CalendarViewWeekIcon from '@mui/icons-material/CalendarViewWeek';
 import DownloadIcon from '@mui/icons-material/Download';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
-import SaveIcon from '@mui/icons-material/Save'; // Může být pro export
+import SaveIcon from '@mui/icons-material/Save';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 
 
 const ScheduleToolbar = ({
-                             onToggleCompactView, // Předpoklad pro toggle button
-                             onToggleWeekends,    // Předpoklad pro toggle button
-                             isCompactView,       // Stav pro toggle
-                             showWeekends,        // Stav pro toggle
                              onDownloadScheduleImage,
                              onExportWorkspace,
                              onImportWorkspace,

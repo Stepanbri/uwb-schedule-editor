@@ -1,6 +1,6 @@
 // PROJEKT/NEW/src/features/editor/Dialogs/CourseLoadingProcessDialog.jsx
 import React from 'react';
-import { Dialog, DialogContent, DialogContentText, CircularProgress, Box } from '@mui/material';
+import { Dialog, DialogContent, DialogContentText, CircularProgress } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
 const CourseLoadingProcessDialog = ({ open, message }) => {

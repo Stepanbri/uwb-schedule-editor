@@ -1,9 +1,6 @@
 // PROJEKT/NEW/src/features/editor/Dialogs/SelectSTAGIdentityDialog.jsx
 import React, { useState, useEffect } from 'react';
-import {
-    Dialog, DialogTitle, DialogContent, DialogActions, Button,
-    List, ListItem, ListItemButton, ListItemText, Typography, CircularProgress, Box, Alert
-} from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, List, ListItemButton, ListItemText, Typography, CircularProgress, Box, Alert} from '@mui/material';
 import PersonPinIcon from '@mui/icons-material/PersonPin';
 import { useTranslation } from 'react-i18next';
 

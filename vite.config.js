@@ -16,7 +16,7 @@ export default defineConfig({
       // a plná URL je 'https://stag-ws.zcu.cz/ws/services/rest2/...'
       // Chceme, aby se požadavky na '/api-stag' přeposílaly na STAG server
       '/api-stag': {
-        target: 'https://stag-ws.zcu.cz', // Cílový STAG server
+        target: 'https://stag-demo.zcu.cz', // Cílový STAG server
         changeOrigin: true, // Nutné pro virtuální hostování a přepsání 'Host' hlavičky
         rewrite: (path) => path.replace(/^\/api-stag/, ''), // Odstraní /api-stag z cesty požadavku
         secure: false, // Pokud STAG server používá self-signed certifikát (pro produkci spíše true)

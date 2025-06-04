@@ -1,6 +1,6 @@
 // src/features/editor/ScheduleBox/ScheduleBox.jsx
 import React, { useMemo } from 'react';
-import { Box, Paper, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, styled } from '@mui/material';
+import { Paper, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, styled } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useCourseManagement } from '../hooks/useCourseManagement';
 import { timeToMinutes } from '../../../utils/timeUtils';
@@ -65,19 +65,17 @@ const StickyTableCell = styled(TableCell)(({ theme, stickytype }) => ({
         minWidth: DAY_CELL_WIDTH,
         width: DAY_CELL_WIDTH,
         borderRight: `1px solid ${theme.palette.divider}`,
-    }) // <-- Odstraněna čárka zde, pokud je toto poslední vlastnost v objektu
-})); // <-- Přidán středník
+    })
+}));
 
-// Definice DayRowCell (řádek 99 dle vašeho číslování by měl začínat zde nebo poblíž)
 const DayRowCell = styled(TableCell)(({ theme }) => ({
     position: 'relative',
     height: MIN_EVENT_HEIGHT,
     padding: 0,
     borderBottom: `1px solid ${theme.palette.divider}`,
-})); // <-- Přidán středník
+}));
 
 export const layoutEvents = (eventsForDay) => {
-    // ... (kód funkce layoutEvents zůstává stejný) ...
     if (!eventsForDay || eventsForDay.length === 0) return [];
 
     const sortedEvents = [...eventsForDay].sort((a, b) => {
@@ -118,7 +116,6 @@ export const layoutEvents = (eventsForDay) => {
 };
 
 function ScheduleBox() {
-    // ... (kód funkce ScheduleBox zůstává stejný) ...
     const { t } = useTranslation();
     const { activeSchedule, courses } = useCourseManagement();
 
@@ -136,7 +133,7 @@ function ScheduleBox() {
     }, [scheduledEvents, courses]);
 
 
-    const renderEvent = (eventData, levelIndex, dayIndex) => {
+    const renderEvent = (eventData, levelIndex) => {
         const eventStartMinutes = timeToMinutes(eventData.startTime);
         const eventEndMinutes = timeToMinutes(eventData.endTime);
 
@@ -169,7 +166,7 @@ function ScheduleBox() {
                                 {t('schedule.dayTime', 'Den/Čas')}
                             </StickyTableCell>
                             {TIME_BLOCKS.map((block, index) => (
-                                <StickyTableCell key={index} stickytype="time" sx={{ height: TIME_HEADER_HEIGHT, background: "linear-gradient(-90deg,rgba(37, 105, 106, 0) 0%, rgba(18, 218, 222, 0.02) 100%);" }}>
+                                <StickyTableCell key={index} stickytype="time" sx={{ height: TIME_HEADER_HEIGHT }}>
                                     <Typography variant="caption" display="block" fontWeight="bold">{block.label}</Typography>
                                     {block.start} - {block.end}
                                 </StickyTableCell>

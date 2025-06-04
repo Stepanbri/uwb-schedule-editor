@@ -96,6 +96,7 @@ const LoadCourseFromSTAGDialog = ({ open, onClose, onSubmit }) => {
                             <Select
                                 labelId="academic-year-select-label"
                                 value={academicYear}
+                                variant={"filled"}
                                 label={t('Dialogs.loadCourseFromSTAG.academicYearLabel', 'Akademický rok')}
                                 onChange={(e) => setAcademicYear(e.target.value)}
                             >
@@ -112,6 +113,7 @@ const LoadCourseFromSTAGDialog = ({ open, onClose, onSubmit }) => {
                             <Select
                                 labelId="semester-select-label"
                                 value={semester}
+                                variant={"filled"}
                                 label={t('Dialogs.loadCourseFromSTAG.semesterLabel', 'Semestr')}
                                 onChange={(e) => setSemester(e.target.value)}
                             >

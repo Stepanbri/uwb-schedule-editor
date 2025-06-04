@@ -37,9 +37,8 @@ const ConfirmationDialog = ({
                             {itemsToOverwrite.map((item, index) => (
                                 <ListItem key={`overwrite-${index}`} disablePadding sx={{pl:1}}>
                                     <ListItemText
-                                        primaryTypographyProps={{variant: 'body2'}}
-                                        secondaryTypographyProps={{variant: 'caption'}}
-                                        primary={typeof item === 'string' ? item : item.name}
+                                        slotProps={{ primary: {variant: 'body2'}, secondary: {variant: 'caption'} }}
+                                    primary={typeof item === 'string' ? item : item.name}
                                         secondary={typeof item === 'string' ? null : item.details}
                                     />
                                 </ListItem>
@@ -55,8 +54,7 @@ const ConfirmationDialog = ({
                             {itemsToAdd.map((item, index) => (
                                 <ListItem key={`add-${index}`} disablePadding sx={{pl:1}}>
                                     <ListItemText
-                                        primaryTypographyProps={{variant: 'body2'}}
-                                        secondaryTypographyProps={{variant: 'caption'}}
+                                        slotProps={{ primary: {variant: 'body2'}, secondary: {variant: 'caption'} }}
                                         primary={typeof item === 'string' ? item : item.name}
                                         secondary={typeof item === 'string' ? null : item.details}
                                     />

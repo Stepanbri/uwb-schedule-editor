@@ -235,11 +235,6 @@ function EditorPage() {
         });
     };
 
-    const [isCompactView, setIsCompactView] = useState(false);
-    const [showWeekends, setShowWeekends] = useState(true);
-    const handleToggleCompactView = () => setIsCompactView(prev => !prev);
-    const handleToggleWeekends = () => setShowWeekends(prev => !prev);
-
     const drawerContent = (
         <Box sx={{ width: { xs: '85vw', sm: LEFT_SIDEBAR_WIDTH_DESKTOP }, height: '100%', display: 'flex', flexDirection: 'column' }} role="presentation">
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1, borderBottom: 1, borderColor: 'divider' }}>
@@ -287,10 +282,6 @@ function EditorPage() {
                 <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%'}}>
                     <Box ref={scheduleToolbarRef} sx={{px: 1, pt: 1, flexShrink: 0}}>
                         <ScheduleToolbar
-                            onToggleCompactView={handleToggleCompactView}
-                            onToggleWeekends={handleToggleWeekends}
-                            isCompactView={isCompactView}
-                            showWeekends={showWeekends}
                             onDownloadScheduleImage={() => handleSaveScheduleImage(scheduleBoxRef.current)}
                             onExportWorkspace={handleExportWorkspace}
                             onImportWorkspace={handleImportWorkspace}
@@ -343,10 +334,6 @@ function EditorPage() {
                     <MainContentArea>
                         <Box ref={scheduleToolbarRef}>
                             <ScheduleToolbar
-                                onToggleCompactView={handleToggleCompactView}
-                                onToggleWeekends={handleToggleWeekends}
-                                isCompactView={isCompactView}
-                                showWeekends={showWeekends}
                                 onDownloadScheduleImage={() => handleSaveScheduleImage(scheduleBoxRef.current)}
                                 onExportWorkspace={handleExportWorkspace}
                                 onImportWorkspace={handleImportWorkspace}

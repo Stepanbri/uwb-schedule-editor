@@ -211,7 +211,7 @@
       "priorityChanged": "Priorita preference byla upravena.",
       "activityChanged": "Aktivita preference byla změněna.",
       "confirmDeleteTitle": "Odstranit preferenci?",
-      "confirmDeleteMessage": "Opravdu si přejete odstranit preferenci \"{{displayLabel}}\"?"
+      "confirmDeleteMessage": "Opravdu si přejete odstranit preferenci {{displayLabel}}?"
     }
   },
   "Dialogs": {

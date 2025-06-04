@@ -89,14 +89,6 @@ class CourseClass {
         if (filters.instructor) {
             filteredEvents = filteredEvents.filter(event => event.instructor === filters.instructor || (typeof event.instructor === 'object' && event.instructor.name === filters.instructor));
         }
-        // Při filtrování událostí bychom měli brát v úvahu rok a semestr PŘEDMĚTU,
-        // protože všechny jeho události by měly odpovídat tomuto kontextu.
-        // if (filters.semester) {
-        //     filteredEvents = filteredEvents.filter(event => event.semester === filters.semester);
-        // }
-        // if (filters.academicYear) {
-        //     filteredEvents = filteredEvents.filter(event => event.year === filters.academicYear);
-        // }
         if (filters.hasCapacity === true) {
             filteredEvents = filteredEvents.filter(event => event.currentCapacity < event.maxCapacity);
         }
@@ -128,7 +120,7 @@ class CourseClass {
                 if (useSubstitution && countAsKey === 'practical') {
                     countAsKey = 'lecture';
                 }
-                if (countAsKey && counts.hasOwnProperty(countAsKey)) {
+                if (countAsKey && Object.prototype.hasOwnProperty.call(counts, countAsKey)) {
                     counts[countAsKey]++;
                 }
                 counts.total++;
