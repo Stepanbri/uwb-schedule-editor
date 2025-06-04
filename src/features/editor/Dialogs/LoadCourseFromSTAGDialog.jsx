@@ -35,7 +35,7 @@ const LoadCourseFromSTAGDialog = ({ open, onClose, onSubmit }) => {
         const newErrors = {};
         if (!courseCodeFull.trim()) {
             newErrors.courseCodeFull = t('Dialogs.loadCourseFromSTAG.errorCourseCodeRequired', 'Kód předmětu je povinný.');
-        } else if (!/^[A-Z]{2,5}\/[A-Z0-9]{2,6}$/i.test(courseCodeFull.trim())) {
+        } else if (!/^[A-Z]{2,5}\/[A-Z0-9-]{2,10}$/i.test(courseCodeFull.trim())) {
             newErrors.courseCodeFull = t('Dialogs.loadCourseFromSTAG.errorCourseCodeFormat', 'Neplatný formát kódu (např. KIV/PPA1).');
         }
         if (!academicYear.trim()) {

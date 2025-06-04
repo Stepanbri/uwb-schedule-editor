@@ -14,25 +14,23 @@ const backgroundDark = '#080e0e'; // default i paper
 const textDark = '#e4e9e9';
 const accentDark = '#23ebed';
 
-// Barvy pro typy událostí (dle dokumentace a běžné praxe)
-//
 const eventColors = {
-    lectureLight: alpha('#ffcdd2', 0.7), // světle červená pro přednášky
+    lectureLight: alpha('#ffcdd2', 0.7),
     lectureLightBorder: '#ef9a9a',
-    lectureDark: alpha('#b71c1c', 0.5),   // tmavší červená
+    lectureDark: alpha('#b71c1c', 0.5),
     lectureDarkBorder: '#e57373',
 
-    practicalLight: alpha('#c8e6c9', 0.7), // světle zelená pro cvičení
+    practicalLight: alpha('#c8e6c9', 0.7),
     practicalLightBorder: '#a5d6a7',
-    practicalDark: alpha('#2e7d32', 0.5),  // tmavší zelená
+    practicalDark: alpha('#2e7d32', 0.5),
     practicalDarkBorder: '#81c784',
 
-    seminarLight: alpha('#fff9c4', 0.7),  // světle žlutá pro semináře
+    seminarLight: alpha('#fff9c4', 0.7),
     seminarLightBorder: '#fff59d',
-    seminarDark: alpha('#f9a825', 0.5), // tmavší žlutá/oranžová
+    seminarDark: alpha('#f9a825', 0.5),
     seminarDarkBorder: '#ffeb3b',
 
-    otherLight: alpha('#e0e0e0', 0.7),    // pro ostatní/defaultní typy
+    otherLight: alpha('#e0e0e0', 0.7),
     otherLightBorder: '#bdbdbd',
     otherDark: alpha('#616161', 0.5),
     otherDarkBorder: '#9e9e9e',
@@ -45,25 +43,24 @@ const getDesignTokens = (mode) => ({
             ? {
                 primary: {
                     main: primaryLight,
-                    // MUI si dopočítá light a dark varianty, nebo je zde můžeme explicitně definovat
                 },
                 secondary: {
                     main: secondaryLight,
                 },
-                accent: { // Vlastní barva
+                accent: {
                     main: accentLight,
-                    contrastText: '#000000', // Nutno určit kontrastní text
+                    contrastText: '#000000',
                 },
                 background: {
                     default: backgroundLight,
-                    paper: backgroundLight, // Stejné jako default pro konzistenci sidebaru atd.
+                    paper: backgroundLight,
                 },
                 text: {
                     primary: textLight,
                     secondary: alpha(textLight, 0.7),
                     disabled: alpha(textLight, 0.5),
                 },
-                eventTypes: { // Barvy pro události v rozvrhu
+                eventTypes: {
                     lecture: eventColors.lectureLight,
                     lectureBorder: eventColors.lectureLightBorder,
                     practical: eventColors.practicalLight,
@@ -116,80 +113,66 @@ const getDesignTokens = (mode) => ({
         divider: mode === 'light' ? alpha(textLight, 0.12) : alpha(textDark, 0.12),
     },
     typography: {
-        fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif', //
-        h1: { fontSize: '2.8rem', fontWeight: 700 }, // Pro LandingPage
+        fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+        h1: { fontSize: '2.8rem', fontWeight: 700 },
         h2: { fontSize: '2.2rem', fontWeight: 600 },
         h3: { fontSize: '1.8rem', fontWeight: 600 },
         h4: { fontSize: '1.5rem', fontWeight: 500 },
         h5: { fontSize: '1.25rem', fontWeight: 500 },
-        h6: { fontSize: '1.1rem', fontWeight: 500 }, // Např. pro titulky v sidebarech
+        h6: { fontSize: '1.1rem', fontWeight: 500 },
         subtitle1: { fontSize: '1rem', fontWeight: 500 },
         subtitle2: { fontSize: '0.875rem', fontWeight: 500 },
         body1: { fontSize: '1rem' },
         body2: { fontSize: '0.875rem' },
         caption: { fontSize: '0.75rem' },
         button: {
-            textTransform: 'none', // Globálně vypneme uppercase pro tlačítka
+            textTransform: 'none',
             fontWeight: 500,
         }
     },
     shape: {
-        borderRadius: 8, // Mírně zaoblenější rohy
+        borderRadius: 8,
     },
     components: {
         MuiAppBar: {
             styleOverrides: {
                 root: ({ theme }) => ({
-                    // AppBar by měl mít barvu primary, ale můžeme ji zde přepsat, pokud chceme
-                    // backgroundColor: theme.palette.mode === 'light' ? primaryLight : theme.palette.grey[900],
-                    // Pro příklad necháme MUI default, který by měl použít primary.main
-                    boxShadow: 'none', // Plošší vzhled pro AppBar
+                    boxShadow: 'none',
                     borderBottom: `1px solid ${theme.palette.divider}`,
                 }),
             }
         },
         MuiPaper: {
             defaultProps: {
-                elevation: 0, // Plošší vzhled pro Paper defaultně
+                elevation: 0,
             },
             styleOverrides: {
                 root: ({ theme }) => ({
                     // border: `1px solid ${theme.palette.divider}`, // Jemné ohraničení pro Paper
-                    // Tento styl se může aplikovat na mnoho věcí, takže opatrně
                 }),
-                outlined: ({theme}) => ({ // Pro variantu outlined
+                outlined: ({theme}) => ({
                     border: `1px solid ${theme.palette.divider}`,
                 })
             }
         },
         MuiCard: {
             defaultProps: {
-                elevation: 0, // Karty také plošší
+                elevation: 0,
             },
             styleOverrides: {
                 root: ({ theme }) => ({
-                    border: `1px solid ${theme.palette.divider}`, // Ohraničení pro karty
+                    border: `1px solid ${theme.palette.divider}`,
                     transition: 'box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out',
-                    '&:hover': { // Jemný hover efekt pro karty, pokud je to žádoucí globálně
-                        // boxShadow: theme.shadows[3],
-                        // transform: 'translateY(-2px)',
-                    }
                 }),
             }
         },
         MuiButton: {
             defaultProps: {
-                disableElevation: true, // Plošší tlačítka
+                disableElevation: true,
             },
             styleOverrides: {
-                root: {
-                    // Příklad globální úpravy paddingu tlačítek
-                    // padding: '8px 16px',
-                },
-                containedPrimary: ({ theme }) => ({
-                    // Příklad: Pokud chceme, aby primární tlačítko mělo vždy bílý text
-                    // color: theme.palette.common.white,
-                }),
+                root: {},
+                containedPrimary: ({ theme }) => ({}),
             }
         },
         MuiTooltip: {
@@ -206,7 +189,6 @@ const getDesignTokens = (mode) => ({
         MuiDialog: {
             styleOverrides: {
                 paper: ({theme}) => ({
-                    // Můžeme nastavit výchozí border, pokud chceme
                     border: `1px solid ${theme.palette.divider}`,
                 })
             }
@@ -214,7 +196,7 @@ const getDesignTokens = (mode) => ({
         MuiDrawer: {
             styleOverrides: {
                 paper: ({theme}) => ({
-                    borderRight: `1px solid ${theme.palette.divider}`, // Pro levý/pravý drawer
+                    borderRight: `1px solid ${theme.palette.divider}`,
                     borderLeft: `1px solid ${theme.palette.divider}`,
                 })
             }

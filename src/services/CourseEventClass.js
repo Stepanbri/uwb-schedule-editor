@@ -1,46 +1,42 @@
 // src/services/CourseEventClass.js
-/**
- * Reprezentuje rozvrhovou akci (Course Event).
- * Základní atributy dle dokumentace[cite: 19].
- * Každá rozvrhová akce má vlastní ID v STAG systému (stagId).
- */
 class CourseEventClass {
     constructor({
-                    id, // Unikátní lokální identifikátor akce (může být generován v aplikaci)
-                    stagId = null, // ID akce ze STAG API
-                    startTime, // "10:00" [cite: 19]
-                    endTime, // "11:30" [cite: 19]
-                    day, // 0 pro pondělí, ..., 6 pro neděli [cite: 20]
-                    recurrence, // "KAŽDÝ TÝDEN", "SUDÝ TÝDEN", "LICHÝ TÝDEN" [cite: 19]
-                    validityStart = null, // Datum začátku platnosti [cite: 19]
-                    validityEnd = null, // Datum konce platnosti [cite: 19]
-                    courseId, // ID předmětu, ke kterému akce patří (lokální nebo stagId předmětu)
-                    courseCode, // Např. KIV/PPA1 pro rychlou referenci
-                    room = '', // Místnost [cite: 19]
-                    type, // "PŘEDNÁŠKA", "CVIČENÍ", "SEMINÁŘ", "ZKOUŠKA", "ZÁPOČET" [cite: 19, 20]
-                    instructor = '', // Jméno vyučujícího (může být objekt InstructorClass) [cite: 19]
-                    currentCapacity = 0, // Aktuální počet zapsaných [cite: 19]
-                    maxCapacity = 0, // Maximální kapacita [cite: 19]
-                    note = '', // Doplňující poznámka [cite: 19]
-                    isVirtual = false, // true, pokud je virtuální (pozná se např. absencí místnosti) [cite: 25, 28]
-                    year = '', // Akademický rok [cite: 19]
-                    semester = '', // Semestr (LS, ZS) [cite: 19]
-                    groupId = null, // ID rozvrhové skupiny (propojené akce) [cite: 29, 32]
-                    departmentCode = '' // Zkratka katedry [cite: 13]
+                    id, // Mělo by být stagId, pokud je dostupné
+                    stagId = null,
+                    startTime,
+                    endTime,
+                    day,
+                    recurrence,
+                    validityStart = null,
+                    validityEnd = null,
+                    courseId, // Unikátní ID předmětu (department/code_year_semester)
+                    courseCode,
+                    room = '',
+                    type,
+                    instructor = '',
+                    currentCapacity = 0,
+                    maxCapacity = 0,
+                    note = '',
+                    isVirtual = false,
+                    year = '',
+                    semester = '',
+                    groupId = null,
+                    departmentCode = ''
                 }) {
-        this.id = id || `${Date.now()}-${Math.random().toString(36).substring(2, 9)}-${Math.random().toString(36).substring(2, 9)}`; // Generování unikátního ID, pokud není dodáno
-        this.stagId = stagId;
+        // Použijeme stagId jako primární id, pokud je dostupné, jinak dodané id, jinak generujeme
+        this.id = id || stagId || `${departmentCode}-${courseCode}-${type}-${day}-${startTime}-${Math.random().toString(36).substring(2, 9)}`;
+        this.stagId = stagId || (id && id.startsWith('STAG_') ? id : null); // Pokud id je stagId
         this.startTime = startTime;
         this.endTime = endTime;
         this.day = day;
         this.recurrence = recurrence;
         this.validityStart = validityStart;
         this.validityEnd = validityEnd;
-        this.courseId = courseId;
+        this.courseId = courseId; // Toto by mělo být unikátní ID kurzu
         this.courseCode = courseCode;
         this.room = room;
         this.type = type;
-        this.instructor = instructor; // Může být string nebo instance InstructorClass
+        this.instructor = instructor;
         this.currentCapacity = currentCapacity;
         this.maxCapacity = maxCapacity;
         this.note = note;
@@ -48,16 +44,10 @@ class CourseEventClass {
         this.year = year;
         this.semester = semester;
         this.groupId = groupId;
-        this.departmentCode = departmentCode; // Přidáno pro snazší práci s daty v Workspace
+        this.departmentCode = departmentCode;
     }
 
-    /**
-     * Převede číselný den na textový řetězec (vyžaduje i18n funkci).
-     * @param {function} tFunction - Funkce t() z useTranslation().
-     * @returns {string} Název dne.
-     */
     getDayAsString(tFunction) {
-        // Implementace dle dokumentu [cite: 20]
         const days = [
             tFunction('courseEvent.monday', 'Pondělí'),
             tFunction('courseEvent.tuesday', 'Úterý'),
@@ -69,9 +59,6 @@ class CourseEventClass {
         ];
         return days[this.day] || '';
     }
-
-    // Další metody specifické pro CourseEventClass mohou být přidány zde
-    // Například: getDurationInMinutes(), conflictsWith(otherEvent), atd.
 }
 
 export default CourseEventClass;

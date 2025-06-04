@@ -1,339 +1,376 @@
 {
-  "appTitle": "Plánovač Rozvrhu ZČU",
-  "appTitleShort": "Plánovač Rozvrhu",
+  "appTitle": "WCU Schedule Planner",
+  "appTitleShort": "Schedule Planner",
   "nav": {
-    "editor": "Editor Rozvrhu",
+    "editor": "Schedule Editor",
     "faq": "FAQ",
-    "landing": "Úvod"
+    "landing": "Home"
   },
-  "languageToggle": "Jazyk",
+  "languageToggle": "Language",
   "themeToggle": {
-    "light": "Světlý režim",
-    "dark": "Tmavý režim",
-    "lightTooltip": "Přepnout na světlý režim",
-    "darkTooltip": "Přepnout na tmavý režim"
+    "light": "Light Mode",
+    "dark": "Dark Mode",
+    "lightTooltip": "Switch to light mode",
+    "darkTooltip": "Switch to dark mode"
   },
   "common": {
-    "loading": "Načítání...",
-    "saving": "Ukládání...",
-    "processing": "Zpracovávám...",
-    "processingStudentPlan": "Zpracovávám data studenta...",
-    "processingCourse": "Zpracovávám předmět...",
-    "loadingApp": "Načítání pracovní plochy...",
-    "error": "Chyba",
-    "success": "Úspěch",
-    "warning": "Varování",
-    "info": "Informace",
-    "cancel": "Zrušit",
-    "add": "Přidat",
-    "save": "Uložit",
-    "delete": "Smazat",
-    "confirm": "Potvrdit",
-    "continue": "Pokračovat",
-    "close": "Zavřít",
-    "notSpecified": "Nezadáno",
-    "unknownType": "Neznámý typ",
-    "noAdditionalInfo": "Bez dalších informací",
-    "scheduleNotAvailable": "Rozvrh není k dispozici nebo se načítá."
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "processing": "Processing...",
+    "processingStudentPlan": "Processing student data...",
+    "processingCourse": "Processing course...",
+    "loadingApp": "Loading workspace...",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "info": "Information",
+    "cancel": "Cancel",
+    "add": "Add",
+    "save": "Save",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "continue": "Continue",
+    "close": "Close",
+    "notSpecified": "Not specified",
+    "unknownType": "Unknown type",
+    "noAdditionalInfo": "No additional information",
+    "scheduleNotAvailable": "Schedule is not available or is currently loading."
   },
   "alerts": {
-    "workspaceSaved": "Pracovní plocha uložena.",
-    "loadedDummyData": "Byla načtena ukázková data.",
-    "workspaceLoadedFromLocalStorage": "Pracovní plocha načtena z Local Storage.",
-    "stagLoginSuccessful": "Přihlášení do STAGu proběhlo úspěšně.",
-    "stagLoginNoRoles": "Přihlášení proběhlo, ale nebyly nalezeny žádné role nebo chybí informace o uživateli.",
-    "courseRemoved": "Předmět {{courseId}} byl odstraněn.",
-    "allCoursesRemoved": "Všechny předměty byly odstraněny.",
-    "confirmRemoveAllCourses": "Opravdu chcete odstranit všechny načtené předměty a jejich zapsané akce z rozvrhu? Tato akce je nevratná.",
-    "internalError": "Interní chyba aplikace.",
-    "eventFull": "Kapacita akce '{{eventType}}' předmětu {{courseCode}} je plná.",
-    "typeRequirementMet": "Požadovaný počet akcí typu '{{eventType}}' pro předmět {{courseCode}} je již naplněn.",
-    "eventEnrolled": "Akce '{{eventType}}' předmětu {{courseCode}} byla zapsána.",
-    "eventUnenrolled": "Akce '{{eventType}}' předmětu {{courseCode}} byla odepsána.",
-    "courseOverwritten": "Předmět {{courseCode}} byl přepsán novými daty.",
-    "courseAdded": "Předmět {{courseCode}} byl přidán.",
-    "stagSubjectNotFound": "Předmět {{subjectCode}} nebyl v systému STAG nalezen.",
-    "stagLoadError": "Chyba při komunikaci se STAG API.",
-    "identitySelectedLog": "Role/Identita {{stagUser}} byla vybrána.",
-    "fetchStudentInfoErrorNoStudyDetails": "Nepodařilo se získat ID oboru studenta ze STAGu.",
-    "fetchStudentInfoErrorNoData": "Nepodařilo se získat kompletní informace o studentovi ze STAGu.",
-    "fetchStudentInfoError": "Nepodařilo se načíst detaily studenta.",
-    "loadingStudyPlanSubjects": "Načítám předměty studijního plánu...",
-    "noStudentContextForPlan": "Chybí kontext studenta (ID oboru) pro načtení předmětů.",
-    "noSubjectsFoundForField": "Pro daný obor a verzi plánu nebyly nalezeny žádné předměty.",
-    "noSubjectsMatchCriteria": "Nebyly nalezeny žádné předměty odpovídající zadaným kritériím ročníku, semestru a statutu.",
-    "fetchingSubjectDetailsCount": "Načítám detaily a rozvrhové akce pro {{count}} předmětů...",
-    "studyPlanLoadSummary_one": "Byl přidán {{added}} předmět, přepsán {{overwritten}} předmět. {{failed}} se nepodařilo zpracovat.",
-    "studyPlanLoadSummary_few": "Byly přidány {{added}} předměty, přepsány {{overwritten}} předměty. {{failed}} se nepodařilo zpracovat.",
-    "studyPlanLoadSummary_many": "Bylo přidáno {{added}} předmětů, přepsáno {{overwritten}} předmětů. {{failed}} se nepodařilo zpracovat.",
-    "studyPlanLoadSummary_other": "Bylo přidáno {{added}} předmětů, přepsáno {{overwritten}} předmětů. {{failed}} se nepodařilo zpracovat.",
-    "studyPlanLoadError": "Chyba při načítání předmětů studijního plánu.",
-    "identitySelectionCancelledAndTicketCleared": "Výběr identity byl zrušen. STAG session byla ukončena.",
-    "studyParamsSelectionCancelled": "Výběr parametrů studia byl zrušen. STAG session byla ukončena.",
-    "confirmRemoveCourse": "Opravdu chcete odstranit předmět {{courseName}} ({{courseStagId}}) a odepsat všechny jeho zapsané akce z aktuálního rozvrhu?",
-    "workspaceCleared": "Pracovní plocha byla vymazána."
+    "workspaceSaved": "Workspace saved.",
+    "loadedDummyData": "Demo data has been loaded.",
+    "workspaceLoadedFromLocalStorage": "Workspace loaded from Local Storage.",
+    "stagLoginSuccessful": "STAG login successful.",
+    "stagLoginNoRoles": "Login successful, but no roles were found or user information is missing.",
+    "courseRemoved": "Course {{courseId}} has been removed.",
+    "allCoursesRemoved": "All courses have been removed.",
+    "confirmRemoveAllCourses": "Are you sure you want to remove all courses and their enrolled events from the schedule? This action is irreversible.",
+    "confirmRemoveCourseTitle": "Remove Course?",
+    "internalError": "Internal application error.",
+    "eventFull": "Capacity for '{{eventType}}' of course {{courseCode}} is full.",
+    "typeRequirementMet": "The required number of '{{eventType}}' events for course {{courseCode}} is already met.",
+    "eventEnrolled": "Event '{{eventType}}' of course {{courseCode}} has been enrolled.",
+    "eventUnenrolled": "Event '{{eventType}}' of course {{courseCode}} has been unenrolled.",
+    "courseOverwritten": "Course {{courseCode}} has been overwritten with new data.",
+    "courseAdded": "Course {{courseCode}} has been added.",
+    "stagSubjectNotFound": "Course {{subjectCode}} was not found in STAG system.",
+    "stagLoadError": "Error communicating with STAG API.",
+    "identitySelectedLog": "Role/Identity {{stagUser}} has been selected.",
+    "fetchStudentInfoErrorNoStudyDetails": "Failed to retrieve student's field of study ID from STAG.",
+    "fetchStudentInfoErrorNoData": "Failed to retrieve complete student information from STAG.",
+    "fetchStudentInfoError": "Failed to load student details.",
+    "loadingStudyPlanSubjects": "Loading study plan courses...",
+    "noStudentContextForPlan": "Student context (field of study ID) is missing for loading courses.",
+    "noSubjectsFoundForField": "No courses found for the given field of study and plan version.",
+    "noSubjectsMatchCriteria": "No courses found matching the specified year, semester, and status criteria.",
+    "fetchingSubjectDetailsCount": "Fetching details and schedule events for {{count}} courses...",
+    "studyPlanLoadSummary_one": "{{added}} course added, {{overwritten}} course overwritten. {{failed}} failed to process.",
+    "studyPlanLoadSummary_other": "{{added}} courses added, {{overwritten}} courses overwritten. {{failed}} failed to process.",
+    "studyPlanLoadError": "Error loading study plan courses.",
+    "identitySelectionCancelledAndTicketCleared": "Identity selection was cancelled. STAG session has been terminated.",
+    "studyParamsSelectionCancelled": "Study parameters selection was cancelled. STAG session has been terminated.",
+    "confirmRemoveCourse": "Are you sure you want to remove course {{courseName}} ({{courseStagId}}) and unenroll all its registered events from the current schedule?",
+    "workspaceCleared": "Workspace has been cleared.",
+    "workspaceExported": "Workspace exported successfully.",
+    "workspaceExportFailed": "Failed to export workspace.",
+    "workspaceImported": "Workspace imported successfully.",
+    "workspaceImportFailed": "Failed to import workspace. The file might be corrupted or in an invalid format.",
+    "fileReadError": "Error reading file.",
+    "imageSaveError": "Error saving schedule image.",
+    "allPreferencesRemoved": "All preferences have been removed.",
+    "confirmRemoveAllPreferences": "Are you sure you want to remove all preferences? This action is irreversible.",
+    "workspaceNotInitializedYet": "Workspace has not been loaded yet."
   },
   "courseEvent": {
-    "monday": "Pondělí",
-    "tuesday": "Úterý",
-    "wednesday": "Středa",
-    "thursday": "Čtvrtek",
-    "friday": "Pátek",
-    "saturday": "Sobota",
-    "sunday": "Neděle",
-    "lecture": "Přednáška",
-    "practical": "Cvičení",
-    "seminar": "Seminář",
-    "exam": "Zkouška",
-    "credit": "Zápočet",
-    "block": "Bloková výuka",
-    "unknown": "Neznámý typ",
-    "recurrence": "Opakování",
+    "monday": "Monday",
+    "tuesday": "Tuesday",
+    "wednesday": "Wednesday",
+    "thursday": "Thursday",
+    "friday": "Friday",
+    "saturday": "Saturday",
+    "sunday": "Sunday",
+    "lecture": "Lecture",
+    "practical": "Practical",
+    "seminar": "Seminar",
+    "exam": "Exam",
+    "credit": "Credit",
+    "block": "Block teaching",
+    "unknown": "Unknown type",
+    "recurrence": "Recurrence",
     "recurrenceShort": {
-      "každýtýden": "KT",
-      "sudýtýden": "ST",
-      "lichýtýden": "LT",
-      "jednorázově": "Jedn."
+      "každýtýden": "EW",
+      "sudýtýden": "EvenW",
+      "lichýtýden": "OddW",
+      "jednorázově": "Once"
     },
-    "každýtýden": "Každý týden",
-    "sudýtýden": "Sudý týden",
-    "lichýtýden": "Lichý týden",
-    "jednorázově": "Jednorázově"
+    "každýtýden": "Every week",
+    "sudýtýden": "Even week",
+    "lichýtýden": "Odd week",
+    "jednorázově": "One-time"
   },
   "enrollmentShort": {
-    "lecture": "P",
-    "practical": "C",
+    "lecture": "L",
+    "practical": "P",
     "seminar": "S"
   },
   "labels": {
-    "credits": "{{count}} kredit",
-    "credits_plural": "{{count}} kredity",
-    "requirementsMet": "Požadavky splněny ({{count}})",
-    "remaining": "Zbývá: {{needed}} (Zaps: {{enrolledCount}})",
-    "eventType": "Typ akce",
-    "enrolled": "Zapsáno",
-    "enroll": "Zapsat",
-    "room": "Místnost",
-    "virtualEvent": "Virtuální akce",
-    "capacity": "Kapacita",
-    "full": "Plno",
-    "instructor": "Vyučující",
-    "notes": "Poznámka",
-    "recurrence": "Opakování",
-    "loadingCourses": "Načítání předmětů...",
-    "unknownDepartment": "Neznámá katedra",
-    "noCoursesToDisplay": "Žádné předměty k zobrazení. Přidejte předmět nebo načtěte uložený stav.",
-    "noEventsForCourse": "Tento předmět nemá žádné rozvrhové akce."
+    "credits_one": "{{count}} credit",
+    "credits_other": "{{count}} credits",
+    "requirementsMet": "Requirements met ({{count}})",
+    "remaining": "Rem: {{needed}} (Enr: {{enrolledCount}})",
+    "eventType": "Event Type",
+    "enrolled": "Enrolled",
+    "enroll": "Enroll",
+    "room": "Room",
+    "virtualEvent": "Virtual Event",
+    "capacity": "Capacity",
+    "full": "Full",
+    "instructor": "Instructor",
+    "notes": "Note",
+    "recurrence": "Recurrence",
+    "loadingCourses": "Loading courses...",
+    "unknownDepartment": "Unknown Department",
+    "noCoursesToDisplay": "No courses to display. Add a course or load a saved state.",
+    "noEventsForCourse": "This course has no schedule events."
   },
   "tooltips": {
-    "removeCourse": "Odstranit předmět {{courseName}} z pracovní plochy",
-    "requiredEnrollments": "Požadované zápisy: {{enrolledReqStr}}",
-    "enrollAction": "Zapsat akci do svého rozvrhu",
-    "unenrollAction": "Odzapsat akci ze svého rozvrhu",
-    "enrollDisabledCapacityFull": "Kapacita této akce je plná.",
-    "enrollDisabledTypeMet": "Požadovaný počet akcí typu \"{{eventType}}\" pro tento předmět je již naplněn."
+    "removeCourse": "Remove course {{courseName}} from workspace",
+    "requiredEnrollments": "Required enrollments: {{enrolledReqStr}}",
+    "enrollAction": "Enroll event in your schedule",
+    "unenrollAction": "Unenroll event from your schedule",
+    "enrollDisabledCapacityFull": "This event's capacity is full.",
+    "enrollDisabledTypeMet": "The required number of \"{{eventType}}\" events for this course is already met."
   },
   "propertiesBar": {
-    "title": "Nastavení Generování",
-    "addPreferenceButton": "Přidat preferenci",
-    "generateButton": "Vygenerovat Rozvrh",
-    "generateScheduleLog": "Generuji rozvrh s preferencemi...",
-    "generateScheduleAlert": "Generování rozvrhu bylo spuštěno s {{count}} aktivními preferencemi.",
-    "generateScheduleSuccess": "Rozvrhy byly úspěšně vygenerovány.",
-    "generateScheduleFailure": "Nepodařilo se vygenerovat žádné rozvrhy splňující zadaná kritéria.",
+    "title": "Generation Settings",
+    "addPreferenceButton": "Add Preference",
+    "generateButton": "Generate Schedule",
+    "generateScheduleLog": "Generating schedule with preferences...",
+    "generateScheduleAlert": "Schedule generation started with {{count}} active preferences.",
+    "generateScheduleSuccess": "Schedules were successfully generated.",
+    "generateScheduleFailure": "Failed to generate any schedules meeting the criteria.",
     "addDialog": {
-      "title": "Přidat novou preferenci",
-      "preferenceType": "Typ preference"
+      "title": "Add New Preference",
+      "preferenceType": "Preference Type"
     },
     "preferenceList": {
-      "noPreferences": "Zatím nebyly přidány žádné preference."
+      "noPreferences": "No preferences have been added yet."
     },
     "preferenceItem": {
-      "increasePriority": "Zvýšit prioritu",
-      "decreasePriority": "Snížit prioritu",
-      "toggleActive": "Aktivovat/deaktivovat preferenci",
-      "deletePreference": "Smazat preferenci"
-    }
+      "increasePriority": "Increase priority",
+      "decreasePriority": "Decrease priority",
+      "toggleActive": "Activate/deactivate preference",
+      "deletePreference": "Delete preference"
+    },
+    "removeAllPreferences": "Remove All Preferences",
+    "removeAllPreferencesTooltip": "Remove all configured preferences."
   },
   "preferences": {
     "types": {
       "FREE_DAY": {
-        "label": "Volný den v týdnu",
-        "shortLabel": "Volný den"
+        "label": "Free day of the week",
+        "shortLabel": "Free Day"
       },
       "AVOID_TIMES": {
-        "label": "Vyhnout se časovému bloku",
-        "shortLabel": "Volno v časovém obdodí"
+        "label": "Free time block",
+        "shortLabel": "Free Time"
       },
       "PREFER_INSTRUCTOR": {
-        "label": "Preferovat vyučujícího",
-        "shortLabel": "Prefer. vyučující"
+        "label": "Prefer instructor",
+        "shortLabel": "Prefer Instr."
       }
     },
     "params": {
-      "day": "Den",
-      "startTime": "Čas od",
-      "endTime": "Čas do",
-      "courseCode": "Kód předmětu",
-      "instructorName": "Jméno vyučujícího"
+      "day": "Day",
+      "startTime": "Start time",
+      "endTime": "End time",
+      "courseCode": "Course Code",
+      "instructorName": "Instructor Name"
     },
     "displayLabels": {
-      "freeDay": "Volný den: {{day}}",
-      "avoidTimes": "Nevolno {{day}}: {{startTime}} - {{endTime}}",
-      "preferInstructor": "Preferovat {{instructorName}} pro {{courseCode}}"
+      "freeDay": "Free day: {{day}}",
+      "avoidTimes": "Unavailable {{day}}: {{startTime}} - {{endTime}}",
+      "preferInstructor": "Prefer {{instructorName}} for {{courseCode}}"
     },
     "dayOptions": {
-      "PO": "Pondělí",
-      "UT": "Úterý",
-      "ST": "Středa",
-      "CT": "Čtvrtek",
-      "PA": "Pátek",
-      "SO": "Sobota",
-      "NE": "Neděle"
+      "PO": "Monday",
+      "UT": "Tuesday",
+      "ST": "Wednesday",
+      "CT": "Thursday",
+      "PA": "Friday",
+      "SO": "Saturday",
+      "NE": "Sunday"
     },
     "alerts": {
-      "added": "Preference úspěšně přidána.",
-      "deleted": "Preference byla odstraněna.",
-      "updated": "Preference byla aktualizována.",
-      "priorityChanged": "Priorita preference byla upravena.",
-      "activityChanged": "Aktivita preference byla změněna."
+      "added": "Preference successfully added.",
+      "deleted": "Preference has been removed.",
+      "allDeleted": "All preferences have been removed.",
+      "updated": "Preference has been updated.",
+      "priorityChanged": "Preference priority has been adjusted.",
+      "activityChanged": "Preference activity has been changed.",
+      "confirmDeleteTitle": "Remove Preference?",
+      "confirmDeleteMessage": "Are you sure you want to remove the preference \"{{displayLabel}}\"?"
     }
   },
   "Dialogs": {
     "selectStudyParams": {
-      "title": "Parametry pro načtení předmětů oboru",
-      "studentInfo": "Načítání pro:",
-      "studyProgram": "Program/Obor:",
-      "studyYearNumLabel": "Ročník studia předmětů",
-      "scheduleAcademicYearLabel": "Akademický rok rozvrhu",
-      "semesterLabel": "Semestr předmětů",
-      "semesterZS": "Zimní (ZS)",
-      "semesterLS": "Letní (LS)",
-      "semesterBoth": "Oba (ZS i LS)",
-      "subjectStatusesTitle": "Statuty předmětů k načtení:",
-      "statusAll": "Všechny",
-      "statusA": "A (Povinný)",
-      "statusB": "B (Povinně vol.)",
-      "statusC": "C (Volitelný)",
-      "submitButton": "Načíst předměty",
-      "errorNoStatusSelected": "Musíte vybrat alespoň jeden status předmětu.",
-      "errorStudyYearInvalid": "Ročník studia musí být číslo (např. 1-5).",
-      "errorScheduleYearInvalid": "Akademický rok pro rozvrhové akce je neplatný (formát RRRR/RRRR).",
-      "errorSemesterRequired": "Semestr je povinný."
+      "title": "Parameters for Loading Field of Study Courses",
+      "studentInfo": "Loading for:",
+      "studyProgram": "Program/Field:",
+      "studyYearNumLabel": "Course Year of Study",
+      "scheduleAcademicYearLabel": "Schedule Academic Year",
+      "semesterLabel": "Course Semester",
+      "semesterZS": "Winter (ZS)",
+      "semesterLS": "Summer (LS)",
+      "semesterBoth": "Both (ZS & LS)",
+      "subjectStatusesTitle": "Course Statuses to Load:",
+      "statusAll": "All",
+      "statusA": "A (Compulsory)",
+      "statusB": "B (Compulsory Elect.)",
+      "statusC": "C (Elective)",
+      "submitButton": "Load Courses",
+      "errorNoStatusSelected": "You must select at least one course status.",
+      "errorStudyYearInvalid": "Year of study must be a number (e.g., 1-5).",
+      "errorScheduleYearInvalid": "Academic year for schedule events is invalid (format YYYY/YYYY).",
+      "errorSemesterRequired": "Semester is required."
     },
     "selectIdentity": {
-      "title": "Výběr STAG Identity/Role",
-      "loadingRoles": "Načítání rolí...",
-      "errorNoTicket": "Chybí platný STAG ticket pro načtení rolí. Zkuste se přihlásit znovu.",
-      "noValidRolesFound": "Nebyly nalezeny žádné validní STAG role/identity.",
-      "noRolesFound": "Nebyly nalezeny žádné STAG role/identity pro váš účet.",
-      "errorFetchingRoles": "Nepodařilo se načíst STAG role.",
-      "pleaseSelectRole": "Prosím, vyberte jednu roli.",
-      "noRolesAvailable": "Pro váš účet nejsou aktuálně k dispozici žádné STAG role nebo se je nepodařilo načíst."
+      "title": "Select STAG Identity/Role",
+      "loadingRoles": "Loading roles...",
+      "errorNoTicket": "A valid STAG ticket is missing for loading roles. Please try logging in again.",
+      "noValidRolesFound": "No valid STAG roles/identities were found.",
+      "noRolesFound": "No STAG roles/identities found for your account.",
+      "errorFetchingRoles": "Failed to load STAG roles.",
+      "pleaseSelectRole": "Please select one role.",
+      "noRolesAvailable": "No STAG roles are currently available for your account or they could not be loaded."
     },
     "loadFromStudentRedirect": {
-      "title": "Načtení předmětů z plánu studenta",
-      "p1": "Pro načtení předmětů dle vašeho studijního plánu je nutné se přihlásit do informačního systému STAG.",
-      "p2": "Po kliknutí na \"Pokračovat\" budete přesměrováni na přihlašovací stránku ZČU (Orion login). Po úspěšném přihlášení budete automaticky vráceni zpět do aplikace Plánovač Rozvrhu.",
-      "p3": "Tato aplikace neukládá vaše přihlašovací údaje. Získaný dočasný přístupový klíč (ticket) se použije pouze pro komunikaci se STAG API během této relace.",
-      "faqLink": "Více informací o bezpečnosti a fungování přihlášení",
-      "continueButton": "Pokračovat na přihlášení"
+      "title": "Load Courses from Student Plan",
+      "p1": "To load courses according to your study plan, you need to log in to the STAG information system.",
+      "p2": "After clicking \"Continue\", you will be redirected to the UWB login page (Orion login). After successful login, you will be automatically returned to the Schedule Planner application.",
+      "p3": "This application does not store your login credentials. The temporary access key (ticket) obtained is used only for communication with the STAG API during this session.",
+      "faqLink": "More information about security and login functionality",
+      "continueButton": "Continue to Login"
     },
     "loadCourseFromSTAG": {
-      "title": "Načíst předmět ze STAGu",
-      "courseCodeLabel": "Kód předmětu (např. KIV/PPA1)",
-      "academicYearLabel": "Akademický rok",
-      "semesterLabel": "Semestr",
-      "semesterZS": "Zimní (ZS)",
-      "semesterLS": "Letní (LS)",
-      "submitButton": "Načíst",
-      "errorCourseCodeRequired": "Kód předmětu je povinný.",
-      "errorCourseCodeFormat": "Neplatný formát kódu (např. KIV/PPA1).",
-      "errorYearRequired": "Akademický rok je povinný.",
-      "errorYearFormat": "Neplatný formát roku (např. 2023/2024).",
-      "errorSemesterRequired": "Semestr je povinný."
+      "title": "Load Course from STAG",
+      "courseCodeLabel": "Course Code (e.g., KIV/PPA1)",
+      "academicYearLabel": "Academic Year",
+      "semesterLabel": "Semester",
+      "semesterZS": "Winter (ZS)",
+      "semesterLS": "Summer (LS)",
+      "submitButton": "Load",
+      "errorCourseCodeRequired": "Course code is required.",
+      "errorCourseCodeFormat": "Invalid code format (e.g., KIV/PPA1 or KIV/PCPP-CV).",
+      "errorYearRequired": "Academic year is required.",
+      "errorYearFormat": "Invalid year format (e.g., 2023/2024).",
+      "errorSemesterRequired": "Semester is required."
     },
     "existingCourseWarning": {
-      "title": "Předmět již existuje",
-      "message": "Předmět \"{{courseIdentifier}}\" již máte načtený. Přejete si přepsat jeho stávající data novými daty ze STAGu?",
-      "confirmButton": "Přepsat"
+      "title": "Course Already Exists",
+      "message": "Course \"{{courseIdentifier}}\" is already loaded. Do you want to overwrite its existing data (year, semester, events) with new data from STAG?",
+      "confirmButton": "Overwrite"
     },
     "loadingProcess": {
-      "defaultMessage": "Zpracovávám požadavek..."
+      "defaultMessage": "Processing request..."
+    },
+    "confirmation": {
+      "overwriteListTitle": "The following items will be overwritten:",
+      "addListTitle": "The following items will be added:",
+      "courseDetails": "Year: {{year}}, Semester: {{semester}}"
+    },
+    "studentPlanOverwrite": {
+      "title": "Confirm Load Courses from Plan",
+      "message": "The following action may add new courses and overwrite existing courses in your workspace (if they have the same department/course code) with data from STAG for the specified year and semester. Do you wish to continue?"
     }
   },
   "courseBar": {
-    "loadSingleFromSTAG": "Načíst předmět ze STAGu",
-    "loadFromStudentPlan": "Předměty z plánu studenta",
-    "removeAllCourses": "Odstranit všechny předměty",
-    "removeAllCoursesTooltip": "Odstranit všechny načtené předměty a jejich zapsané akce z rozvrhu."
+    "loadSingleFromSTAG": "Load Course from STAG",
+    "loadFromStudentPlan": "Courses from Student Plan",
+    "removeAllCourses": "Remove All Courses",
+    "removeAllCoursesTooltip": "Remove all loaded courses and their enrolled events from the schedule."
   },
   "editorPage": {
     "mobileDrawer": {
-      "coursesTitle": "Kurzy",
-      "propertiesTitle": "Preference",
-      "coursesTab": "Kurzy",
-      "propertiesTab": "Preference"
+      "coursesTitle": "Courses",
+      "propertiesTitle": "Preferences",
+      "coursesTab": "Courses",
+      "propertiesTab": "Preferences"
     }
   },
   "schedule": {
-    "dayTime": "Den/Čas"
+    "dayTime": "Day/Time"
   },
   "landingPage": {
     "hero": {
-      "title": "Plánovač Rozvrhu pro ZČU",
-      "description": "Snadno si naplánujte svůj semestrální rozvrh, optimalizujte svůj čas a buďte připraveni na zápisy. Intuitivní nástroj pro studenty Západočeské univerzity.",
-      "editorButton": "Spustit Plánovač",
-      "universityButton": "Web ZČU"
+      "title": "Schedule Planner for WCU",
+      "description": "Easily plan your semester schedule, optimize your time, and be prepared for enrollments. An intuitive tool for students of the University of West Bohemia.",
+      "editorButton": "Launch Planner",
+      "universityButton": "WCU Website"
     },
     "functions": {
-      "sectionTitle": "Klíčové Funkce",
-      "intro": "Objevte nástroje, které vám usnadní plánování semestru a maximalizují vaši efektivitu.",
+      "sectionTitle": "Key Features",
+      "intro": "Discover tools that will simplify your semester planning and maximize your efficiency.",
       "func1": {
-        "title": "Načítání ze STAGu",
-        "desc": "Importujte předměty a jejich rozvrhové akce přímo z univerzitního systému IS/STAG podle kódu předmětu nebo vašeho studijního plánu."
+        "title": "Load from STAG",
+        "desc": "Import courses and their schedule events directly from the IS/STAG university system by course code or your study plan."
       },
       "func2": {
-        "title": "Vizuální Editor Rozvrhu",
-        "desc": "Přehledně si sestavte a upravujte svůj rozvrh v intuitivním tabulkovém zobrazení českého formátu."
+        "title": "Visual Schedule Editor",
+        "desc": "Clearly assemble and edit your schedule in an intuitive Czech-format table view."
       },
       "func3": {
-        "title": "Správa Preferencí",
-        "desc": "Definujte si své priority – volné dny, časy, kterým se chcete vyhnout, nebo preferované vyučující."
+        "title": "Preference Management",
+        "desc": "Define your priorities – free days, times to avoid, or preferred instructors."
       },
       "func4": {
-        "title": "Automatické Generování",
-        "desc": "Nechte aplikaci navrhnout optimální varianty rozvrhu na základě vašich předmětů a nastavených preferencí."
+        "title": "Automatic Generation",
+        "desc": "Let the application suggest optimal schedule variants based on your courses and set preferences."
       },
       "func5": {
-        "title": "Uložení a Export",
-        "desc": "Uložte si svou práci v prohlížeči, exportujte pracovní plochu do souboru nebo stáhněte hotový rozvrh jako obrázek."
+        "title": "Save and Export",
+        "desc": "Save your work in the browser, export your workspace to a file, or download the finished schedule as an image."
       },
       "func6": {
-        "title": "Responzivní Design",
-        "desc": "Plánujte svůj rozvrh pohodlně na počítači, tabletu i mobilním telefonu."
+        "title": "Responsive Design",
+        "desc": "Plan your schedule comfortably on your computer, tablet, or mobile phone."
       }
     },
     "tech": {
-      "sectionTitle": "Použité Technologie",
-      "versionLabel": "Verze",
-      "reactDesc": "Moderní JavaScriptová knihovna pro tvorbu uživatelských rozhraní.",
-      "muiDesc": "Rozsáhlá sada React komponent implementujících Material Design.",
-      "viteDesc": "Rychlý buildovací nástroj nové generace pro webové projekty.",
-      "i18nextDesc": "Výkonný framework pro internacionalizaci JavaScriptových aplikací."
+      "sectionTitle": "Technologies Used",
+      "versionLabel": "Version",
+      "reactDesc": "A modern JavaScript library for building user interfaces.",
+      "muiDesc": "A comprehensive suite of React components implementing Material Design.",
+      "viteDesc": "A next-generation fast frontend build tool for web projects.",
+      "i18nextDesc": "A powerful internationalization framework for JavaScript applications."
     },
     "author": {
-      "sectionTitle": "O Projektu",
+      "sectionTitle": "About the Project",
       "namePlaceholder": "Štěpán Bříza",
-      "summary": "Tento Plánovač Rozvrhu byl vytvořen jako součást bakalářské práce na Fakultě aplikovaných věd Západočeské univerzity v Plzni. Cílem bylo vytvořit moderní a uživatelsky přívětivý nástroj pro studenty.",
-      "githubButton": "Zdrojový kód na GitHubu"
+      "summary": "This Schedule Planner was created as part of a bachelor's thesis at the Faculty of Applied Sciences, University of West Bohemia in Pilsen. The goal was to create a modern and user-friendly tool for students.",
+      "githubButton": "Source Code on GitHub"
     }
   },
   "faqPage": {
-    "title": "Často Kladené Otázky (FAQ)",
-    "q1": "Je používání aplikace bezpečné?",
-    "a1": "Ano, aplikace komunikuje se STAG API pouze pro načítání veřejně dostupných dat o předmětech nebo dat vašeho studijního plánu po vašem explicitním přihlášení přes oficiální bránu ZČU. Vaše přihlašovací údaje se v aplikaci nikdy neukládají.",
-    "q2": "Musím být online, abych mohl aplikaci používat?",
-    "a2": "Pro načítání dat ze STAGu je nutné připojení k internetu. Již načtená data a váš rozpracovaný rozvrh se ukládají lokálně ve vašem prohlížeči, takže k nim máte přístup i offline. Pro export a některé další funkce může být opět vyžadováno připojení."
+    "title": "Frequently Asked Questions (FAQ)",
+    "q1": "Is the application safe to use?",
+    "a1": "Yes, the application communicates with the STAG API only to retrieve publicly available course data or your study plan data after your explicit login via the official UWB gateway. Your login credentials are never stored in the application.",
+    "q2": "Do I need to be online to use the application?",
+    "a2": "An internet connection is required to load data from STAG. Data already loaded and your work-in-progress schedule are saved locally in your browser, so you can access them offline. An internet connection may be required again for export and some other functions."
+  },
+  "scheduleToolbar": {
+    "downloadImage": "Download PNG",
+    "downloadImageTooltip": "Download current schedule as a PNG image",
+    "exportWorkspace": "Export JSON",
+    "exportWorkspaceTooltip": "Export the entire workspace (courses, schedule, preferences) as a JSON file",
+    "importWorkspace": "Import JSON",
+    "importWorkspaceTooltip": "Import workspace from a JSON file (will replace current data!)",
+    "resetWorkspace": "Reset Workspace",
+    "resetWorkspaceTooltip": "Clear all courses, schedule, and preferences and start over",
+    "confirmResetWorkspace": "Are you sure you want to reset the entire workspace? All unsaved data will be lost and this action is irreversible.",
+    "compactView": "Compact View",
+    "compactViewTooltip": "Toggle compact schedule display",
+    "fullWeekView": "Full Week",
+    "fullWeekViewTooltip": "Toggle display of weekend days in the schedule"
   }
 }

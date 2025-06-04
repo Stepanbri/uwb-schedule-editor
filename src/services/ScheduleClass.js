@@ -43,6 +43,24 @@ class ScheduleClass {
     }
 
     /**
+     * Odstraní všechny události patřící danému předmětu,
+     * pokud jejich ID nejsou v poskytnuté sadě nových ID událostí.
+     * Používá se při přepisu předmětu novými daty.
+     * @param {string} courseId - ID předmětu, jehož staré události se mají odstranit.
+     * @param {Set<string>} newEventIdsSet - Sada ID nových událostí, které mají být zachovány.
+     */
+    removeEventsByCourseIdIfNoLongerPresent(courseId, newEventIdsSet) {
+        this.enrolledEvents = this.enrolledEvents.filter(event => {
+            if (event.courseId === courseId) {
+                // Pokud událost patří k danému kurzu, zkontrolujeme, zda je mezi novými událostmi
+                return newEventIdsSet.has(event.id);
+            }
+            // Pokud událost nepatří k tomuto kurzu, ponecháme ji
+            return true;
+        });
+    }
+
+    /**
      * Zkontroluje, zda je daná akce již zapsána v rozvrhu.
      * @param {string|number} eventId - ID akce.
      * @returns {boolean}

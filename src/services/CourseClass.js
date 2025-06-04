@@ -1,27 +1,19 @@
 // src/services/CourseClass.js
 import CourseEventClass from './CourseEventClass';
 
-// Mapping from typical event type strings (e.g., from STAG or user input) to standardized keys
-// This should align with how event types are stored/named in your CourseEventClass instances
-// and how neededEnrollments keys are defined.
 const EVENT_TYPE_TO_KEY_MAP = {
     'přednáška': 'lecture',
-    'lecture': 'lecture', // Allow for already keyed data
+    'lecture': 'lecture',
     'př': 'lecture',
     'cv': 'practical',
     'cvičení': 'practical',
-    'practical': 'practical', // Allow for already keyed data
+    'practical': 'practical',
     'seminář': 'seminar',
-    'seminar': 'seminar', // Allow for already keyed data
-    // Add other mappings as needed, e.g., for "ZKOUŠKA", "ZÁPOČET" if they were to be tracked
+    'seminar': 'seminar',
 };
 
-const ENROLLMENT_KEYS_ORDER = ['lecture', 'practical', 'seminar']; // For consistent display
+const ENROLLMENT_KEYS_ORDER = ['lecture', 'practical', 'seminar'];
 
-/**
- * Reprezentuje předmět (Course).
- * Každý předmět má vlastní ID v STAG systému (stagId).
- */
 class CourseClass {
     constructor({
                     stagId = null,
@@ -29,27 +21,31 @@ class CourseClass {
                     departmentCode,
                     courseCode,
                     credits,
-                    neededEnrollments = {}, // e.g., { lecture: 1, practical: 2 }
+                    neededEnrollments = {},
                     events = [],
-                    semester = '',
-                    year = '',
+                    semester = '', // např. ZS, LS
+                    year = '',     // např. 2023/2024
                 }) {
-        this.id = departmentCode + '/'+ courseCode;
-        this.stagId = stagId;
+        // ID je nyní jen KATEDRA/KOD_PREDMETU
+        this.id = `${departmentCode}/${courseCode}`;
+        this.stagId = stagId; // Může se měnit při přepisu, pokud STAG má jiné ID pro jiný rok/semestr
         this.name = name;
         this.departmentCode = departmentCode;
         this.courseCode = courseCode;
         this.credits = credits;
-        // Ensure neededEnrollments has all standard keys, defaulting to 0
         this.neededEnrollments = {
             lecture: parseInt(neededEnrollments.lecture || 0, 10),
             practical: parseInt(neededEnrollments.practical || 0, 10),
             seminar: parseInt(neededEnrollments.seminar || 0, 10),
         };
-        this.events = events.map(eventData => eventData instanceof CourseEventClass ? eventData : new CourseEventClass({...eventData, courseId: this.id, courseCode: this.getShortCode(), departmentCode: this.departmentCode }));
-        this.semester = semester;
+        // Atributy roku a semestru jsou důležité pro data předmětu
         this.year = year;
+        this.semester = semester;
+        // Události jsou vždy vázány na aktuální rok a semestr předmětu
+        this.events = events.map(eventData => eventData instanceof CourseEventClass ? eventData : new CourseEventClass({...eventData, courseId: this.id, courseCode: this.getShortCode(), departmentCode: this.departmentCode, year: this.year, semester: this.semester }));
     }
+
+    // ... (ostatní metody zůstávají stejné) ...
 
     _hasEventsOfType(typeKeyToCheck) {
         if (!this.events || this.events.length === 0) return false;
@@ -59,14 +55,12 @@ class CourseClass {
         });
     }
 
-    // Metoda pro určení, zda se jedná o speciální případ substituce
-    // (přednáška/přednášky jsou potřeba k zapsání pro řádný zápis, ale nejsou k dispozici, takže se cvičení počítají jako přednášky)
     isSpecialLectureSubstitutionCase() {
         return (this.neededEnrollments.lecture > 0 && !this._hasEventsOfType('lecture') && this._hasEventsOfType('practical'));
     }
 
     getShortCode() {
-        return `${this.departmentCode}/${this.courseCode}`; // Např. KMA/MA2 [cite: 14]
+        return `${this.departmentCode}/${this.courseCode}`;
     }
 
     addCourseEvent(eventData) {
@@ -77,7 +71,7 @@ class CourseClass {
                 courseId: this.id,
                 courseCode: this.getShortCode(),
                 departmentCode: this.departmentCode,
-                year: this.year,
+                year: this.year, // Události by měly mít stejný rok/semestr jako předmět
                 semester: this.semester
             });
 
@@ -92,16 +86,17 @@ class CourseClass {
 
     getCourseEvents(filters = {}) {
         let filteredEvents = this.events;
-        // ... (filtering logic as in original file) ...
         if (filters.instructor) {
             filteredEvents = filteredEvents.filter(event => event.instructor === filters.instructor || (typeof event.instructor === 'object' && event.instructor.name === filters.instructor));
         }
-        if (filters.semester) {
-            filteredEvents = filteredEvents.filter(event => event.semester === filters.semester);
-        }
-        if (filters.academicYear) {
-            filteredEvents = filteredEvents.filter(event => event.year === filters.academicYear);
-        }
+        // Při filtrování událostí bychom měli brát v úvahu rok a semestr PŘEDMĚTU,
+        // protože všechny jeho události by měly odpovídat tomuto kontextu.
+        // if (filters.semester) {
+        //     filteredEvents = filteredEvents.filter(event => event.semester === filters.semester);
+        // }
+        // if (filters.academicYear) {
+        //     filteredEvents = filteredEvents.filter(event => event.year === filters.academicYear);
+        // }
         if (filters.hasCapacity === true) {
             filteredEvents = filteredEvents.filter(event => event.currentCapacity < event.maxCapacity);
         }
@@ -111,7 +106,7 @@ class CourseClass {
         if (filters.room) {
             filteredEvents = filteredEvents.filter(event => event.room === filters.room);
         }
-        if (filters.type) { // Assuming filters.type is the standardized key ('lecture', 'practical') or the display name
+        if (filters.type) {
             const filterTypeKey = EVENT_TYPE_TO_KEY_MAP[filters.type.toLowerCase()] || filters.type.toLowerCase();
             filteredEvents = filteredEvents.filter(event => {
                 const eventTypeKey = EVENT_TYPE_TO_KEY_MAP[event.type.toLowerCase()];
@@ -121,30 +116,18 @@ class CourseClass {
         return filteredEvents;
     }
 
-    /**
-     * Gets the counts of currently enrolled (scheduled) events for this course, by type.
-     * @param {Set<string>} allEnrolledEventIdsInSchedule - A Set of IDs of all events currently in the user's schedule.
-     * @returns {{lecture: number, practical: number, seminar: number, total: number}}
-     */
     getEnrolledCounts(allEnrolledEventIdsInSchedule) {
         const counts = { lecture: 0, practical: 0, seminar: 0, total: 0 };
-        if (!allEnrolledEventIdsInSchedule || allEnrolledEventIdsInSchedule.size === 0) { // Kontrola i velikosti Setu
+        if (!allEnrolledEventIdsInSchedule || allEnrolledEventIdsInSchedule.size === 0) {
             return counts;
         }
-
         const useSubstitution = this.isSpecialLectureSubstitutionCase();
-
         this.events.forEach(event => {
             if (allEnrolledEventIdsInSchedule.has(event.id)) {
                 let countAsKey = EVENT_TYPE_TO_KEY_MAP[event.type?.toLowerCase()];
-
                 if (useSubstitution && countAsKey === 'practical') {
-                    // V tomto speciálním případě se cvičení počítá jako přednáška
                     countAsKey = 'lecture';
                 }
-                // Pokud je i tak countAsKey 'practical' (tj. neededEnrollments.practical > 0 a nejedná se o substituci),
-                // nebo 'seminar', započítá se normálně.
-
                 if (countAsKey && counts.hasOwnProperty(countAsKey)) {
                     counts[countAsKey]++;
                 }
@@ -154,16 +137,10 @@ class CourseClass {
         return counts;
     }
 
-    /**
-     * Gets the number of remaining enrollments needed for each event type to meet requirements for display.
-     * @param {Set<string>} allEnrolledEventIdsInSchedule - A Set of IDs of all events currently in the user's schedule.
-     * @returns {{lecture: number, practical: number, seminar: number, totalNeeded: number}}
-     */
     getDisplayableNeededEnrollments(allEnrolledEventIdsInSchedule) {
         const enrolledCounts = this.getEnrolledCounts(allEnrolledEventIdsInSchedule);
         const needed = { lecture: 0, practical: 0, seminar: 0, totalNeeded: 0 };
         let currentTotalNeeded = 0;
-
         ENROLLMENT_KEYS_ORDER.forEach(key => {
             const required = this.neededEnrollments[key] || 0;
             const currentlyEnrolled = enrolledCounts[key] || 0;
@@ -174,38 +151,24 @@ class CourseClass {
         return needed;
     }
 
-    /**
-     * Checks if the requirement for a specific event type (e.g., 'lecture') is met for this course.
-     * @param {('lecture'|'practical'|'seminar')} enrollmentKey - The key for the event type.
-     * @param {Set<string>} allEnrolledEventIdsInSchedule - A Set of IDs of all events currently in the user's schedule.
-     * @returns {boolean} True if the requirement for this type is met.
-     */
     isEnrollmentTypeRequirementMet(enrollmentKey, allEnrolledEventIdsInSchedule) {
         const enrolledCounts = this.getEnrolledCounts(allEnrolledEventIdsInSchedule);
         return enrolledCounts[enrollmentKey] >= (this.neededEnrollments[enrollmentKey] || 0);
     }
 
-
-    /**
-     * Checks if all enrollment requirements for this course are met.
-     * @param {Set<string>} allEnrolledEventIdsInSchedule - A Set of IDs of all events currently in the user's schedule.
-     * @returns {boolean} True if all requirements are met.
-     */
-    areAllEnrollmentRequirementsMet(allEnrolledEventIdsInSchedule) { // Renamed from areConditionsMet for clarity
+    areAllEnrollmentRequirementsMet(allEnrolledEventIdsInSchedule) {
         const needed = this.getDisplayableNeededEnrollments(allEnrolledEventIdsInSchedule);
         return ENROLLMENT_KEYS_ORDER.every(key => needed[key] === 0);
     }
 
     generateDummyCourseEvents(count = 2) {
-        // ... (implementation from original file, adapted if necessary) ...
+        // ... (implementace jako dříve, ale zajistit, že courseId a context roku/semestru jsou správně předány do CourseEventClass)
         const types = ['PŘEDNÁŠKA', 'CVIČENÍ', 'SEMINÁŘ'];
-        const days = [0, 1, 2, 3, 4]; // Po-Pá
+        const days = [0, 1, 2, 3, 4];
         const startTimes = ['08:00', '09:00', '10:00', '11:00', '13:00', '14:00', '15:00'];
         const instructors = ['Dr. Novák', 'Ing. Svoboda', 'Doc. Procházka'];
         const rooms = ['UC101', 'UC102', 'UP105', 'UI30'];
-
         this.events = [];
-
         types.forEach(type => {
             for (let i = 0; i < count; i++) {
                 const day = days[Math.floor(Math.random() * days.length)];
@@ -213,24 +176,21 @@ class CourseClass {
                 const startTime = startTimes[startTimeIndex];
                 const hour = parseInt(startTime.split(':')[0]);
                 const endTime = `${String(hour + 1 + Math.floor(Math.random() * 2)).padStart(2, '0')}:00`;
-
                 this.addCourseEvent(new CourseEventClass({
                     stagId: `dummyStagEv${this.courseCode}${type.substring(0,1)}${i}`,
-                    startTime,
-                    endTime,
-                    day,
-                    recurrence: 'KAŽDÝ TÝDEN', // [cite: 19]
-                    courseId: this.id,
+                    startTime, endTime, day,
+                    recurrence: 'KAŽDÝ TÝDEN',
+                    courseId: this.id, // ID předmětu (KATEDRA/KOD)
                     courseCode: this.getShortCode(),
                     departmentCode: this.departmentCode,
                     room: rooms[Math.floor(Math.random() * rooms.length)],
-                    type: type, // [cite: 19]
-                    instructor: instructors[Math.floor(Math.random() * instructors.length)], // [cite: 19]
-                    currentCapacity: Math.floor(Math.random() * 20), // [cite: 19]
-                    maxCapacity: 20 + Math.floor(Math.random() * 30), // [cite: 19]
-                    year: this.year || '2023/2024', // [cite: 19]
-                    semester: this.semester || 'ZS', // [cite: 19]
-                    note: `Dummy ${type} ${i+1}` // [cite: 19]
+                    type: type,
+                    instructor: instructors[Math.floor(Math.random() * instructors.length)],
+                    currentCapacity: Math.floor(Math.random() * 20),
+                    maxCapacity: 20 + Math.floor(Math.random() * 30),
+                    year: this.year, // Rok a semestr z instance CourseClass
+                    semester: this.semester,
+                    note: `Dummy ${type} ${i+1}`
                 }));
             }
         });

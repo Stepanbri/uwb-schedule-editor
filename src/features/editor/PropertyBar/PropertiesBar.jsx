@@ -1,24 +1,24 @@
 // src/features/editor/PropertiesBar/PropertiesBar.jsx
-import React, { useState, useEffect } from 'react'; // useEffect pro načtení parametrů dialogu
+import React, { useState, useEffect } from 'react';
 import {
     Box, Typography, Button, Divider, Dialog, DialogTitle,
     DialogContent, DialogActions, Select, MenuItem, TextField,
-    FormControl, InputLabel
+    FormControl, InputLabel, Tooltip // Přidán Tooltip
 } from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import DeleteSweepIcon from '@mui/icons-material/DeleteSweep'; // Ikona pro odstranění všech
 import { useTranslation } from 'react-i18next';
 import PreferenceList from './PreferenceList';
-import { usePreferenceManagement, PREFERENCE_CONFIG, PREFERENCE_OPTIONS } from '../hooks/usePreferenceManagement'; // Import hooku a konfigurace
+import { usePreferenceManagement, PREFERENCE_CONFIG, PREFERENCE_OPTIONS } from '../hooks/usePreferenceManagement';
 
 function PropertiesBar() {
     const { t } = useTranslation();
     const {
-        preferences, // Seřazené pole preferencí z hooku
-        // PREFERENCE_CONFIG, // Již importováno přímo
-        // PREFERENCE_OPTIONS, // Již importováno přímo
+        preferences,
         addPreference,
         deletePreference,
+        handleRemoveAllPreferences, // Nová funkce z hooku
         changePreferencePriority,
         togglePreferenceActive,
         handleGenerateSchedule,
@@ -26,11 +26,9 @@ function PropertiesBar() {
     } = usePreferenceManagement();
 
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-    // Stavy pro formulář v dialogu pro přidání nové preference
     const [selectedPreferenceType, setSelectedPreferenceType] = useState(Object.keys(PREFERENCE_CONFIG)[0]);
     const [currentPreferenceParams, setCurrentPreferenceParams] = useState({});
 
-    // Efekt pro inicializaci/reset parametrů dialogu při změně typu preference nebo otevření dialogu
     useEffect(() => {
         if (isAddDialogOpen) {
             const config = PREFERENCE_CONFIG[selectedPreferenceType];
@@ -38,6 +36,10 @@ function PropertiesBar() {
             if (config && config.params) {
                 config.params.forEach(p => {
                     newParams[p.name] = p.defaultValue !== undefined ? p.defaultValue : '';
+                    if (p.type === 'text' && p.name === 'courseCode' && PREFERENCE_CONFIG[selectedPreferenceType]?.defaultCourseCodeProvider) {
+                        // Zde by mohla být logika pro načtení kódu prvního kurzu, pokud je to požadováno
+                        // newParams[p.name] = PREFERENCE_CONFIG[selectedPreferenceType].defaultCourseCodeProvider();
+                    }
                 });
             }
             setCurrentPreferenceParams(newParams);
@@ -46,7 +48,6 @@ function PropertiesBar() {
 
 
     const handleOpenAddDialog = () => {
-        // Nastavíme výchozí typ a resetujeme parametry (useEffect výše to zařídí)
         setSelectedPreferenceType(Object.keys(PREFERENCE_CONFIG)[0]);
         setIsAddDialogOpen(true);
     };
@@ -61,7 +62,6 @@ function PropertiesBar() {
         addPreference({
             type: selectedPreferenceType,
             params: { ...currentPreferenceParams }
-            // ID, priorita a isActive budou nastaveny v hooku/službě
         });
         handleCloseAddDialog();
     };
@@ -76,30 +76,44 @@ function PropertiesBar() {
                 flexDirection: 'column',
                 height: '100%',
                 backgroundColor: (theme) => theme.palette.background.paper,
-
-
                 flexGrow: 1,
                 overflowY: 'auto',
                 minHeight: 0,
-
             }}
         >
             <Typography variant="h6" gutterBottom component="div" sx={{ px: { xs: 1, sm: 0 } }}>
-                {t('propertiesBar.title', 'Nastavení Generování')}
+                {t('propertiesBar.title')}
             </Typography>
             <Button
                 variant="outlined"
                 startIcon={<AddCircleOutlineIcon />}
                 onClick={handleOpenAddDialog}
-                sx={{ mb: 2 }}
+                sx={{ mb: 1 }} // Zmenšena mezera
                 fullWidth
             >
-                {t('propertiesBar.addPreferenceButton', 'Přidat preferenci')}
+                {t('propertiesBar.addPreferenceButton')}
             </Button>
 
-            <Box sx={{ flexGrow: 1, overflowY: 'auto', minHeight: 0 }}>
+            {preferences && preferences.length > 0 && ( // Zobrazit jen pokud jsou nějaké preference
+                <Tooltip title={t('propertiesBar.removeAllPreferencesTooltip')}>
+                    <Button
+                        variant="outlined"
+                        color="error"
+                        startIcon={<DeleteSweepIcon />}
+                        onClick={handleRemoveAllPreferences} // Použití nové funkce
+                        sx={{ mb: 2, textTransform: 'none' }}
+                        fullWidth
+                        size="small"
+                    >
+                        {t('propertiesBar.removeAllPreferences')}
+                    </Button>
+                </Tooltip>
+            )}
+
+
+            <Box sx={{ flexGrow: 1, overflowY: 'auto', minHeight: 0, mb: 2 }}>
                 <PreferenceList
-                    preferences={preferences} // Předáváme již seřazené preference z hooku
+                    preferences={preferences}
                     onPriorityChange={changePreferencePriority}
                     onToggleActive={togglePreferenceActive}
                     onDelete={deletePreference}
@@ -107,17 +121,18 @@ function PropertiesBar() {
                 />
             </Box>
 
-            <Divider sx={{ my: 2 }} />
+            <Divider sx={{ mt: 'auto' }} /> {/* Posunuto dolů, pokud je seznam krátký */}
 
             <Button
                 variant="contained"
                 color="primary"
                 startIcon={<PlayArrowIcon />}
-                onClick={handleGenerateSchedule} // Funkce z hooku
+                onClick={handleGenerateSchedule}
                 fullWidth
-                disabled={preferences.length > 0 && activePreferencesCount === 0} // Zakázáno, pokud jsou preference, ale žádná není aktivní
+                disabled={preferences.length > 0 && activePreferencesCount === 0}
+                sx={{ mt: 2 }} // Mezera nad tlačítkem generování
             >
-                {t('propertiesBar.generateButton', 'Vygenerovat Rozvrh')}
+                {t('propertiesBar.generateButton')}
             </Button>
 
             <Dialog
@@ -127,14 +142,14 @@ function PropertiesBar() {
                 maxWidth="xs"
                 PaperProps={{ component: 'form', onSubmit: (e) => { e.preventDefault(); handleConfirmAddPreference(); } }}
             >
-                <DialogTitle>{t('propertiesBar.addDialog.title', 'Přidat novou preferenci')}</DialogTitle>
+                <DialogTitle>{t('propertiesBar.addDialog.title')}</DialogTitle>
                 <DialogContent dividers>
                     <FormControl fullWidth margin="normal">
-                        <InputLabel id="preference-type-label">{t('propertiesBar.addDialog.preferenceType', 'Typ preference')}</InputLabel>
+                        <InputLabel id="preference-type-label">{t('propertiesBar.addDialog.preferenceType')}</InputLabel>
                         <Select
                             labelId="preference-type-label"
                             value={selectedPreferenceType}
-                            label={t('propertiesBar.addDialog.preferenceType', 'Typ preference')}
+                            label={t('propertiesBar.addDialog.preferenceType')}
                             onChange={(e) => setSelectedPreferenceType(e.target.value)}
                             variant="filled"
                         >
@@ -160,7 +175,6 @@ function PropertiesBar() {
                                     >
                                         {(PREFERENCE_OPTIONS[param.optionsKey] || param.options || []).map(optValue => (
                                             <MenuItem key={optValue} value={optValue}>
-                                                {/* Pokud optionsKey odkazuje na překlad, např. pro dny */}
                                                 {param.optionsKey ? t(`preferences.${param.optionsKey}.${optValue}`, optValue) : optValue}
                                             </MenuItem>
                                         ))}
@@ -173,18 +187,27 @@ function PropertiesBar() {
                                     type="time"
                                     value={currentPreferenceParams[param.name] || param.defaultValue || ''}
                                     onChange={(e) => handleParamChange(param.name, e.target.value)}
-                                    InputLabelProps={{ shrink: true }} // Opraveno z inputLabel
-                                    inputProps={{ step: 300 }} // Opraveno z htmlInput
+                                    InputLabelProps={{ shrink: true }}
+                                    inputProps={{ step: 300 }}
                                     variant="filled"
                                 />
                             )}
-                            {/* Zde by mohly být další typy parametrů, např. TextField pro textové vstupy */}
+                            {param.type === 'text' && ( // Přidáno pro textové parametry jako courseCode
+                                <TextField
+                                    label={t(param.labelKey, param.name)}
+                                    type="text"
+                                    value={currentPreferenceParams[param.name] || param.defaultValue || ''}
+                                    onChange={(e) => handleParamChange(param.name, e.target.value)}
+                                    variant="filled"
+                                    // Zde by mohla být nápověda nebo placeholder, např. "KIV/PPA1"
+                                />
+                            )}
                         </FormControl>
                     ))}
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleCloseAddDialog}>{t('common.cancel', 'Zrušit')}</Button>
-                    <Button type="submit" variant="contained">{t('common.add', 'Přidat')}</Button>
+                    <Button onClick={handleCloseAddDialog}>{t('common.cancel')}</Button>
+                    <Button type="submit" variant="contained">{t('common.add')}</Button>
                 </DialogActions>
             </Dialog>
         </Box>

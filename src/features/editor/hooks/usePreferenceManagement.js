@@ -4,8 +4,6 @@ import { useWorkspace } from '../../../contexts/WorkspaceContext';
 import { useSnackbar } from '../../../contexts/SnackbarContext';
 import { useTranslation } from 'react-i18next';
 
-// Definice typů preferencí a jejich parametrů (může být přesunuto do constants)
-// Toto je příklad, upravte dle vaší stávající PREFERENCE_CONFIG z PropertiesBar
 export const PREFERENCE_CONFIG = {
     FREE_DAY: {
         labelKey: 'preferences.types.FREE_DAY.label',
@@ -14,7 +12,7 @@ export const PREFERENCE_CONFIG = {
         params: [
             { name: 'day', labelKey: 'preferences.params.day', type: 'select', optionsKey: 'dayOptions', defaultValue: 'PO' },
         ],
-        displayFormatter: (params, t) => t('preferences.displayLabels.freeDay', `Volný den: {{day}}`, { day: t(`preferences.dayOptions.${params.day}`, params.day) })
+        displayFormatter: (params, t) => t('preferences.displayLabels.freeDay', { day: t(`preferences.dayOptions.${params.day}`, params.day) })
     },
     AVOID_TIMES: {
         labelKey: 'preferences.types.AVOID_TIMES.label',
@@ -25,97 +23,95 @@ export const PREFERENCE_CONFIG = {
             { name: 'startTime', labelKey: 'preferences.params.startTime', type: 'time', defaultValue: '10:00' },
             { name: 'endTime', labelKey: 'preferences.params.endTime', type: 'time', defaultValue: '12:00' },
         ],
-        displayFormatter: (params, t) => t('preferences.displayLabels.avoidTimes', `Nevolno {{day}}: {{startTime}} - {{endTime}}`, { day: t(`preferences.dayOptions.${params.day}`, params.day), startTime: params.startTime, endTime: params.endTime })
+        displayFormatter: (params, t) => t('preferences.displayLabels.avoidTimes', { day: t(`preferences.dayOptions.${params.day}`, params.day), startTime: params.startTime, endTime: params.endTime })
     },
-    // PREFER_INSTRUCTOR by zde také mohla být
+    PREFER_INSTRUCTOR: { // Přidání konfigurace pro PREFER_INSTRUCTOR
+        labelKey: 'preferences.types.PREFER_INSTRUCTOR.label',
+        shortLabelKey: 'preferences.types.PREFER_INSTRUCTOR.shortLabel',
+        defaultLabel: 'Preferovat vyučujícího',
+        params: [
+            { name: 'courseCode', labelKey: 'preferences.params.courseCode', type: 'text', defaultValue: '' }, // Může být select z načtených kurzů
+            { name: 'instructorName', labelKey: 'preferences.params.instructorName', type: 'text', defaultValue: '' }, // Může být select z dostupných vyučujících pro daný kurz
+        ],
+        displayFormatter: (params, t) => t('preferences.displayLabels.preferInstructor', { instructorName: params.instructorName, courseCode: params.courseCode })
+    }
 };
 
-// Možnosti pro selecty (může být v i18n souborech nebo constants)
 export const PREFERENCE_OPTIONS = {
-    dayOptions: ['PO', 'UT', 'ST', 'CT', 'PA', 'SO', 'NE'] // Klíče pro překlad
+    dayOptions: ['PO', 'UT', 'ST', 'CT', 'PA', 'SO', 'NE']
 };
 
 
 export const usePreferenceManagement = () => {
     const {
-        preferences: rawPreferences, // Objekt preferencí z kontextu
-        addPreference: addPrefToContext,
-        deletePreference: deletePrefFromContext,
-        updatePreference: updatePrefInContext,
+        preferences: rawPreferences,
+        addPreference: addPrefToContext, // Z kontextu
+        deletePreference: deletePrefFromContext, // Z kontextu
+        handleRemoveAllPreferences: handleRemoveAllPreferencesFromContext, // Nová z kontextu
+        updatePreference: updatePrefInContext, // Z kontextu
         updatePreferencePriority: updatePrefPriorityInContext,
         togglePreferenceActive: togglePrefActiveInContext,
         generateAndSetSchedules,
     } = useWorkspace();
-    const { showSnackbar } = useSnackbar();
+    const { showSnackbar } = useSnackbar(); // Zůstává pro notifikace specifické pro tento hook
     const { t } = useTranslation();
 
-    // Převod objektu preferencí na pole a seřazení dle priority pro zobrazení
-    // Toto by se mělo dít v komponentě, která zobrazuje seznam, nebo zde, pokud je to čistší
     const preferences = Object.values(rawPreferences || {}).sort((a, b) => a.priority - b.priority);
 
-    const addPreference = useCallback((newPreferenceData) => {
-        // newPreferenceData by měla být { type: '...', params: { ... } }
-        // ID a priorita budou doplněny v WorkspaceService/Context
-        addPrefToContext(newPreferenceData); // Kontext se postará o normalizaci priorit atd.
-        showSnackbar(t('preferences.alerts.added', 'Preference přidána'), 'success');
-    }, [addPrefToContext, showSnackbar, t]);
+    // addPreference, deletePreference, updatePreference jsou nyní volány přímo z WorkspaceContext,
+    // který se stará o snackbary.
+    const addPreference = addPrefToContext;
+    const deletePreference = deletePrefFromContext;
+    const updatePreference = updatePrefInContext;
+    const handleRemoveAllPreferences = handleRemoveAllPreferencesFromContext;
 
-    const deletePreference = useCallback((preferenceId) => {
-        deletePrefFromContext(preferenceId);
-        showSnackbar(t('preferences.alerts.deleted', 'Preference odstraněna'), 'info');
-    }, [deletePrefFromContext, showSnackbar, t]);
-
-    const updatePreference = useCallback((preferenceId, updatedData) => {
-        updatePrefInContext(preferenceId, updatedData);
-        showSnackbar(t('preferences.alerts.updated', 'Preference aktualizována'), 'success');
-    }, [updatePrefInContext, showSnackbar, t]);
 
     const changePreferencePriority = useCallback((preferenceId, direction) => {
         updatePrefPriorityInContext(preferenceId, direction);
-        // Notifikace může být zde, pokud je potřeba
-        // showSnackbar(t('preferences.alerts.priorityChanged', 'Priorita preference upravena'), 'success');
+        // showSnackbar(t('preferences.alerts.priorityChanged'), 'info'); // WorkspaceContext to řeší
     }, [updatePrefPriorityInContext]);
 
     const togglePreferenceActive = useCallback((preferenceId) => {
         togglePrefActiveInContext(preferenceId);
-        // showSnackbar(t('preferences.alerts.activityChanged', 'Aktivita preference změněna'), 'info');
+        // showSnackbar(t('preferences.alerts.activityChanged'), 'info'); // WorkspaceContext to řeší
     }, [togglePrefActiveInContext]);
 
     const handleGenerateSchedule = useCallback(async () => {
-        showSnackbar(t('propertiesBar.generateScheduleLog', 'Spouštím generování rozvrhu...'), 'info');
-        const success = generateAndSetSchedules(); // Tato metoda je již v WorkspaceContext
+        const activePrefsCount = preferences.filter(p => p.isActive).length;
+        showSnackbar(t('propertiesBar.generateScheduleAlert', { count: activePrefsCount }), 'info');
+        const success = generateAndSetSchedules();
         if (success) {
-            showSnackbar(t('propertiesBar.generateScheduleSuccess', 'Rozvrhy byly vygenerovány.'), 'success');
+            showSnackbar(t('propertiesBar.generateScheduleSuccess'), 'success');
         } else {
-            showSnackbar(t('propertiesBar.generateScheduleFailure', 'Nepodařilo se vygenerovat žádné rozvrhy splňující kritéria.'), 'warning');
+            showSnackbar(t('propertiesBar.generateScheduleFailure'), 'warning');
         }
-    }, [generateAndSetSchedules, showSnackbar, t]);
+    }, [generateAndSetSchedules, showSnackbar, t, preferences]);
 
     const getPreferenceDisplayLabel = useCallback((preference) => {
         const config = PREFERENCE_CONFIG[preference.type];
         if (config && config.displayFormatter) {
-            // Zajistíme, aby parametry pro formátování byly také přeloženy, pokud je to nutné (např. dny)
             const formattedParams = { ...preference.params };
             if (config.params) {
                 config.params.forEach(paramDef => {
-                    if (paramDef.type === 'select' && paramDef.optionsKey === 'dayOptions') {
+                    if (paramDef.type === 'select' && paramDef.optionsKey === 'dayOptions' && preference.params && preference.params[paramDef.name]) {
                         formattedParams[paramDef.name] = t(`preferences.dayOptions.${preference.params[paramDef.name]}`, preference.params[paramDef.name]);
                     }
                 });
             }
             return config.displayFormatter(formattedParams, t);
         }
-        return t(config?.shortLabelKey || `preferences.types.${preference.type}.label`, preference.type);
+        return t(config?.shortLabelKey || `preferences.types.${preference.type}.shortLabel`, preference.type);
     }, [t]);
 
 
     return {
-        preferences, // Seřazené pole preferencí
-        PREFERENCE_CONFIG, // Konfigurace pro formuláře atd.
-        PREFERENCE_OPTIONS, // Možnosti pro selecty
+        preferences,
+        PREFERENCE_CONFIG,
+        PREFERENCE_OPTIONS,
         addPreference,
         deletePreference,
-        updatePreference, // Obecná aktualizace, pokud bude potřeba měnit i jiné věci než prioritu/aktivitu
+        handleRemoveAllPreferences, // Vystavena
+        updatePreference,
         changePreferencePriority,
         togglePreferenceActive,
         handleGenerateSchedule,

@@ -1,17 +1,18 @@
-// PROJEKT/NEW/src/features/editor/CourseBar.jsx
+// src/features/editor/CourseBar.jsx
 import React from 'react';
-import {Box, Typography, CircularProgress, Button, Stack, alpha} from '@mui/material'; // Odebrán nepoužitý Divider
+import { Box, Typography, CircularProgress, Button, Stack, alpha, Tooltip, IconButton } from '@mui/material';
 import { SimpleTreeView, TreeItem } from '@mui/x-tree-view';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import AddIcon from '@mui/icons-material/Add';
-import SchoolIcon from '@mui/icons-material/School'; // Ikona pro studijní plán
+import SchoolIcon from '@mui/icons-material/School';
+import DeleteSweepIcon from '@mui/icons-material/DeleteSweep'; // Ikona pro odstranění všech
 import { useTranslation } from 'react-i18next';
 
 import CourseNodeHeader from './CourseBar/CourseNodeHeader';
 import EventNode from './CourseBar/EventNode';
-import { EVENT_TYPE_TO_KEY_MAP } from '../../services/CourseClass'; // Upravena cesta dle vaší struktury
-import ScheduleClass from '../../services/ScheduleClass'; // Přidán import pro type checking
+import { EVENT_TYPE_TO_KEY_MAP } from '../../services/CourseClass';
+import ScheduleClass from '../../services/ScheduleClass';
 
 function CourseBar({
                        courses,
@@ -20,7 +21,8 @@ function CourseBar({
                        onToggleEvent,
                        isLoading = false,
                        onOpenLoadCourseFromSTAGDialog,
-                       onOpenLoadCoursesFromStudentDialog // Nová prop pro otevření dialogu
+                       onOpenLoadCoursesFromStudentDialog,
+                       onRemoveAllCourses, // Nová prop
                    }) {
     const { t } = useTranslation();
 
@@ -28,7 +30,7 @@ function CourseBar({
         return (
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', p: 2 }}>
                 <CircularProgress />
-                <Typography sx={{ ml: 2 }}>{t('labels.loadingCourses', 'Načítání předmětů...')}</Typography>
+                <Typography sx={{ ml: 2 }}>{t('labels.loadingCourses')}</Typography>
             </Box>
         );
     }
@@ -38,13 +40,11 @@ function CourseBar({
         const eventsList = activeSchedule.getAllEnrolledEvents() || [];
         enrolledEventIds = new Set(eventsList.map(e => e.id));
     } else if (activeSchedule) {
-        // Toto varování pomůže odhalit, pokud activeSchedule není správného typu
         console.warn("CourseBar: activeSchedule is present but getAllEnrolledEvents is not a function. Received:", activeSchedule);
     }
 
-
     const coursesByDepartment = courses.reduce((acc, course) => {
-        const dept = course.departmentCode || t('labels.unknownDepartment', 'Neznámá katedra');
+        const dept = course.departmentCode || t('labels.unknownDepartment');
         if (!acc[dept]) {
             acc[dept] = [];
         }
@@ -54,7 +54,6 @@ function CourseBar({
 
     const getItemId = (prefix, id) => `${prefix}-${id}`;
 
-
     return (
         <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', p: { xs: 0.5, sm: 1 } }}>
             <Stack direction="column" spacing={1} sx={{ p: 1, borderBottom: 1, borderColor: 'divider', mb: 1, flexShrink: 0 }}>
@@ -63,28 +62,42 @@ function CourseBar({
                     size="small"
                     startIcon={<AddIcon />}
                     onClick={onOpenLoadCourseFromSTAGDialog}
-                    sx={{textTransform: 'none', justifyContent: 'flex-start'}}
-                    aria-label={t('courseBar.loadSingleFromSTAG', 'Načíst předmět ze STAGu')}
+                    sx={{ textTransform: 'none', justifyContent: 'flex-start' }}
+                    aria-label={t('courseBar.loadSingleFromSTAG')}
                 >
-                    {t('courseBar.loadSingleFromSTAG', 'Načíst předmět ze STAGu')}
+                    {t('courseBar.loadSingleFromSTAG')}
                 </Button>
                 <Button
                     variant="outlined"
                     size="small"
                     startIcon={<SchoolIcon />}
                     onClick={onOpenLoadCoursesFromStudentDialog}
-                    sx={{textTransform: 'none', justifyContent: 'flex-start'}}
-                    aria-label={t('courseBar.loadFromStudentPlan', 'Předměty z plánu studenta')}
+                    sx={{ textTransform: 'none', justifyContent: 'flex-start' }}
+                    aria-label={t('courseBar.loadFromStudentPlan')}
                 >
-                    {t('courseBar.loadFromStudentPlan', 'Předměty z plánu studenta')}
+                    {t('courseBar.loadFromStudentPlan')}
                 </Button>
-                {/* Další tlačítka (JSON, manuální) mohou být přidána zde */}
+                {courses && courses.length > 0 && ( // Zobrazit jen pokud jsou nějaké předměty
+                    <Tooltip title={t('courseBar.removeAllCoursesTooltip')}>
+                        <Button
+                            variant="outlined"
+                            size="small"
+                            color="error"
+                            startIcon={<DeleteSweepIcon />}
+                            onClick={onRemoveAllCourses} // Použití nové prop
+                            sx={{ textTransform: 'none', justifyContent: 'flex-start' }}
+                            aria-label={t('courseBar.removeAllCourses')}
+                        >
+                            {t('courseBar.removeAllCourses')}
+                        </Button>
+                    </Tooltip>
+                )}
             </Stack>
 
             {(!courses || courses.length === 0) ? (
-                <Box sx={{ p: 2, textAlign: 'center', flexGrow:1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Box sx={{ p: 2, textAlign: 'center', flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <Typography color="text.secondary">
-                        {t('labels.noCoursesToDisplay', 'Žádné předměty k zobrazení. Nahrajte soubor s předměty nebo načtěte uložený stav.')}
+                        {t('labels.noCoursesToDisplay')}
                     </Typography>
                 </Box>
             ) : (
@@ -103,7 +116,7 @@ function CourseBar({
                                         {departmentCode}
                                     </Typography>
                                 }
-                                sx={{ '& > .MuiTreeItem-content': { py: '2px', '&:hover': {backgroundColor: (theme) => alpha(theme.palette.action.hover, 0.04)} } }}
+                                sx={{ '& > .MuiTreeItem-content': { py: '2px', '&:hover': { backgroundColor: (theme) => alpha(theme.palette.action.hover, 0.04) } } }}
                             >
                                 {deptCourses.map((course) => {
                                     const enrolledCounts = course.getEnrolledCounts(enrolledEventIds);
@@ -124,30 +137,27 @@ function CourseBar({
                                                 />
                                             }
                                             sx={{
-                                                '& > .MuiTreeItem-content': { py: '1px', '&:hover': { bgcolor: (theme) => alpha(theme.palette.action.hover, 0.08)} }, // Jemnější hover pro položku kurzu
+                                                '& > .MuiTreeItem-content': { py: '1px', '&:hover': { bgcolor: (theme) => alpha(theme.palette.action.hover, 0.08)} },
                                                 '& > .MuiTreeItem-content.Mui-focused, & > .MuiTreeItem-content.Mui-selected, & > .MuiTreeItem-content.Mui-selected.Mui-focused': {
-                                                    backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.12), // Výraznější selekce
+                                                    backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.12),
                                                 }
                                             }}
                                         >
                                             {course.events && course.events.length > 0 ? (
                                                 course.events.map((event) => {
                                                     const isEnrolled = enrolledEventIds.has(event.id);
-                                                    // Normalizujeme typ události pro vyhledání v EVENT_TYPE_TO_KEY_MAP
                                                     const normalizedEventType = event.type?.toLowerCase() || '';
                                                     const eventTypeKey = EVENT_TYPE_TO_KEY_MAP[normalizedEventType] || normalizedEventType;
-
                                                     const typeRequirementMetForCourse = course.isEnrollmentTypeRequirementMet(eventTypeKey, enrolledEventIds);
-
                                                     let canEnroll = true;
                                                     let disabledTooltipText = '';
 
                                                     if (event.currentCapacity >= event.maxCapacity) {
                                                         canEnroll = false;
-                                                        disabledTooltipText = t('tooltips.enrollDisabledCapacityFull', 'Kapacita této akce je plná.');
+                                                        disabledTooltipText = t('tooltips.enrollDisabledCapacityFull');
                                                     } else if (typeRequirementMetForCourse && !isEnrolled) {
                                                         canEnroll = false;
-                                                        disabledTooltipText = t('tooltips.enrollDisabledTypeMet', `Požadovaný počet akcí typu "${t(`courseEvent.${eventTypeKey}`, event.type)}" pro tento předmět je již naplněn.`, { eventType: t(`courseEvent.${eventTypeKey}`, event.type) });
+                                                        disabledTooltipText = t('tooltips.enrollDisabledTypeMet', { eventType: t(`courseEvent.${eventTypeKey}`, event.type) });
                                                     }
 
                                                     return (
@@ -166,10 +176,10 @@ function CourseBar({
                                                             sx={{
                                                                 '& > .MuiTreeItem-content': {
                                                                     p: '2px 0', width: '100%', cursor: 'default',
-                                                                    '&:hover': { backgroundColor: 'transparent' }, // EventNode si řeší vlastní hover
+                                                                    '&:hover': { backgroundColor: 'transparent' },
                                                                 },
                                                                 '& > .MuiTreeItem-content.Mui-focused, & > .MuiTreeItem-content.Mui-selected, & > .MuiTreeItem-content.Mui-selected.Mui-focused': {
-                                                                    backgroundColor: 'transparent', // EventNode si řeší vlastní focus/select
+                                                                    backgroundColor: 'transparent',
                                                                 },
                                                                 '& .MuiTreeItem-label': { width: '100%', p: 0, m: 0 }
                                                             }}
@@ -178,7 +188,7 @@ function CourseBar({
                                                 })
                                             ) : (
                                                 <Typography sx={{ fontStyle: 'italic', p: '8px 16px', fontSize: '0.8rem', color: 'text.disabled' }}>
-                                                    {t('labels.noEventsForCourse', 'Tento předmět nemá žádné rozvrhové akce.')}
+                                                    {t('labels.noEventsForCourse')}
                                                 </Typography>
                                             )}
                                         </TreeItem>

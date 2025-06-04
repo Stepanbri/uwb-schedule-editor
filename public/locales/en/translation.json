@@ -69,7 +69,16 @@
     "identitySelectionCancelledAndTicketCleared": "Identity selection was cancelled. STAG session has been terminated.",
     "studyParamsSelectionCancelled": "Study parameters selection was cancelled. STAG session has been terminated.",
     "confirmRemoveCourse": "Are you sure you want to remove course {{courseName}} ({{courseStagId}}) and unenroll all its registered events from the current schedule?",
-    "workspaceCleared": "Workspace has been cleared."
+    "workspaceCleared": "Workspace has been cleared.",
+    "workspaceExported": "Workspace exported successfully.",
+    "workspaceExportFailed": "Failed to export workspace.",
+    "workspaceImported": "Workspace imported successfully.",
+    "workspaceImportFailed": "Failed to import workspace. The file might be corrupted or in an invalid format.",
+    "fileReadError": "Error reading file.",
+    "imageSaveError": "Error saving schedule image.",
+    "allPreferencesRemoved": "All preferences have been removed.",
+    "confirmRemoveAllPreferences": "Are you sure you want to remove all preferences? This action is irreversible.",
+    "workspaceNotInitializedYet": "Workspace has not been loaded yet."
   },
   "courseEvent": {
     "monday": "Monday",
@@ -151,7 +160,9 @@
       "decreasePriority": "Decrease priority",
       "toggleActive": "Activate/deactivate preference",
       "deletePreference": "Delete preference"
-    }
+    },
+    "removeAllPreferences": "Remove All Preferences",
+    "removeAllPreferencesTooltip": "Remove all configured preferences."
   },
   "preferences": {
     "types": {
@@ -192,6 +203,7 @@
     "alerts": {
       "added": "Preference successfully added.",
       "deleted": "Preference has been removed.",
+      "allDeleted": "All preferences have been removed.",
       "updated": "Preference has been updated.",
       "priorityChanged": "Preference priority has been adjusted.",
       "activityChanged": "Preference activity has been changed."
@@ -246,18 +258,27 @@
       "semesterLS": "Summer (LS)",
       "submitButton": "Load",
       "errorCourseCodeRequired": "Course code is required.",
-      "errorCourseCodeFormat": "Invalid code format (e.g., KIV/PPA1).",
+      "errorCourseCodeFormat": "Invalid code format (e.g., KIV/PPA1 or KIV/PCPP-CV).",
       "errorYearRequired": "Academic year is required.",
       "errorYearFormat": "Invalid year format (e.g., 2023/2024).",
       "errorSemesterRequired": "Semester is required."
     },
     "existingCourseWarning": {
       "title": "Course Already Exists",
-      "message": "Course \"{{courseIdentifier}}\" is already loaded. Do you want to overwrite its existing data with new data from STAG?",
+      "message": "Course \"{{courseIdentifier}}\" is already loaded. Do you want to overwrite its existing data (year, semester, events) with new data from STAG?",
       "confirmButton": "Overwrite"
     },
     "loadingProcess": {
       "defaultMessage": "Processing request..."
+    },
+    "confirmation": {
+      "overwriteListTitle": "The following items will be overwritten:",
+      "addListTitle": "The following items will be added:",
+      "courseDetails": "Year: {{year}}, Semester: {{semester}}"
+    },
+    "studentPlanOverwrite": {
+      "title": "Confirm Load Courses from Plan",
+      "message": "The following action may add new courses and overwrite existing courses in your workspace (if they have the same department/course code) with data from STAG for the specified year and semester. Do you wish to continue?"
     }
   },
   "courseBar": {
@@ -333,5 +354,20 @@
     "a1": "Yes, the application communicates with the STAG API only to retrieve publicly available course data or your study plan data after your explicit login via the official UWB gateway. Your login credentials are never stored in the application.",
     "q2": "Do I need to be online to use the application?",
     "a2": "An internet connection is required to load data from STAG. Data already loaded and your work-in-progress schedule are saved locally in your browser, so you can access them offline. An internet connection may be required again for export and some other functions."
+  },
+  "scheduleToolbar": {
+    "downloadImage": "Download PNG",
+    "downloadImageTooltip": "Download current schedule as a PNG image",
+    "exportWorkspace": "Export JSON",
+    "exportWorkspaceTooltip": "Export the entire workspace (courses, schedule, preferences) as a JSON file",
+    "importWorkspace": "Import JSON",
+    "importWorkspaceTooltip": "Import workspace from a JSON file (will replace current data!)",
+    "resetWorkspace": "Reset Workspace",
+    "resetWorkspaceTooltip": "Clear all courses, schedule, and preferences and start over",
+    "confirmResetWorkspace": "Are you sure you want to reset the entire workspace? All unsaved data will be lost and this action is irreversible.",
+    "compactView": "Compact View",
+    "compactViewTooltip": "Toggle compact schedule display",
+    "fullWeekView": "Full Week",
+    "fullWeekViewTooltip": "Toggle display of weekend days in the schedule"
   }
 }
