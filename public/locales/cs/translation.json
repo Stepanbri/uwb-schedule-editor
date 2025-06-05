@@ -355,11 +355,21 @@
     }
   },
   "faqPage": {
-    "title": "Často Kladené Otázky (FAQ)",
-    "q1": "Je používání aplikace bezpečné?",
-    "a1": "Ano, aplikace komunikuje se STAG API pouze pro načítání veřejně dostupných dat o předmětech nebo dat vašeho studijního plánu po vašem explicitním přihlášení přes oficiální bránu ZČU. Vaše přihlašovací údaje se v aplikaci nikdy neukládají.",
-    "q2": "Musím být online, abych mohl aplikaci používat?",
-    "a2": "Pro načítání dat ze STAGu je nutné připojení k internetu. Již načtená data a váš rozpracovaný rozvrh se ukládají lokálně ve vašem prohlížeči, takže k nim máte přístup i offline. Pro export a některé další funkce může být opět vyžadováno připojení."
+    "title": "Často kladené otázky (FAQ)",
+    "q1": "Co je Plánovač Rozvrhu ZČU?",
+    "a1": "Plánovač Rozvrhu ZČU je nástroj navržený pro studenty Západočeské univerzity v Plzni, který jim pomáhá vizualizovat a plánovat jejich semestrální rozvrh. Umožňuje načítat předměty ze STAGu, přidávat je do rozvrhu, nastavovat preference a generovat možné varianty rozvrhu.",
+    "q2": "Jak mohu nahrát své předměty?",
+    "a2": "Předměty můžete načíst několika způsoby: jednotlivě pomocí kódu předmětu ze STAGu, hromadně pro celý studijní plán (vyžaduje přihlášení přes STAG), nebo importem dříve uložené pracovní plochy ze souboru.",
+    "q3": "Jak funguje přihlášení přes STAG? Je to bezpečné?",
+    "a3": "Pro načtení předmětů z vašeho studijního plánu využíváme standardní přihlašovací mechanismus systému STAG (prostřednictvím ZČU Orion login). Vaše přihlašovací údaje (jméno a heslo) zadáváte přímo na stránkách ZČU, naše aplikace k nim nemá přístup. Po úspěšném přihlášení získáme pouze dočasný anonymní klíč (tzv. \"ticket\"), který nám umožní načíst veřejně dostupné informace o předmětech a vašem studijním plánu. Tento klíč je platný pouze po omezenou dobu a neumožňuje provádět žádné změny ve vašem studiu. Aplikace tento klíč nikde neukládá.",
+    "q4": "Co se stane s mými daty po zavření aplikace?",
+    "a4": "Aplikace ukládá vaši pracovní plochu (načtené předměty, zapsané akce, preference) pouze do lokálního úložiště vašeho prohlížeče. Tato data nejsou odesílána na žádný server a zůstávají pouze u vás. Pokud si přejete, můžete pracovní plochu exportovat do souboru a později ji znovu importovat. Při vymazání dat prohlížeče nebo použití anonymního režimu mohou být data ztracena, pokud nebyla exportována.",
+    "q5": "Proč se mi nezobrazují některé předměty nebo rozvrhové akce?",
+    "a5": "Ujistěte se, že máte správně nastavený akademický rok a semestr pro načítání předmětů v dialogu \"Načíst předměty ze STAGu\" nebo \"Parametry pro načtení předmětů oboru\". Data ve STAGu nemusí být vždy kompletní, zejména pro budoucí období nebo pokud jde o méně časté typy akcí. Aplikace zobrazuje pouze data, která STAG API poskytne. Pokud problém přetrvává, ověřte dostupnost dat přímo v systému STAG.",
+    "q6": "Mohu si v aplikaci oficiálně zapsat předměty?",
+    "a6": "Ne. Tato aplikace slouží pouze k vizualizaci a plánování vašeho rozvrhu. Oficiální zápis předmětů a rozvrhových akcí musíte provést standardním způsobem přes informační systém STAG/Portál ZČU ve stanovených termínech.",
+    "q7": "Jak funguje generování rozvrhu a preference?",
+    "a7": "Generátor rozvrhu se snaží najít takové kombinace zapsaných rozvrhových akcí, které nekolidují a zároveň splňují vámi zadané preference (např. volný den, preferovaný čas, preferovaný vyučující). Čím více preferencí zadáte, tím může být generování složitější a nemusí vždy vést k nalezení optimálního rozvrhu. Preference mají váhu (prioritu), kterou můžete měnit."
   },
   "scheduleToolbar": {
     "downloadImage": "Stáhnout PNG",

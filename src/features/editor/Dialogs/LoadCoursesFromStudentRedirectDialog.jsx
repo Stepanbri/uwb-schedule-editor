@@ -4,11 +4,18 @@ import {
     Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button, Link, Typography, Box
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import VpnKeyIcon from '@mui/icons-material/VpnKey';
 
 const LoadCoursesFromStudentRedirectDialog = ({ open, onClose, onContinueToSTAGLogin }) => {
     const { t } = useTranslation();
+    const navigate = useNavigate();
+
+    const handleFaqLinkClick = () => {
+        navigate('/faq');
+        onClose();
+    };
 
     return (
         <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -29,7 +36,7 @@ const LoadCoursesFromStudentRedirectDialog = ({ open, onClose, onContinueToSTAGL
                     </Typography>
                     <Box sx={{mt: 2, display: 'flex', alignItems: 'center'}}>
                         <HelpOutlineIcon fontSize="small" sx={{mr:0.5, color: 'action.active'}}/>
-                        <Link component="button" variant="body2" onClick={() => { /* TODO: Otevřít FAQ na specifické sekci */ alert('Odkaz na FAQ sekci o přihlášení STAG'); }}>
+                        <Link component="button" variant="body2" onClick={handleFaqLinkClick}>
                             {t('Dialogs.loadFromStudentRedirect.faqLink', 'Více informací o bezpečnosti a fungování přihlášení')}
                         </Link>
                     </Box>

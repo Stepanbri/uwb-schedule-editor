@@ -9,6 +9,11 @@ function FAQPage() {
     const faqs = [
         { id: 'q1', question: t('faqPage.q1'), answer: t('faqPage.a1') },
         { id: 'q2', question: t('faqPage.q2'), answer: t('faqPage.a2') },
+        { id: 'q3', question: t('faqPage.q3'), answer: t('faqPage.a3') },
+        { id: 'q4', question: t('faqPage.q4'), answer: t('faqPage.a4') },
+        { id: 'q5', question: t('faqPage.q5'), answer: t('faqPage.a5') },
+        { id: 'q6', question: t('faqPage.q6'), answer: t('faqPage.a6') },
+        { id: 'q7', question: t('faqPage.q7'), answer: t('faqPage.a7') },
         // Zde můžete přidat další otázky a odpovědi
     ];
 

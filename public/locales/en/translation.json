@@ -353,10 +353,20 @@
   },
   "faqPage": {
     "title": "Frequently Asked Questions (FAQ)",
-    "q1": "Is the application safe to use?",
-    "a1": "Yes, the application communicates with the STAG API only to retrieve publicly available course data or your study plan data after your explicit login via the official UWB gateway. Your login credentials are never stored in the application.",
-    "q2": "Do I need to be online to use the application?",
-    "a2": "An internet connection is required to load data from STAG. Data already loaded and your work-in-progress schedule are saved locally in your browser, so you can access them offline. An internet connection may be required again for export and some other functions."
+    "q1": "What is WCU Schedule Planner?",
+    "a1": "WCU Schedule Planner is a tool designed for students of the University of West Bohemia to help them visualize and plan their semester schedules. It allows loading courses from STAG, adding them to the schedule, setting preferences, and generating possible schedule variants.",
+    "q2": "How can I load my courses?",
+    "a2": "You can load courses in several ways: individually using the course code from STAG, in bulk for your entire study plan (requires STAG login), or by importing a previously saved workspace from a file.",
+    "q3": "How does STAG login work? Is it secure?",
+    "a3": "To load courses from your study plan, we use the standard STAG login mechanism (via UWB Orion login). You enter your credentials (username and password) directly on the UWB website; our application does not have access to them. After successful login, we only obtain a temporary anonymous key (a \"ticket\") that allows us to retrieve publicly available information about courses and your study plan. This key is valid only for a limited time and does not permit any changes to your studies. The application does not store this key anywhere.",
+    "q4": "What happens to my data when I close the application?",
+    "a4": "The application saves your workspace (loaded courses, enrolled events, preferences) only to your browser's local storage. This data is not sent to any server and remains solely with you. If you wish, you can export your workspace to a file and later import it again. Clearing browser data or using incognito mode may result in data loss if not exported.",
+    "q5": "Why are some courses or schedule events not displaying?",
+    "a5": "Ensure you have correctly set the academic year and semester for loading courses in the \"Load Courses from STAG\" or \"Parameters for Loading Field of Study Courses\" dialog. Data in STAG may not always be complete, especially for future periods or less common event types. The application displays only the data provided by the STAG API. If the problem persists, verify the data availability directly in the STAG system.",
+    "q6": "Can I officially enroll in courses through this application?",
+    "a6": "No. This application is solely for visualizing and planning your schedule. Official enrollment in courses and schedule events must be done through the standard STAG/UWB Portal system within the specified deadlines.",
+    "q7": "How does schedule generation and preferences work?",
+    "a7": "The schedule generator tries to find combinations of enrolled schedule events that do not conflict and also meet your specified preferences (e.g., a free day, preferred time, preferred instructor). The more preferences you set, the more complex the generation can be, and it may not always lead to finding an optimal schedule. Preferences have a weight (priority) that you can change."
   },
   "scheduleToolbar": {
     "downloadImage": "Download PNG",
