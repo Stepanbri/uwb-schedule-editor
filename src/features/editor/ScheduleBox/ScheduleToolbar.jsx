@@ -55,7 +55,7 @@ const ScheduleToolbar = ({
         >
             {/* Akční tlačítka */}
             <Tooltip title={t('scheduleToolbar.downloadImageTooltip')}>
-                <IconButton size="medium" onClick={onDownloadScheduleImage} color="primary">
+                <IconButton size="small" onClick={onDownloadScheduleImage} color="primary">
                     <PhotoCameraIcon />
                 </IconButton>
             </Tooltip>
@@ -63,13 +63,13 @@ const ScheduleToolbar = ({
             <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
 
             <Tooltip title={t('scheduleToolbar.exportWorkspaceTooltip')}>
-                <IconButton size="medium" onClick={onExportWorkspace} color="primary">
+                <IconButton size="small" onClick={onExportWorkspace} color="primary">
                     <DownloadIcon />
                 </IconButton>
             </Tooltip>
 
             <Tooltip title={t('scheduleToolbar.importWorkspaceTooltip')}>
-                <IconButton size="medium" onClick={handleImportClick} color="primary">
+                <IconButton size="small" onClick={handleImportClick} color="primary">
                     <UploadFileIcon />
                 </IconButton>
             </Tooltip>
@@ -84,7 +84,7 @@ const ScheduleToolbar = ({
             <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
 
             <Tooltip title={t('scheduleToolbar.resetWorkspaceTooltip')}>
-                <IconButton size="medium" onClick={onResetWorkspace} color="error">
+                <IconButton size="small" onClick={onResetWorkspace} color="error">
                     <RefreshIcon />
                 </IconButton>
             </Tooltip>
