@@ -2,7 +2,7 @@
 import CourseClass from './CourseClass';
 import ScheduleClass from './ScheduleClass';
 import CourseEventClass from './CourseEventClass';
-import { EVENT_TYPE_TO_KEY_MAP } from './CourseClass';
+import { EVENT_TYPE_TO_KEY_MAP } from './CourseClass'; // Obnovený import
 import html2canvas from 'html2canvas'; // Import pro ukládání obrázku
 
 const MAX_GENERATED_SCHEDULES = 10;
@@ -12,6 +12,10 @@ const generatePreferenceId = () => `pref_${Date.now()}_${Math.random().toString(
 
 class WorkspaceService {
     constructor() {
+        this.resetToEmptyState(); // Inicializace na prázdný stav
+    }
+
+    resetToEmptyState() {
         this.semester = '';
         this.year = '';
         this.courses = [];
@@ -19,6 +23,7 @@ class WorkspaceService {
         this.primarySchedule = new ScheduleClass();
         this.generatedSchedules = [];
         this.activeScheduleIndex = -1;
+        console.log("WorkspaceService: State reset to empty.");
     }
 
     getActiveSchedule() {
@@ -38,40 +43,34 @@ class WorkspaceService {
     }
 
     addCourse(courseData) {
-        // Identifikátor předmětu pro vyhledávání ve workspace je jen KATEDRA/KOD
         const courseIdentifier = `${courseData.departmentCode}/${courseData.courseCode}`;
         const existingCourse = this.courses.find(c => c.id === courseIdentifier);
 
         if (existingCourse) {
             console.warn(`Předmět ${courseIdentifier} již existuje ve workspace. Přepisuji daty pro rok ${courseData.year}, semestr ${courseData.semester}.`);
-
-            // Před aktualizací událostí, odstraň všechny staré události tohoto předmětu z rozvrhů.
             const oldEventIds = existingCourse.events.map(e => e.id);
             oldEventIds.forEach(eventId => {
                 this.primarySchedule.removeEventById(eventId);
                 this.generatedSchedules.forEach(schedule => schedule.removeEventById(eventId));
             });
 
-            // Aktualizujeme atributy existující instance předmětu
             existingCourse.stagId = courseData.stagId || existingCourse.stagId;
             existingCourse.name = courseData.name || existingCourse.name;
             existingCourse.credits = courseData.credits !== undefined ? courseData.credits : existingCourse.credits;
             existingCourse.neededEnrollments = courseData.neededEnrollments || existingCourse.neededEnrollments;
-            existingCourse.year = courseData.year; // Aktualizujeme rok
-            existingCourse.semester = courseData.semester; // Aktualizujeme semestr
-
-            existingCourse.events = []; // Vyčistíme staré události z instance předmětu
+            existingCourse.year = courseData.year;
+            existingCourse.semester = courseData.semester;
+            existingCourse.events = [];
             if (courseData.events && Array.isArray(courseData.events)) {
                 courseData.events.forEach(eventData => {
-                    // ID události by mělo být co nejvíce perzistentní (ideálně ze STAGu)
                     const eventInstanceId = eventData.id || eventData.stagId || `${eventData.departmentCode}-${eventData.courseCode}-${eventData.type}-${eventData.day}-${eventData.startTime}-${Math.random().toString(16).slice(2, 7)}`;
-                    existingCourse.addCourseEvent(new CourseEventClass({ // addCourseEvent použije this.year a this.semester z existingCourse
-                        ...eventData, // Rozbalíme eventData, ale explicitně přepíšeme/doplníme klíčové atributy
+                    existingCourse.addCourseEvent(new CourseEventClass({
+                        ...eventData,
                         id: eventInstanceId,
-                        courseId: existingCourse.id, // KATEDRA/KOD
+                        courseId: existingCourse.id,
                         departmentCode: existingCourse.departmentCode,
                         courseCode: existingCourse.courseCode,
-                        year: existingCourse.year, // Rok a semestr z aktualizovaného předmětu
+                        year: existingCourse.year,
                         semester: existingCourse.semester
                     }));
                 });
@@ -79,9 +78,6 @@ class WorkspaceService {
             return existingCourse;
         }
 
-        // Pokud předmět neexistuje, vytvoříme novou instanci
-        // CourseClass konstruktor se postará o vytvoření ID (KATEDRA/KOD)
-        // a přiřadí rok a semestr z courseData
         const course = new CourseClass(courseData);
         this.courses.push(course);
         return course;
@@ -96,9 +92,6 @@ class WorkspaceService {
                 eventsToRemoveFromSchedule.forEach(eventId => schedule.removeEventById(eventId));
             });
             this.courses = this.courses.filter(c => c.id !== courseToRemove.id);
-            console.log(`Předmět ${courseToRemove.getShortCode()} odstraněn.`);
-        } else {
-            console.warn(`Pokus o odstranění neexistujícího předmětu: ${courseIdentifier}`);
         }
     }
 
@@ -107,8 +100,6 @@ class WorkspaceService {
         this.primarySchedule.clear();
         this.generatedSchedules = [];
         this.activeScheduleIndex = -1;
-        console.log("WorkspaceService: All courses and schedule data cleared.");
-        // Preferences are kept
     }
 
     getAllCourses() {
@@ -130,11 +121,9 @@ class WorkspaceService {
     _normalizePriorities() {
         const sortedPreferences = Object.values(this.preferences)
             .sort((a, b) => a.priority - b.priority);
-
         const normalizedPreferences = {};
         sortedPreferences.forEach((pref, index) => {
-            const newPriority = index + 1;
-            normalizedPreferences[pref.id] = { ...pref, priority: newPriority };
+            normalizedPreferences[pref.id] = { ...pref, priority: index + 1 };
         });
         this.preferences = normalizedPreferences;
     }
@@ -149,23 +138,17 @@ class WorkspaceService {
         };
         this.preferences[newId] = newPreference;
         this._normalizePriorities();
-        console.log("Preference added:", newPreference);
     }
 
     deletePreference(preferenceId) {
         if (this.preferences[preferenceId]) {
             delete this.preferences[preferenceId];
             this._normalizePriorities();
-            console.log("Preference deleted:", preferenceId);
-        } else {
-            console.warn("Attempted to delete non-existent preference:", preferenceId);
         }
     }
 
     removeAllPreferences() {
         this.preferences = {};
-        this._normalizePriorities(); // Effectively does nothing on empty, but good for consistency
-        console.log("WorkspaceService: All preferences cleared.");
     }
 
     updatePreference(preferenceId, updatedData) {
@@ -177,28 +160,19 @@ class WorkspaceService {
             if (updatedData.priority !== undefined) {
                 this._normalizePriorities();
             }
-            console.log("Preference updated:", this.preferences[preferenceId]);
-        } else {
-            console.warn("Attempted to update non-existent preference:", preferenceId);
         }
     }
 
     updatePreferencePriority(preferenceId, direction) {
         const prefsArray = Object.values(this.preferences).sort((a, b) => a.priority - b.priority);
         const index = prefsArray.findIndex(p => p.id === preferenceId);
-
         if (index === -1) return;
 
         if (direction === 'up' && index > 0) {
-            const currentPriority = prefsArray[index].priority;
-            prefsArray[index].priority = prefsArray[index - 1].priority;
-            prefsArray[index - 1].priority = currentPriority;
+            [prefsArray[index].priority, prefsArray[index - 1].priority] = [prefsArray[index - 1].priority, prefsArray[index].priority];
         } else if (direction === 'down' && index < prefsArray.length - 1) {
-            const currentPriority = prefsArray[index].priority;
-            prefsArray[index].priority = prefsArray[index + 1].priority;
-            prefsArray[index + 1].priority = currentPriority;
+            [prefsArray[index].priority, prefsArray[index + 1].priority] = [prefsArray[index + 1].priority, prefsArray[index].priority];
         }
-
         const newPreferencesObject = {};
         prefsArray.forEach(p => { newPreferencesObject[p.id] = p; });
         this.preferences = newPreferencesObject;
@@ -208,9 +182,6 @@ class WorkspaceService {
     togglePreferenceActive(preferenceId) {
         if (this.preferences[preferenceId]) {
             this.preferences[preferenceId].isActive = !this.preferences[preferenceId].isActive;
-            console.log("Preference active toggled:", this.preferences[preferenceId]);
-        } else {
-            console.warn("Attempted to toggle active on non-existent preference:", preferenceId);
         }
     }
 
@@ -218,22 +189,7 @@ class WorkspaceService {
         return {
             semester: this.semester,
             year: this.year,
-            courses: this.courses.map(course => ({
-                id: course.id,
-                stagId: course.stagId,
-                name: course.name,
-                departmentCode: course.departmentCode,
-                courseCode: course.courseCode,
-                credits: course.credits,
-                neededEnrollments: course.neededEnrollments,
-                events: course.events.map(event => ({
-                    ...event, // Spread all properties of event
-                    // Ensure complex objects like instructor are simplified if they are class instances
-                    instructor: typeof event.instructor === 'object' && event.instructor && event.instructor.name ? event.instructor.name : event.instructor,
-                })),
-                semester: course.semester,
-                year: course.year,
-            })),
+            courses: this.courses.map(course => course.serialize()), // Použijeme serialize metodu z CourseClass
             primaryScheduleEvents: this.primarySchedule.getAllEnrolledEvents().map(event => ({ id: event.id })),
             generatedSchedules: this.generatedSchedules.map(schedule => ({
                 enrolledEventIds: schedule.getAllEnrolledEvents().map(event => event.id)
@@ -248,7 +204,7 @@ class WorkspaceService {
             const workspaceData = this._getWorkspaceData();
             localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(workspaceData));
         } catch (error) {
-            console.error("Failed to save workspace:", error);
+            console.error("Chyba při ukládání workspace do localStorage:", error);
         }
     }
 
@@ -257,515 +213,368 @@ class WorkspaceService {
             const workspaceData = this._getWorkspaceData();
             const jsonString = JSON.stringify(workspaceData, null, 2);
             const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
+            link.href = url;
             link.download = filename;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            URL.revokeObjectURL(link.href);
+            URL.revokeObjectURL(url);
             return true;
         } catch (error) {
-            console.error("Chyba při exportu pracovní plochy do JSON:", error);
+            console.error("Chyba při exportu workspace:", error);
             return false;
         }
     }
 
     importWorkspaceFromJson(jsonDataString) {
         try {
-            const parsedData = JSON.parse(jsonDataString);
-            this.clearWorkspace(false); // Clear current without removing from storage yet
-
-            this.semester = parsedData.semester || '';
-            this.year = parsedData.year || '';
-            this.preferences = parsedData.preferences || {};
-            this.activeScheduleIndex = parsedData.activeScheduleIndex !== undefined ? parsedData.activeScheduleIndex : -1;
-
-            this.courses = (parsedData.courses || []).map(courseData => {
-                // Ensure events are instantiated as CourseEventClass
-                const courseEvents = (courseData.events || []).map(eventData => {
-                    // Add missing properties if not in JSON, or they will be undefined in CourseEventClass
-                    return new CourseEventClass({
-                        courseId: courseData.id, // Link event back to its course
-                        courseCode: `${courseData.departmentCode}/${courseData.courseCode}`,
-                        departmentCode: courseData.departmentCode,
-                        year: courseData.year,
-                        semester: courseData.semester,
-                        ...eventData
-                    });
-                });
-                return new CourseClass({ ...courseData, events: courseEvents });
-            });
-
-            this.primarySchedule = new ScheduleClass();
-            if (parsedData.primaryScheduleEvents) {
-                const eventRefs = parsedData.primaryScheduleEvents
-                    .map(eventRef => this.findEventByIdGlobal(eventRef.id))
-                    .filter(Boolean);
-                this.primarySchedule.addEvents(eventRefs);
+            const data = JSON.parse(jsonDataString);
+            if (!data || typeof data !== 'object') {
+                console.error("ImportWorkspace: Neplatný formát JSON dat.");
+                return false;
             }
 
-            this.generatedSchedules = (parsedData.generatedSchedules || []).map(scheduleData => {
-                const schedule = new ScheduleClass();
-                if (scheduleData.enrolledEventIds) {
-                    const eventRefs = scheduleData.enrolledEventIds
-                        .map(eventId => this.findEventByIdGlobal(eventId))
-                        .filter(Boolean);
-                    schedule.addEvents(eventRefs);
-                }
-                return schedule;
-            });
-            this._normalizePriorities();
+            this.resetToEmptyState(); // Nejprve vyčistíme aktuální stav
 
-            console.log("WorkspaceService: Workspace imported from JSON.");
-            // After successful import, save to localStorage to persist it
-            this.saveWorkspace();
+            this.year = data.year || '';
+            this.semester = data.semester || '';
+
+            if (Array.isArray(data.courses)) {
+                this.courses = data.courses.map(courseData => new CourseClass(courseData));
+            }
+
+            if (data.primaryScheduleEvents && Array.isArray(data.primaryScheduleEvents)) {
+                const eventsToEnroll = data.primaryScheduleEvents
+                    .map(eventRef => this.findEventByIdGlobal(eventRef.id))
+                    .filter(event => event !== null);
+                this.primarySchedule.clear();
+                eventsToEnroll.forEach(event => this.primarySchedule.addEvent(event));
+            }
+
+            if (Array.isArray(data.generatedSchedules)) {
+                this.generatedSchedules = data.generatedSchedules.map(scheduleData => {
+                    const newSchedule = new ScheduleClass();
+                    if (scheduleData.enrolledEventIds && Array.isArray(scheduleData.enrolledEventIds)) {
+                        const eventsForGenerated = scheduleData.enrolledEventIds
+                            .map(eventId => this.findEventByIdGlobal(eventId))
+                            .filter(event => event !== null);
+                        eventsForGenerated.forEach(event => newSchedule.addEvent(event));
+                    }
+                    return newSchedule;
+                });
+            }
+            
+            this.activeScheduleIndex = (typeof data.activeScheduleIndex === 'number' && data.activeScheduleIndex >= -1) ? data.activeScheduleIndex : -1;
+            
+            if (typeof data.preferences === 'object' && data.preferences !== null) {
+                this.preferences = data.preferences;
+                this._normalizePriorities(); // Zajistíme validní priority
+            }
+
+            console.log("Workspace importován z JSON.");
             return true;
         } catch (error) {
-            console.error("Chyba při importu pracovní plochy z JSON:", error);
+            console.error("Chyba při importu workspace z JSON:", error);
+            this.resetToEmptyState(); // V případě chyby vrátíme do prázdného stavu
             return false;
         }
     }
-
+    
     async saveScheduleImage(scheduleWrapperElement, filename = 'rozvrh.png') {
-        console.log("saveScheduleImage: Start. Přijatý scheduleWrapperElement:", scheduleWrapperElement); // Log pro vstupní element
-
         if (!scheduleWrapperElement) {
-            console.error("saveScheduleImage: scheduleWrapperElement (očekávaná obálka rozvrhu) nebyl poskytnut.");
-            return false;
+            console.error('Chyba: Element pro vyfocení rozvrhu nebyl poskytnut.');
+            return;
         }
 
-        if (!(scheduleWrapperElement instanceof HTMLElement)) {
-            console.error("saveScheduleImage: scheduleWrapperElement není HTMLElement. Typ prvku:", typeof scheduleWrapperElement, scheduleWrapperElement);
-            return false;
-        }
-        console.log("saveScheduleImage: scheduleWrapperElement je HTMLElement.");
-
-        const scheduleBoxPaperElement = scheduleWrapperElement.firstElementChild;
+        const scheduleBoxPaperElement = scheduleWrapperElement.querySelector('.MuiPaper-root'); // Najdeme Paper uvnitř
         if (!scheduleBoxPaperElement) {
-            console.error("saveScheduleImage: Nepodařilo se najít scheduleBoxPaperElement (očekávaný Paper uvnitř Wrapperu) pomocí firstElementChild.", { wrapperChildrenCount: scheduleWrapperElement.childElementCount });
-            return false;
+            console.error('Chyba: Vnitřní Paper element ScheduleBox nebyl nalezen.');
+            return;
         }
-        if (!(scheduleBoxPaperElement instanceof HTMLElement)) {
-            console.error("saveScheduleImage: scheduleBoxPaperElement (nalezený přes firstElementChild) není HTMLElement.", scheduleBoxPaperElement);
-            return false; // Přidáno pro konzistenci
+        
+        const scheduleContentElement = scheduleBoxPaperElement.children[0]; // Předpokládáme, že první dítě je StyledTableContainer
+        if (!scheduleContentElement || !scheduleContentElement.children[0]) {
+             console.error('Chyba: Vnitřní prvek obsahu ScheduleBox (StyledTableContainer nebo Table) nebyl nalezen.');
+             return;
         }
-        console.log("saveScheduleImage: Nalezen scheduleBoxPaperElement (Paper):", scheduleBoxPaperElement);
-
-        const scheduleContentElement = scheduleBoxPaperElement.firstElementChild;
-        if (!scheduleContentElement) {
-            console.error("saveScheduleImage: Nepodařilo se najít scheduleContentElement (očekávaný StyledTableContainer uvnitř Paperu) pomocí firstElementChild.", { paperChildrenCount: scheduleBoxPaperElement.childElementCount });
-            return false;
-        }
-        if (!(scheduleContentElement instanceof HTMLElement)) {
-            console.error("saveScheduleImage: scheduleContentElement (nalezený přes firstElementChild) není HTMLElement.", scheduleContentElement);
-            return false; // Přidáno pro konzistenci
-        }
-        console.log("saveScheduleImage: Nalezen scheduleContentElement (StyledTableContainer):", scheduleContentElement);
-
-        if (typeof scheduleContentElement.scrollHeight === 'undefined' || typeof scheduleContentElement.scrollWidth === 'undefined') {
-            console.error("saveScheduleImage: scheduleContentElement (StyledTableContainer) nemá definované scrollHeight nebo scrollWidth.", scheduleContentElement);
-            return false;
-        }
+        const tableElement = scheduleContentElement.children[0]; // Předpokládáme, že tabulka je první dítě StyledTableContainer
 
         // Uložení původních stylů
-        const originalStyles = {
-            content: {
-                overflow: scheduleContentElement.style.overflow,
-                height: scheduleContentElement.style.height,
-                width: scheduleContentElement.style.width,
-                maxHeight: scheduleContentElement.style.maxHeight,
-            },
-            paper: {
-                overflow: scheduleBoxPaperElement.style.overflow,
-                height: scheduleBoxPaperElement.style.height,
-                maxHeight: scheduleBoxPaperElement.style.maxHeight,
-            },
-            wrapper: {
-                overflow: scheduleWrapperElement.style.overflow,
-                height: scheduleWrapperElement.style.height,
-                maxHeight: scheduleWrapperElement.style.maxHeight,
-            }
+        const originalWrapperStyles = {
+            overflow: scheduleWrapperElement.style.overflow,
+            height: scheduleWrapperElement.style.height,
+            width: scheduleWrapperElement.style.width,
+            maxHeight: scheduleWrapperElement.style.maxHeight,
+        };
+        const originalPaperStyles = {
+            overflow: scheduleBoxPaperElement.style.overflow,
+            height: scheduleBoxPaperElement.style.height,
+            width: scheduleBoxPaperElement.style.width,
+            maxHeight: scheduleBoxPaperElement.style.maxHeight,
+        };
+        const originalContentStyles = {
+            overflow: scheduleContentElement.style.overflow,
+            height: scheduleContentElement.style.height,
+            width: scheduleContentElement.style.width,
+            maxHeight: scheduleContentElement.style.maxHeight,
         };
 
         try {
-            // Dočasná úprava stylů pro plné zobrazení obsahu
-            console.log("saveScheduleImage: Aplikuji dočasné styly pro plné zobrazení.");
-            scheduleContentElement.style.overflow = 'visible';
-            scheduleContentElement.style.height = scheduleContentElement.scrollHeight + 'px';
-            scheduleContentElement.style.width = scheduleContentElement.scrollWidth + 'px';
-            scheduleContentElement.style.maxHeight = 'none';
+            // Dočasná úprava stylů pro plný obsah
+            scheduleWrapperElement.style.overflow = 'visible';
+            scheduleWrapperElement.style.height = 'auto'; // Nebo scheduleWrapperElement.scrollHeight + 'px'
+            scheduleWrapperElement.style.width = 'auto';  // Nebo scheduleWrapperElement.scrollWidth + 'px'
+            scheduleWrapperElement.style.maxHeight = 'none';
 
             scheduleBoxPaperElement.style.overflow = 'visible';
             scheduleBoxPaperElement.style.height = 'auto';
+            scheduleBoxPaperElement.style.width = 'auto';
             scheduleBoxPaperElement.style.maxHeight = 'none';
-
-            scheduleWrapperElement.style.overflow = 'visible';
-            scheduleWrapperElement.style.height = 'auto';
-            scheduleWrapperElement.style.maxHeight = 'none';
-
-            // Je možné, že po změně stylů a `auto` výšky/šířky se `scrollWidth` a `scrollHeight` 
-            // `scheduleContentElement` mírně změní nebo budou přesnější. Změříme je znovu.
-            const currentScrollWidth = scheduleContentElement.scrollWidth;
-            const currentScrollHeight = scheduleContentElement.scrollHeight;
-
-            const computedStyle = window.getComputedStyle(scheduleContentElement);
-            const bgColor = computedStyle.backgroundColor;
-            const finalBgColor = (bgColor === 'rgba(0, 0, 0, 0)' || bgColor === 'transparent')
-                ? (window.getComputedStyle(scheduleBoxPaperElement).backgroundColor || 'white') 
-                : bgColor;
             
-            console.log(`saveScheduleImage: Použije se (po úpravě stylů) scrollWidth: ${currentScrollWidth}, scrollHeight: ${currentScrollHeight}, bgColor: ${finalBgColor}`);
+            scheduleContentElement.style.overflow = 'visible';
+            scheduleContentElement.style.height = tableElement.scrollHeight + 'px';
+            scheduleContentElement.style.width = tableElement.scrollWidth + 'px';
+            scheduleContentElement.style.maxHeight = 'none';
 
-            const canvas = await html2canvas(scheduleContentElement, {
+            const canvas = await html2canvas(tableElement, { // Snímat přímo tabulku
+                allowTaint: true,
                 useCORS: true,
-                scale: 2,
-                logging: false,
-                backgroundColor: finalBgColor,
-                width: currentScrollWidth, // Použijeme aktuální scrollWidth
-                height: currentScrollHeight, // Použijeme aktuální scrollHeight
-                windowWidth: currentScrollWidth,
-                windowHeight: currentScrollHeight,
-                scrollX: 0, 
-                scrollY: 0,
-                x: 0,       
-                y: 0,       
+                logging: true,
+                scrollX: 0, // Dříve -window.scrollX
+                scrollY: 0, // Dříve -window.scrollY
+                x: 0, // Pozice X výřezu
+                y: 0, // Pozice Y výřezu
+                width: tableElement.scrollWidth, // Šířka celého obsahu elementu
+                height: tableElement.scrollHeight, // Výška celého obsahu elementu
+                backgroundColor: window.getComputedStyle(scheduleBoxPaperElement).backgroundColor || '#ffffff', // Barva pozadí
+                scale: 2, // Zvýšení kvality obrázku
             });
-
-            const image = canvas.toDataURL('image/png');
+            const image = canvas.toDataURL('image/png', 1.0);
             const link = document.createElement('a');
-            link.download = filename;
             link.href = image;
+            link.download = filename;
+            document.body.appendChild(link);
             link.click();
-            console.log("saveScheduleImage: Obrázek by měl být stažen.");
-            return true;
+            document.body.removeChild(link);
         } catch (error) {
-            console.error("Chyba při generování nebo ukládání obrázku rozvrhu pomocí html2canvas:", error);
-            return false;
+            console.error('Chyba při vytváření obrázku rozvrhu:', error);
         } finally {
             // Obnovení původních stylů
-            console.log("saveScheduleImage: Obnovuji původní styly.");
-            scheduleContentElement.style.overflow = originalStyles.content.overflow;
-            scheduleContentElement.style.height = originalStyles.content.height;
-            scheduleContentElement.style.width = originalStyles.content.width;
-            scheduleContentElement.style.maxHeight = originalStyles.content.maxHeight;
+            scheduleWrapperElement.style.overflow = originalWrapperStyles.overflow;
+            scheduleWrapperElement.style.height = originalWrapperStyles.height;
+            scheduleWrapperElement.style.width = originalWrapperStyles.width;
+            scheduleWrapperElement.style.maxHeight = originalWrapperStyles.maxHeight;
 
-            scheduleBoxPaperElement.style.overflow = originalStyles.paper.overflow;
-            scheduleBoxPaperElement.style.height = originalStyles.paper.height;
-            scheduleBoxPaperElement.style.maxHeight = originalStyles.paper.maxHeight;
-
-            scheduleWrapperElement.style.overflow = originalStyles.wrapper.overflow;
-            scheduleWrapperElement.style.height = originalStyles.wrapper.height;
-            scheduleWrapperElement.style.maxHeight = originalStyles.wrapper.maxHeight;
+            scheduleBoxPaperElement.style.overflow = originalPaperStyles.overflow;
+            scheduleBoxPaperElement.style.height = originalPaperStyles.height;
+            scheduleBoxPaperElement.style.width = originalPaperStyles.width;
+            scheduleBoxPaperElement.style.maxHeight = originalPaperStyles.maxHeight;
+            
+            scheduleContentElement.style.overflow = originalContentStyles.overflow;
+            scheduleContentElement.style.height = originalContentStyles.height;
+            scheduleContentElement.style.width = originalContentStyles.width;
+            scheduleContentElement.style.maxHeight = originalContentStyles.maxHeight;
         }
     }
-
 
     loadWorkspace() {
-        try {
-            const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
-            if (savedData) {
-                const parsedData = JSON.parse(savedData);
-                this.semester = parsedData.semester || '';
-                this.year = parsedData.year || '';
-                this.preferences = parsedData.preferences || {};
-                this.activeScheduleIndex = parsedData.activeScheduleIndex !== undefined ? parsedData.activeScheduleIndex : -1;
+        const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (savedData) {
+            try {
+                const data = JSON.parse(savedData);
+                // Validace základní struktury dat
+                if (typeof data === 'object' && data !== null && Array.isArray(data.courses)) {
+                    this.year = data.year || '';
+                    this.semester = data.semester || '';
+                    this.courses = data.courses.map(courseData => new CourseClass(courseData));
 
-                this.courses = (parsedData.courses || []).map(courseData => {
-                    const courseEvents = (courseData.events || []).map(eventData => new CourseEventClass({
-                        courseId: courseData.id,
-                        courseCode: `${courseData.departmentCode}/${courseData.courseCode}`,
-                        departmentCode: courseData.departmentCode,
-                        year: courseData.year,
-                        semester: courseData.semester,
-                        ...eventData
-                    }));
-                    return new CourseClass({ ...courseData, events: courseEvents });
-                });
-
-                this.primarySchedule = new ScheduleClass();
-                if (parsedData.primaryScheduleEvents) {
-                    const eventRefs = parsedData.primaryScheduleEvents
-                        .map(eventRef => this.findEventByIdGlobal(eventRef.id))
-                        .filter(Boolean);
-                    this.primarySchedule.addEvents(eventRefs);
-                }
-
-                this.generatedSchedules = (parsedData.generatedSchedules || []).map(scheduleData => {
-                    const schedule = new ScheduleClass();
-                    if (scheduleData.enrolledEventIds) {
-                        const eventRefs = scheduleData.enrolledEventIds
-                            .map(eventId => this.findEventByIdGlobal(eventId))
-                            .filter(Boolean);
-                        schedule.addEvents(eventRefs);
+                    this.primarySchedule = new ScheduleClass();
+                    if (data.primaryScheduleEvents && Array.isArray(data.primaryScheduleEvents)) {
+                        const eventsToEnroll = data.primaryScheduleEvents
+                            .map(eventRef => this.findEventByIdGlobal(eventRef.id))
+                            .filter(event => event !== null);
+                        eventsToEnroll.forEach(event => this.primarySchedule.addEvent(event));
                     }
-                    return schedule;
-                });
-                this._normalizePriorities();
-                console.log("WorkspaceService: Workspace loaded from localStorage.");
-                return true;
-            } else {
-                this._normalizePriorities();
-                return this._loadHardcodedDummyData();
-            }
-        } catch (error) {
-            console.error("Failed to load workspace from localStorage:", error);
-            this.clearWorkspace(false);
-            this._normalizePriorities();
-            return this._loadHardcodedDummyData();
-        }
-    }
+                    
+                    this.generatedSchedules = Array.isArray(data.generatedSchedules) ? data.generatedSchedules.map(scheduleData => {
+                        const newSchedule = new ScheduleClass();
+                        if (scheduleData.enrolledEventIds && Array.isArray(scheduleData.enrolledEventIds)) {
+                             const eventsForGenerated = scheduleData.enrolledEventIds
+                                .map(eventId => this.findEventByIdGlobal(eventId))
+                                .filter(event => event !== null);
+                            eventsForGenerated.forEach(event => newSchedule.addEvent(event));
+                        }
+                        return newSchedule;
+                    }) : [];
+                    
+                    this.activeScheduleIndex = (typeof data.activeScheduleIndex === 'number' && data.activeScheduleIndex >= -1) ? data.activeScheduleIndex : -1;
+                    
+                    this.preferences = (typeof data.preferences === 'object' && data.preferences !== null) ? data.preferences : {};
+                    if (Object.keys(this.preferences).length > 0) {
+                        this._normalizePriorities();
+                    }
 
-    _loadHardcodedDummyData() {
-        console.log("WorkspaceService: Loading hardcoded dummy data.");
-        const currentYearNum = new Date().getFullYear();
-        const defaultYear = `${currentYearNum}/${currentYearNum + 1}`;
-        const defaultSemester = 'ZS';
-
-        this.year = defaultYear;     // Nastavíme globální rok a semestr pro workspace
-        this.semester = defaultSemester;
-
-
-        const course1Data = {
-            stagId: 'KIV/PPA1_DUMMY_STAG',
-            name: 'Počítače a programování 1 (Dummy)',
-            departmentCode: 'KIV',
-            courseCode: 'PPA1D', // Dummy kód
-            credits: 6,
-            neededEnrollments: { lecture: 1, practical: 1, seminar: 0 },
-            semester: defaultSemester, // Specifický semestr pro tento dummy předmět
-            year: defaultYear,         // Specifický rok pro tento dummy předmět
-        };
-        const course1Instance = this.addCourse(course1Data); // addCourse vytvoří správné ID a přiřadí rok/semestr
-        if (course1Instance && typeof course1Instance.generateDummyCourseEvents === 'function') {
-            // generateDummyCourseEvents by měl používat rok/semestr z course1Instance
-            course1Instance.generateDummyCourseEvents(2);
-        }
-
-        const course2Data = {
-            stagId: 'KIV/UUR_DUMMY_STAG',
-            name: 'Uživatelská rozhraní (Dummy)',
-            departmentCode: 'KIV',
-            courseCode: 'UURD', // Dummy kód
-            credits: 5,
-            neededEnrollments: { lecture: 1, practical: 0, seminar: 1 },
-            semester: defaultSemester,
-            year: defaultYear,
-            events: [
-                {
-                    id: 'dummy_uur_event_1', stagId: 'UUR_lec_dummy_1_stag', startTime: '10:00', endTime: '11:30', day: 0,
-                    recurrence: 'KAŽDÝ TÝDEN', type: 'PŘEDNÁŠKA', room: 'EP120',
-                    instructor: 'Dr. Testovací', currentCapacity: 5, maxCapacity: 50,
-                    note: 'Úvodní přednáška UURD'
-                    // year a semester se doplní v konstruktoru CourseEventClass z CourseClass instance
-                },
-                {
-                    id: 'dummy_uur_event_2', stagId: 'UUR_sem_dummy_1_stag', startTime: '14:00', endTime: '15:30', day: 2,
-                    recurrence: 'KAŽDÝ TÝDEN', type: 'SEMINÁŘ', room: 'UC305',
-                    instructor: 'Ing. Dummy Data', currentCapacity: 2, maxCapacity: 20,
+                    console.log("WorkspaceService: Workspace loaded from localStorage.");
+                    return true; // Data byla úspěšně načtena z localStorage
+                } else {
+                    console.warn("WorkspaceService: Data v localStorage nejsou ve validním formátu. Inicializuji prázdný workspace.");
+                    this.resetToEmptyState();
+                    return false; // Data nebyla validní
                 }
-            ]
-        };
-        this.addCourse(course2Data);
-
-        this.addPreference({ type: 'FREE_DAY', params: { day: 'ST' } });
-        this.addPreference({ type: 'AVOID_TIMES', params: { day: 'PO', startTime: '08:00', endTime: '10:00' } });
-
-        if (this.courses.length > 0 && this.courses[0].events.length > 0) {
-            this.primarySchedule.addEvent(this.courses[0].events[0]);
+            } catch (error) {
+                console.error("WorkspaceService: Chyba při parsování dat z localStorage. Inicializuji prázdný workspace.", error);
+                this.resetToEmptyState();
+                return false; // Chyba při parsování
+            }
+        } else {
+            console.log("WorkspaceService: Žádná data v localStorage. Inicializuji prázdný workspace.");
+            this.resetToEmptyState(); // Toto je důležité - zajistí prázdný stav
+            return false; // Nic nebylo načteno z localStorage
         }
-        if (this.courses.length > 0 && this.courses[0].events.length > 1) {
-            this.primarySchedule.addEvent(this.courses[0].events[1]);
-        }
-
-        console.log("WorkspaceService: Dummy data loaded and initialized primary schedule.");
-        this.saveWorkspace();
-        return true;
     }
-
 
     clearWorkspace(removeFromStorage = true) {
-        this.semester = '';
-        this.year = '';
-        this.courses = [];
-        this.primarySchedule.clear();
-        this.generatedSchedules = [];
-        this.activeScheduleIndex = -1;
-        this.preferences = {};
+        this.resetToEmptyState(); // Nastaví všechny vlastnosti na prázdné/výchozí
         if (removeFromStorage) {
             localStorage.removeItem(LOCAL_STORAGE_KEY);
-            console.log("WorkspaceService: Workspace cleared from localStorage.");
+            console.log("WorkspaceService: Workspace data removed from localStorage.");
         }
-        console.log("WorkspaceService: Workspace data cleared from memory.");
     }
 
     _eventsConflict(event1, event2) {
-        if (event1.day !== event2.day) {
-            return false;
-        }
-        const start1 = parseInt(event1.startTime.replace(':', ''), 10);
-        const end1 = parseInt(event1.endTime.replace(':', ''), 10);
-        const start2 = parseInt(event2.startTime.replace(':', ''), 10);
-        const end2 = parseInt(event2.endTime.replace(':', ''), 10);
+        if (event1.day !== event2.day) return false;
 
-        if (start1 < end2 && start2 < end1) {
-            if (event1.recurrence === 'KAŽDÝ TÝDEN' || event2.recurrence === 'KAŽDÝ TÝDEN') {
-                return true;
-            }
-            return event1.recurrence === event2.recurrence;
+        const start1 = this._timeToMinutes(event1.startTime);
+        const end1 = this._timeToMinutes(event1.endTime);
+        const start2 = this._timeToMinutes(event2.startTime);
+        const end2 = this._timeToMinutes(event2.endTime);
 
+        // Kontrola překryvu časů
+        const overlap = start1 < end2 && start2 < end1;
+        if (!overlap) return false;
+
+        // Kontrola týdenní frekvence
+        const freq1 = event1.recurrence; // např. "každýtýden", "sudýtýden", "lichýtýden", "jednorázově"
+        const freq2 = event2.recurrence;
+
+        if (freq1 === "jednorázově" || freq2 === "jednorázově") {
+            // Pokud je alespoň jedna akce jednorázová, musíme zkontrolovat datum (pokud máme)
+            // Prozatím, pokud je jedna jednorázová a druhá týdenní/periodická, považujeme za konflikt, pokud se časově kryjí v den
+            // Toto by vyžadovalo přesnější logiku pro jednorázové události (např. porovnání konkrétních dat)
+            // Pro zjednodušení: pokud se časy a dny kryjí, a jedna je jednorázová, považujeme za konflikt.
+            return true;
         }
-        return false;
+
+        if (freq1 === "každýtýden" || freq2 === "každýtýden") return true; // Každý týden koliduje s čímkoliv periodickým
+        if (freq1 === freq2) return true; // Sudý se sudým, lichý s lichým
+
+        return false; // Sudý s lichým nekoliduje
+    }
+
+    _timeToMinutes(timeStr) { // Pomocná funkce pro převod času "HH:MM" na minuty od půlnoci
+        const [hours, minutes] = timeStr.split(':').map(Number);
+        return hours * 60 + minutes;
     }
 
     generateSchedule(coursesToSchedule = this.courses) {
         this.generatedSchedules = [];
         this.activeScheduleIndex = -1;
-        const solutions = [];
 
-        const activePreferencesList = Object.values(this.preferences)
+        const activePreferences = Object.values(this.preferences)
             .filter(p => p.isActive)
             .sort((a, b) => a.priority - b.priority);
 
+        const relevantCourses = coursesToSchedule.filter(course => course.events && course.events.length > 0);
+        if (relevantCourses.length === 0) {
+            console.log("Nebyly nalezeny žádné předměty s událostmi pro generování rozvrhu.");
+            return false;
+        }
+
+        const allEventTypes = {};
+        relevantCourses.forEach(course => {
+            allEventTypes[course.id] = {};
+            course.events.forEach(event => {
+                if (!allEventTypes[course.id][event.type]) {
+                    allEventTypes[course.id][event.type] = [];
+                }
+                allEventTypes[course.id][event.type].push(event);
+            });
+        });
+        
+        let solutionsFound = 0;
+
         const findSchedulesRecursive = (courseIdx, currentScheduleInProgress) => {
-            if (solutions.length >= MAX_GENERATED_SCHEDULES) return;
-
-            if (courseIdx === coursesToSchedule.length) {
-                let allCourseReqsMet = true;
-                for (const course of coursesToSchedule) {
-                    const enrolledEventIdsForCourse = new Set(
-                        currentScheduleInProgress.getAllEnrolledEvents()
-                            .filter(ev => ev.courseId === course.id)
-                            .map(ev => ev.id)
-                    );
-                    if (!course.areAllEnrollmentRequirementsMet(enrolledEventIdsForCourse)) {
-                        allCourseReqsMet = false;
-                        break;
-                    }
-                }
-
-                if (allCourseReqsMet) {
-                    const finalSchedule = new ScheduleClass();
-                    finalSchedule.addEvents(currentScheduleInProgress.getAllEnrolledEvents());
-                    solutions.push(finalSchedule);
-                }
+            if (solutionsFound >= MAX_GENERATED_SCHEDULES) {
                 return;
             }
 
-            const course = coursesToSchedule[courseIdx];
-            const needed = course.neededEnrollments;
-            const eventTypeKeys = Object.keys(needed).filter(typeKey => needed[typeKey] > 0);
+            if (courseIdx === relevantCourses.length) {
+                this.generatedSchedules.push(currentScheduleInProgress.clone());
+                solutionsFound++;
+                return;
+            }
+
+            const course = relevantCourses[courseIdx];
+            const eventTypesForCourse = allEventTypes[course.id];
+            const typeKeys = Object.keys(eventTypesForCourse);
 
             const generateEventCombinationsForCourse = (typeKeyIndex, tempEventsForCourse) => {
-                if (typeKeyIndex === eventTypeKeys.length) {
-                    let conflict = false;
-                    for(const newEvent of tempEventsForCourse) {
-                        for(const existingEvent of currentScheduleInProgress.getAllEnrolledEvents()) {
-                            if(this._eventsConflict(newEvent, existingEvent)) {
-                                conflict = true; break;
-                            }
+                if (solutionsFound >= MAX_GENERATED_SCHEDULES) return;
+
+                if (typeKeyIndex === typeKeys.length) {
+                    const nextScheduleCandidate = currentScheduleInProgress.clone();
+                    let possibleToAddAll = true;
+                    for (const eventToAdd of tempEventsForCourse) {
+                        if (nextScheduleCandidate.conflictsWith(eventToAdd, this._eventsConflict.bind(this))) {
+                            possibleToAddAll = false;
+                            break;
                         }
-                        if(conflict) break;
+                        nextScheduleCandidate.addEvent(eventToAdd);
                     }
 
-                    if (!conflict) {
-                        tempEventsForCourse.forEach(event => currentScheduleInProgress.addEvent(event));
-                        findSchedulesRecursive(courseIdx + 1, currentScheduleInProgress);
-                        tempEventsForCourse.forEach(event => currentScheduleInProgress.removeEventById(event.id));
+                    if (possibleToAddAll) {
+                        findSchedulesRecursive(courseIdx + 1, nextScheduleCandidate);
                     }
                     return;
                 }
 
-                const currentTypeKey = eventTypeKeys[typeKeyIndex];
-                const numNeeded = needed[currentTypeKey];
+                const currentEventTypeKey = typeKeys[typeKeyIndex];
+                const eventsOfThisType = eventTypesForCourse[currentEventTypeKey];
+                const neededCount = course.neededEnrollments[EVENT_TYPE_TO_KEY_MAP[currentEventTypeKey]] || 0;
 
-                const availableEventsOfType = course.events.filter(event => {
-                    const eventTypeMapped = Object.keys(EVENT_TYPE_TO_KEY_MAP).find(key => EVENT_TYPE_TO_KEY_MAP[key] === currentTypeKey && event.type.toLowerCase().includes(key));
-                    if(!eventTypeMapped) return false; // Ensure event type matches the needed type
+                if (neededCount === 0) {
+                    generateEventCombinationsForCourse(typeKeyIndex + 1, tempEventsForCourse);
+                    return;
+                }
 
-                    for (const pref of activePreferencesList) {
-                        if (pref.type === 'FREE_DAY' && event.day === CourseEventClass.dayStringToNumber(pref.params.day)) return false;
-                        if (pref.type === 'AVOID_TIMES' && event.day === CourseEventClass.dayStringToNumber(pref.params.day)) {
-                            const eventStartMins = parseInt(event.startTime.replace(':', ''), 10);
-                            const eventEndMins = parseInt(event.endTime.replace(':', ''), 10);
-                            const prefStartMins = parseInt(pref.params.startTime.replace(':', ''), 10);
-                            const prefEndMins = parseInt(pref.params.endTime.replace(':', ''), 10);
-                            if (Math.max(eventStartMins, prefStartMins) < Math.min(eventEndMins, prefEndMins)) return false;
-                        }
-                    }
-                    return true;
-                });
-
-                if (availableEventsOfType.length < numNeeded) return;
-
-                // This needs a proper combination generator (e.g., n choose k)
-                // For simplicity, taking the first 'numNeeded' events if unique, or all if less.
-                // This is a placeholder for a real combinatorial algorithm.
                 function getCombinations(array, k) {
-                    // Basic combination generator (replace with a more robust one if needed)
                     if (k === 0) return [[]];
-                    if (array.length === 0) return [];
+                    if (array.length < k) return [];
                     const first = array[0];
-                    const rest = array.slice(1);
-                    const combsWithoutFirst = getCombinations(rest, k);
-                    const combsWithFirst = getCombinations(rest, k - 1).map(comb => [first, ...comb]);
+                    const withoutFirst = array.slice(1);
+                    const combsWithFirst = getCombinations(withoutFirst, k - 1).map(comb => [first, ...comb]);
+                    const combsWithoutFirst = getCombinations(withoutFirst, k);
                     return [...combsWithFirst, ...combsWithoutFirst];
                 }
+                
+                const combinations = getCombinations(eventsOfThisType, neededCount);
 
-                const combinations = getCombinations(availableEventsOfType, numNeeded);
-
-                for (const selectedEventsForType of combinations) {
-                    let internalConflict = false;
-                    for (let i = 0; i < selectedEventsForType.length; i++) {
-                        for (let j = i + 1; j < selectedEventsForType.length; j++) {
-                            if (this._eventsConflict(selectedEventsForType[i], selectedEventsForType[j])) {
-                                internalConflict = true; break;
-                            }
-                        }
-                        if(internalConflict) break;
-                    }
-                    if(!internalConflict) {
-                        generateEventCombinationsForCourse(typeKeyIndex + 1, [...tempEventsForCourse, ...selectedEventsForType]);
-                    }
+                for (const combination of combinations) {
+                    if (solutionsFound >= MAX_GENERATED_SCHEDULES) return;
+                    generateEventCombinationsForCourse(typeKeyIndex + 1, [...tempEventsForCourse, ...combination]);
                 }
-            };
-
-            if (eventTypeKeys.length === 0) {
-                findSchedulesRecursive(courseIdx + 1, currentScheduleInProgress);
-            } else {
-                generateEventCombinationsForCourse(0, []);
             }
-        };
 
-        const initialSchedule = new ScheduleClass();
-        findSchedulesRecursive(0, initialSchedule);
-
-        this.generatedSchedules = solutions;
-        if (solutions.length > 0) {
-            this.activeScheduleIndex = 0;
-            console.log(`WorkspaceService: Generated ${solutions.length} schedule variants.`);
-            return true;
+            generateEventCombinationsForCourse(0, []);
         }
-        console.log("WorkspaceService: No valid schedule variants found meeting all criteria.");
-        return false;
+        
+        findSchedulesRecursive(0, new ScheduleClass());
+
+        console.log(`Generování dokončeno. Nalezeno ${this.generatedSchedules.length} rozvrhů.`);
+        return this.generatedSchedules.length > 0;
     }
 }
-
-// Helper in CourseEventClass for day string to number (if not already present)
-// This is a static method, so it can be called on the class itself.
-// Assuming dayOptions in preferences are 'PO', 'UT', etc. matching courseEvent.monday etc. keys
-CourseEventClass.dayStringToNumber = (dayString) => {
-    const dayMap = {
-        'PO': 0, 'Pondělí': 0, 'Monday': 0,
-        'UT': 1, 'Úterý': 1,   'Tuesday': 1,
-        'ST': 2, 'Středa': 2,  'Wednesday': 2,
-        'CT': 3, 'Čtvrtek': 3, 'Thursday': 3,
-        'PA': 4, 'Pátek': 4,   'Friday': 4,
-        'SO': 5, 'Sobota': 5,  'Saturday': 5,
-        'NE': 6, 'Neděle': 6,  'Sunday': 6
-    };
-    return dayMap[dayString] !== undefined ? dayMap[dayString] : -1; // Return -1 for unknown
-};
-
 
 export default WorkspaceService;

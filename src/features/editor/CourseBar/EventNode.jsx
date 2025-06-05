@@ -17,7 +17,8 @@ const EventNode = ({ event, isEnrolled, onToggleEvent, canEnroll, disabledToolti
     } else if (canEnroll) {
         currentDisabledTooltipText = t('tooltips.enrollAction', 'Zapsat akci do svého rozvrhu');
     }
-
+    
+    const instructorDisplay = event.instructor ? (typeof event.instructor === 'object' ? event.instructor.name : event.instructor) : '-';
 
     return (
         <Card
@@ -66,16 +67,14 @@ const EventNode = ({ event, isEnrolled, onToggleEvent, canEnroll, disabledToolti
                 <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
                     {t('labels.capacity', 'Kapacita')}: {event.maxCapacity}
                 </Typography>
-                <Typography variant="body2" sx={{ mb: event.note ? 0.5 : 0, fontSize: '0.8rem' }}>
+                <Typography variant="body2" sx={{ mb: (event.note || instructorDisplay !== '-') ? 0.5 : 0, fontSize: '0.8rem' }}>
                     {t('labels.recurrence', 'Opakování')}: {recurrenceStr}
                 </Typography>
-                {event.instructor && (
-                    <Tooltip title={`${t('labels.instructor', 'Vyučující')}: ${typeof event.instructor === 'object' ? event.instructor.name : event.instructor}`}>
-                        <Typography variant="caption" sx={{ fontStyle: 'italic', display: 'block', color: 'text.secondary', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '0.75rem' }}>
-                            {t('labels.instructor', 'Vyučující')}: {typeof event.instructor === 'object' ? event.instructor.name : event.instructor}
-                        </Typography>
-                    </Tooltip>
-                )}
+                <Tooltip title={`${t('labels.instructor', 'Vyučující')}: ${instructorDisplay}`}>
+                    <Typography variant="caption" sx={{ fontStyle: 'italic', display: 'block', color: 'text.secondary', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '0.75rem' }}>
+                        {t('labels.instructor', 'Vyučující')}: {instructorDisplay}
+                    </Typography>
+                </Tooltip>
                 {event.note && (
                     <Tooltip title={`${t('labels.notes', 'Poznámka')}: ${event.note}`}>
                         <Typography variant="caption" sx={{ fontStyle: 'italic', display: 'block', color: 'text.secondary', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '0.75rem' }}>

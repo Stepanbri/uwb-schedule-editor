@@ -12,14 +12,17 @@ export default defineConfig({
     host: true,
     port: 3030,
     proxy: {
-      // Pokud vaše API volání v StagApiService začínají např. '/ws/services/rest2'
-      // a plná URL je 'https://stag-ws.zcu.cz/ws/services/rest2/...'
-      // Chceme, aby se požadavky na '/api-stag' přeposílaly na STAG server
-      '/api-stag': {
-        target: 'https://stag-demo.zcu.cz', // Cílový STAG server
-        changeOrigin: true, // Nutné pro virtuální hostování a přepsání 'Host' hlavičky
-        rewrite: (path) => path.replace(/^\/api-stag/, ''), // Odstraní /api-stag z cesty požadavku
-        secure: false, // Pokud STAG server používá self-signed certifikát (pro produkci spíše true)
+      '/api/stag-production/': {
+        target: 'https://stag-ws.zcu.cz/',       // Produkční STAG ZČU
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/stag-production/, ''),
+        secure: false, // V produkčním nasazení by mělo být true, pokud server má platný certifikát
+      },
+      '/api/stag-demo/': {
+        target: 'https://stag-demo.zcu.cz/',    // Demo STAG ZČU
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/stag-demo/, ''),
+        secure: false,
       }
     }
   },

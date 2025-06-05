@@ -45,7 +45,33 @@ class CourseClass {
         this.events = events.map(eventData => eventData instanceof CourseEventClass ? eventData : new CourseEventClass({...eventData, courseId: this.id, courseCode: this.getShortCode(), departmentCode: this.departmentCode, year: this.year, semester: this.semester }));
     }
 
-    // ... (ostatní metody zůstávají stejné) ...
+    serialize() {
+        return {
+            id: this.id,
+            stagId: this.stagId,
+            name: this.name,
+            departmentCode: this.departmentCode,
+            courseCode: this.courseCode,
+            credits: this.credits,
+            neededEnrollments: this.neededEnrollments, // Je to již prostý objekt
+            // Zajistíme, že každá událost je také serializována, pokud má metodu serialize
+            // Jinak uložíme událost tak, jak je (měla by být prostý objekt, pokud není instance CourseEventClass)
+            events: this.events.map(event => {
+                if (event && typeof event.serialize === 'function') {
+                    return event.serialize();
+                }
+                // Pokud event není instance s metodou serialize, ale je to objekt (např. po importu ze starého JSON),
+                // je potřeba ho převést na instanci CourseEventClass, aby se správně serializoval
+                // nebo zajistit, že CourseEventClass.constructor správně zachází s těmito daty.
+                // Prozatím, pokud nemá serialize, vrátíme ho tak, jak je, ale toto může být zdroj problémů při deserializaci,
+                // pokud se nespoléháme na to, že this.events jsou VŽDY instance CourseEventClass.
+                // Bezpečnější by bylo zajistit, že this.events jsou vždy instance CourseEventClass, což konstruktor dělá.
+                return event; // Předpokládáme, že konstruktor zajistil, že this.events jsou instance CourseEventClass
+            }),
+            semester: this.semester,
+            year: this.year,
+        };
+    }
 
     _hasEventsOfType(typeKeyToCheck) {
         if (!this.events || this.events.length === 0) return false;

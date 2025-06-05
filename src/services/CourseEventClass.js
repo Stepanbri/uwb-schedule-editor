@@ -47,6 +47,33 @@ class CourseEventClass {
         this.departmentCode = departmentCode;
     }
 
+    serialize() {
+        // Vrátí prostý objekt se všemi vlastnostmi pro JSON serializaci
+        return {
+            id: this.id,
+            stagId: this.stagId,
+            startTime: this.startTime,
+            endTime: this.endTime,
+            day: this.day,
+            recurrence: this.recurrence,
+            validityStart: this.validityStart,
+            validityEnd: this.validityEnd,
+            courseId: this.courseId,
+            courseCode: this.courseCode,
+            room: this.room,
+            type: this.type,
+            instructor: this.instructor, // Předpokládáme, že instructor je již string nebo serializovatelný objekt
+            currentCapacity: this.currentCapacity,
+            maxCapacity: this.maxCapacity,
+            note: this.note,
+            isVirtual: this.isVirtual,
+            year: this.year,
+            semester: this.semester,
+            groupId: this.groupId,
+            departmentCode: this.departmentCode,
+        };
+    }
+
     getDayAsString(tFunction) {
         const days = [
             tFunction('courseEvent.monday', 'Pondělí'),

@@ -45,16 +45,13 @@ export const WorkspaceProvider = ({ children }) => {
         setWorkspaceYear(workspaceService.year);
         setWorkspaceSemester(workspaceService.semester);
 
-        if (isWorkspaceInitialized) { // Ukládáme jen pokud je workspace inicializován
+        if (isWorkspaceInitialized) {
             workspaceService.saveWorkspace();
-            if (showSaveNotification) { // Notifikace jen pokud je explicitně vyžádána
-                // showSnackbar(t('alerts.workspaceSaved'), 'success'); // Spíše per-akce
-            }
         }
-    }, [workspaceService, isWorkspaceInitialized, t /*, showSnackbar */]);
+    }, [workspaceService, isWorkspaceInitialized, t]);
 
     const initializeWorkspace = useCallback(() => {
-        if (isWorkspaceInitialized) return;
+        if (isWorkspaceInitialized && !isLoadingWorkspace) return;
         setIsLoadingWorkspace(true);
         const loadedFromStorage = workspaceService.loadWorkspace();
         syncStateFromService(false);
@@ -62,12 +59,10 @@ export const WorkspaceProvider = ({ children }) => {
         setIsWorkspaceInitialized(true);
 
         if (localStorage.getItem(LOCAL_STORAGE_KEY) && loadedFromStorage) {
-            showSnackbar(t('alerts.workspaceLoadedFromLocalStorage'), 'info');
-        } else if (loadedFromStorage) {
-            showSnackbar(t('alerts.loadedDummyData'), 'info');
+        } else if (loadedFromStorage && !localStorage.getItem(LOCAL_STORAGE_KEY)) {
         }
-        workspaceService.saveWorkspace(); // Uložíme i po první inicializaci
-    }, [isWorkspaceInitialized, workspaceService, syncStateFromService, showSnackbar, t]);
+        workspaceService.saveWorkspace();
+    }, [isWorkspaceInitialized, isLoadingWorkspace, workspaceService, syncStateFromService, showSnackbar, t]);
 
     const addCourse = useCallback((courseData) => {
         if (!isWorkspaceInitialized) return;
@@ -75,7 +70,7 @@ export const WorkspaceProvider = ({ children }) => {
         const existingCourse = workspaceService.courses.find(c => c.id === courseIdentifier);
 
         workspaceService.addCourse(courseData);
-        syncStateFromService(true); // true pro uložení
+        syncStateFromService(true);
         if (existingCourse) {
             showSnackbar(t('alerts.courseOverwritten', { courseCode: courseIdentifier }), 'info');
         } else {
@@ -83,7 +78,7 @@ export const WorkspaceProvider = ({ children }) => {
         }
     }, [workspaceService, syncStateFromService, showSnackbar, t, isWorkspaceInitialized]);
 
-    const removeCourse = useCallback((courseId) => { // courseId je KATEDRA/KOD
+    const removeCourse = useCallback((courseId) => {
         if (!isWorkspaceInitialized) return;
         const courseToRemove = workspaceService.courses.find(c => c.id === courseId);
         const courseIdentifier = courseToRemove ? courseToRemove.getShortCode() : courseId;
@@ -92,7 +87,6 @@ export const WorkspaceProvider = ({ children }) => {
         showSnackbar(t('alerts.courseRemoved', { courseId: courseIdentifier }), 'success');
     }, [workspaceService, syncStateFromService, showSnackbar, t, isWorkspaceInitialized]);
 
-    // Potvrzení se přesunulo do EditorPage
     const handleRemoveAllCourses = useCallback(() => {
         if (!isWorkspaceInitialized) return;
         workspaceService.removeAllCourses();
@@ -101,7 +95,6 @@ export const WorkspaceProvider = ({ children }) => {
     }, [workspaceService, syncStateFromService, showSnackbar, t, isWorkspaceInitialized]);
 
     const toggleEventInSchedule = useCallback((eventToToggle, isCurrentlyEnrolled) => {
-        // ... (jako dříve)
         if (!isWorkspaceInitialized) return false;
         const schedule = workspaceService.getActiveSchedule();
         if (!schedule) {
@@ -118,7 +111,6 @@ export const WorkspaceProvider = ({ children }) => {
     }, [workspaceService, syncStateFromService, isWorkspaceInitialized]);
 
     const updateWorkspaceSettings = useCallback((year, semester) => {
-        // ... (jako dříve)
         if (!isWorkspaceInitialized) return;
         workspaceService.year = year;
         workspaceService.semester = semester;
@@ -127,7 +119,6 @@ export const WorkspaceProvider = ({ children }) => {
     }, [workspaceService, syncStateFromService, showSnackbar, t, isWorkspaceInitialized]);
 
     const addPreference = useCallback((preference) => {
-        // ... (jako dříve)
         if (!isWorkspaceInitialized) return;
         workspaceService.addPreference(preference);
         syncStateFromService(true);
@@ -135,14 +126,12 @@ export const WorkspaceProvider = ({ children }) => {
     }, [workspaceService, syncStateFromService, showSnackbar, t, isWorkspaceInitialized]);
 
     const deletePreference = useCallback((preferenceId) => {
-        // Potvrzení se přesunulo do PreferenceItem
         if (!isWorkspaceInitialized) return;
         workspaceService.deletePreference(preferenceId);
         syncStateFromService(true);
         showSnackbar(t('preferences.alerts.deleted'), 'info');
     }, [workspaceService, syncStateFromService, showSnackbar, t, isWorkspaceInitialized]);
 
-    // Potvrzení se přesunulo do EditorPage
     const handleRemoveAllPreferences = useCallback(() => {
         if (!isWorkspaceInitialized) return;
         workspaceService.removeAllPreferences();
@@ -151,7 +140,6 @@ export const WorkspaceProvider = ({ children }) => {
     }, [workspaceService, syncStateFromService, showSnackbar, t, isWorkspaceInitialized]);
 
     const updatePreference = useCallback((preferenceId, updatedData) => {
-        // ... (jako dříve)
         if (!isWorkspaceInitialized) return;
         workspaceService.updatePreference(preferenceId, updatedData);
         syncStateFromService(true);
@@ -159,7 +147,6 @@ export const WorkspaceProvider = ({ children }) => {
     }, [workspaceService, syncStateFromService, showSnackbar, t, isWorkspaceInitialized]);
 
     const updatePreferencePriority = useCallback((preferenceId, direction) => {
-        // ... (jako dříve)
         if (!isWorkspaceInitialized) return;
         workspaceService.updatePreferencePriority(preferenceId, direction);
         syncStateFromService(true);
@@ -167,7 +154,6 @@ export const WorkspaceProvider = ({ children }) => {
     }, [workspaceService, syncStateFromService, showSnackbar, t, isWorkspaceInitialized]);
 
     const togglePreferenceActive = useCallback((preferenceId) => {
-        // ... (jako dříve)
         if (!isWorkspaceInitialized) return;
         workspaceService.togglePreferenceActive(preferenceId);
         syncStateFromService(true);
@@ -175,7 +161,6 @@ export const WorkspaceProvider = ({ children }) => {
     }, [workspaceService, syncStateFromService, showSnackbar, t, isWorkspaceInitialized]);
 
     const generateAndSetSchedules = useCallback(() => {
-        // ... (jako dříve)
         if (!isWorkspaceInitialized) return false;
         const success = workspaceService.generateSchedule();
         syncStateFromService();
@@ -183,16 +168,13 @@ export const WorkspaceProvider = ({ children }) => {
     }, [workspaceService, syncStateFromService, isWorkspaceInitialized]);
 
     const setActiveGeneratedSchedule = useCallback((index) => {
-        // ... (jako dříve)
         if (!isWorkspaceInitialized) return;
         workspaceService.setActiveScheduleIndex(index);
         syncStateFromService();
     }, [workspaceService, syncStateFromService, isWorkspaceInitialized]);
 
-    // Potvrzení se přesunulo do EditorPage
     const clearFullWorkspace = useCallback(() => {
         workspaceService.clearWorkspace(true);
-        setIsWorkspaceInitialized(false);
         setCourses([]);
         setActiveSchedule(new ScheduleClass());
         setGeneratedSchedules([]);
@@ -200,11 +182,14 @@ export const WorkspaceProvider = ({ children }) => {
         setPreferences({});
         setWorkspaceYear('');
         setWorkspaceSemester('');
+        
+        setIsWorkspaceInitialized(true);
+        
+        workspaceService.saveWorkspace();
         showSnackbar(t('alerts.workspaceCleared'), 'info');
     }, [workspaceService, showSnackbar, t]);
 
     const handleExportWorkspace = useCallback(() => {
-        // ... (jako dříve)
         if (!isWorkspaceInitialized) {
             showSnackbar(t('common.error') + ': ' + t('alerts.workspaceNotInitializedYet', 'Pracovní plocha ještě nebyla načtena.'), 'warning');
             return;
@@ -216,10 +201,8 @@ export const WorkspaceProvider = ({ children }) => {
         }
     }, [workspaceService, showSnackbar, t, isWorkspaceInitialized]);
 
-    // Potvrzení se přesunulo do EditorPage (nebo zůstává zde window.confirm)
     const handleImportWorkspace = useCallback(async (file) => {
         if (!file) return;
-        // Potvrzení je v EditorPage
         const reader = new FileReader();
         reader.onload = async (e) => {
             const text = e.target.result;
@@ -260,12 +243,11 @@ export const WorkspaceProvider = ({ children }) => {
 
     const value = {
         workspaceService, courses, activeSchedule, generatedSchedules, activeScheduleIndex,
-        preferences, isLoadingWorkspace, isWorkspaceInitialized, initializeWorkspace,
-        workspaceYear, workspaceSemester, addCourse, removeCourse, handleRemoveAllCourses,
-        toggleEventInSchedule, updateWorkspaceSettings, addPreference, deletePreference,
-        handleRemoveAllPreferences, updatePreference, updatePreferencePriority,
-        togglePreferenceActive, generateAndSetSchedules, setActiveGeneratedSchedule,
-        clearFullWorkspace, syncStateFromService, findEventByIdGlobal,
+        preferences, isLoadingWorkspace, isWorkspaceInitialized, workspaceYear, workspaceSemester,
+        initializeWorkspace, addCourse, removeCourse, handleRemoveAllCourses, toggleEventInSchedule,
+        updateWorkspaceSettings, addPreference, deletePreference, handleRemoveAllPreferences,
+        updatePreference, updatePreferencePriority, togglePreferenceActive, generateAndSetSchedules,
+        setActiveGeneratedSchedule, clearFullWorkspace, syncStateFromService, findEventByIdGlobal,
         handleExportWorkspace, handleImportWorkspace, handleSaveScheduleImage,
     };
 

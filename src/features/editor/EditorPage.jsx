@@ -120,7 +120,6 @@ function EditorPage() {
         clearFullWorkspace, handleExportWorkspace, handleImportWorkspace, handleSaveScheduleImage,
         handleRemoveAllCourses: removeAllCoursesFromContext,
         handleRemoveAllPreferences: removeAllPreferencesFromContext,
-        loadDummyDataToWorkspace,
     } = useWorkspace();
 
     const { stagUserTicket, isProcessingLoginCallback, userInfo, stagApiService } = useStagApi();
@@ -220,24 +219,6 @@ function EditorPage() {
         });
     };
 
-    const confirmAndResetWorkspaceWithDummy = () => {
-        setResetWorkspaceDialog({
-            open: true,
-            title: t('scheduleToolbar.resetWorkspaceWithDummyTitle', 'Resetovat a načíst ukázková data?'),
-            message: t('scheduleToolbar.confirmResetWorkspaceWithDummy', 'Tímto vymažete stávající pracovní plochu a nahradíte ji ukázkovými daty. Přejete si pokračovat?'),
-            onConfirm: () => {
-                if (loadDummyDataToWorkspace) {
-                    loadDummyDataToWorkspace();
-                } else {
-                    console.warn("loadDummyDataToWorkspace is not available from WorkspaceContext");
-                    clearFullWorkspace();
-                }
-                setResetWorkspaceDialog({ open: false });
-            },
-            confirmButtonColor: "warning"
-        });
-    };
-
     const confirmAndRemoveAllCourses = () => {
         setRemoveAllCoursesDialog({
             open: true,
@@ -315,7 +296,6 @@ function EditorPage() {
                             onExportWorkspace={handleExportWorkspace}
                             onImportWorkspace={handleImportWorkspace}
                             onResetWorkspace={confirmAndResetWorkspaceClean}
-                            onResetWorkspaceAndLoadDummyData={confirmAndResetWorkspaceWithDummy}
                         />
                     </Box>
                     <ScheduleBoxWrapper ref={scheduleBoxRef} sx={{ height: scheduleBoxWrapperHeight, m:1, mt:0, flexGrow: 1 }}>
@@ -368,7 +348,6 @@ function EditorPage() {
                                 onExportWorkspace={handleExportWorkspace}
                                 onImportWorkspace={handleImportWorkspace}
                                 onResetWorkspace={confirmAndResetWorkspaceClean}
-                                onResetWorkspaceAndLoadDummyData={confirmAndResetWorkspaceWithDummy}
                             />
                         </Box>
                         <ScheduleBoxWrapper ref={scheduleBoxRef} sx={{ maxHeight: scheduleBoxWrapperHeight }}>

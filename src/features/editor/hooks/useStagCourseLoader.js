@@ -66,11 +66,16 @@ export const useStagCourseLoader = () => {
 
             const transformedEvents = (Array.isArray(scheduleEventsData) ? scheduleEventsData : []).map(stagEvent => {
                 const eventId = stagEvent.roakIdno || stagEvent.akceIdno || `${subjectInfo.katedra}-${subjectInfo.zkratka}-${stagEvent.typAkceZkr || 'T'}-${stagEvent.denZkr || 'D'}-${stagEvent.hodinaSkutOd?.value || '0000'}-${Math.random().toString(16).slice(2,7)}`;
-                let instructorName = '';
-                if (stagEvent.ucitel) {
+                
+                let instructorName = stagEvent.vsichniUciteleJmenaTituly || '';
+                if (!instructorName && stagEvent.ucitel) {
                     const ucitele = Array.isArray(stagEvent.ucitel) ? stagEvent.ucitel : [stagEvent.ucitel];
-                    instructorName = ucitele.map(u => `${u.titulPred ? u.titulPred + ' ' : ''}${u.jmeno} ${u.prijmeni}${u.titulZa ? ', ' + u.titulZa : ''}`).join(', ');
+                    instructorName = ucitele
+                        .filter(u => u && u.jmeno && u.prijmeni)
+                        .map(u => `${u.titulPred ? u.titulPred + ' ' : ''}${u.jmeno} ${u.prijmeni}${u.titulZa ? ', ' + u.titulZa : ''}`)
+                        .join(', ');
                 }
+
                 const dayKey = stagEvent.denZkr?.toUpperCase() || stagEvent.den?.toUpperCase();
                 let formattedRoom = t('common.notSpecified');
                 if (stagEvent.budova && stagEvent.mistnost) formattedRoom = `${stagEvent.budova.toUpperCase()}${stagEvent.mistnost.replace(/\s|-/g, '')}`;
@@ -121,7 +126,7 @@ export const useStagCourseLoader = () => {
                     title: t('Dialogs.existingCourseWarning.title'),
                     message: t('Dialogs.existingCourseWarning.message', { courseIdentifier: `${courseIdentifier} (pro ${formData.year}, ${formData.semester})` }),
                     courseDataForWorkspace: courseDataForWorkspace,
-                    onConfirm: () => { // Definujeme onConfirm zde
+                    onConfirm: () => {
                         addCourse(courseDataForWorkspace);
                         closeOverwriteSingleCourseDialog();
                         setIsProcessingCourse(false);
@@ -143,6 +148,6 @@ export const useStagCourseLoader = () => {
         isLoadCourseDialogOpen, openLoadCourseDialog, closeLoadCourseDialog, handleSubmitLoadCourse,
         isProcessingCourse,
         overwriteSingleCourseDialog,
-        closeOverwriteSingleCourseDialog, // Pro tlačítko zrušit v dialogu
+        closeOverwriteSingleCourseDialog,
     };
 };

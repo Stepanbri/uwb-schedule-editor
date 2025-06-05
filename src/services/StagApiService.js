@@ -2,22 +2,34 @@
 
 // Použijeme proxy cestu pro vývoj, pokud je vite.config.js nastaven
 // V produkci byste zde měli plnou URL.
-const IS_DEV = import.meta.env.DEV;
-const PROXY_PATH = '/api-stag'; // Stejné jako ve vite.config.js
+// const IS_DEV = import.meta.env.DEV; // Již nepotřebujeme přímo zde
+// const PROXY_PATH = '/api-stag'; // Již nepotřebujeme přímo zde
 
-// https://stag-demo.zcu.cz/ -> STAG Demo
-// https://stag-ws.zcu.cz/ -> ZČU
-
-const DEFAULT_STAG_WS_BASE_URL = IS_DEV ? `${PROXY_PATH}/ws/services/rest2` : "https://stag-demo.zcu.cz/ws/services/rest2";
-const DEFAULT_STAG_LOGIN_URL = "https://stag-demo.zcu.cz/ws/login";
+// Přímé URL pro STAG servery (použijeme pro login redirect)
+const DIRECT_PROD_STAG_URL = "https://stag-ws.zcu.cz";
+const DIRECT_DEMO_STAG_URL = "https://stag-demo.zcu.cz";
 
 class StagApiService {
-    constructor(options = {}) {
-        this.wsBaseUrl = options.wsBaseUrl || DEFAULT_STAG_WS_BASE_URL;
-        this.loginUrl = options.loginUrl || DEFAULT_STAG_LOGIN_URL;
-        this.stagUserTicket = options.initialTicket || null;
-        this.userInfo = options.initialUserInfo || { jmeno: '', prijmeni: '', email: '', titulPred: '', titulZa: '', roles: [] };
-        this.selectedStagUserRole = null; // Identifikátor vybrané role (např. "A23N0001P")
+    // apiRootPath: např. '/api/stag-production/' (pro API volání přes proxy)
+    // useDemoServer: boolean, indikuje, zda se má použít demo STAG pro login
+    constructor(apiRootPath, useDemoServer) {
+        if (!apiRootPath) {
+            throw new Error("StagApiService: apiRootPath is required in constructor!");
+        }
+        // Zajistíme, aby apiRootPath končil lomítkem
+        const internalApiBasePath = apiRootPath.endsWith('/') ? apiRootPath : `${apiRootPath}/`;
+
+        this.wsBaseUrl = `${internalApiBasePath}ws/services/rest2`; // Pro API volání přes proxy
+        
+        // Sestavení přímé login URL
+        const loginDomain = useDemoServer ? DIRECT_DEMO_STAG_URL : DIRECT_PROD_STAG_URL;
+        this.loginUrl = `${loginDomain}/ws/login`; // Standardní cesta pro login přímo na STAG server
+        
+        console.log(`StagApiService initialized with wsBaseUrl: ${this.wsBaseUrl}, direct loginUrl: ${this.loginUrl}`);
+
+        this.stagUserTicket = null;
+        this.userInfo = { jmeno: '', prijmeni: '', email: '', titulPred: '', titulZa: '', roles: [] };
+        this.selectedStagUserRole = null;
     }
 
     setStagUserTicket(ticket) {
@@ -85,6 +97,7 @@ class StagApiService {
         let loginRedirectUrl = `${this.loginUrl}?originalURL=${encodedOriginalURL}`;
         if (useOnlyMainLogin) loginRedirectUrl += "&onlyMainLoginMethod=1";
         if (requestLongTicket) loginRedirectUrl += "&longTicket=1";
+        console.log("StagApiService: Redirecting to STAG login:", loginRedirectUrl);
         window.location.href = loginRedirectUrl;
     }
 

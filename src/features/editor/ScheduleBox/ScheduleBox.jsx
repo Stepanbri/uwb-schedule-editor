@@ -1,6 +1,6 @@
 // src/features/editor/ScheduleBox/ScheduleBox.jsx
 import React, { useMemo } from 'react';
-import { Paper, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, styled } from '@mui/material';
+import { Paper, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, styled, Box } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useCourseManagement } from '../hooks/useCourseManagement';
 import { timeToMinutes } from '../../../utils/timeUtils';
@@ -34,7 +34,7 @@ const TIME_HEADER_HEIGHT = 60;
 const MIN_EVENT_HEIGHT = 50;
 
 const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
-    maxHeight: `calc(100vh - ${theme.mixins.toolbar.minHeight}px - 48px - ${TIME_HEADER_HEIGHT}px)`,
+    maxHeight: `calc(100vh - ${theme.mixins.toolbar.minHeight}px - 48px - ${TIME_HEADER_HEIGHT}px - ${theme.spacing(1.5)} )`,
     overflow: 'auto',
     position: 'relative',
     border: `1px solid ${theme.palette.divider}`
@@ -54,9 +54,9 @@ const StickyTableCell = styled(TableCell)(({ theme, stickytype }) => ({
     ...(stickytype === 'time' && {
         top: 0,
         textAlign: 'center',
-        padding: '4px',
-        fontSize: '0.75rem',
-        minWidth: '60px',
+        padding: '2px 4px',
+        fontSize: '0.7rem',
+        minWidth: '55px',
     }),
     ...(stickytype === 'corner' && {
         left: 0,
@@ -161,14 +161,30 @@ function ScheduleBox() {
             <StyledTableContainer component={Paper}>
                 <Table stickyHeader size="small">
                     <TableHead>
-                        <TableRow sx={{ height: TIME_HEADER_HEIGHT}}>
+                        <TableRow sx={{ height: 'auto' /* TIME_HEADER_HEIGHT -> auto pro přizpůsobení obsahu */}}>
                             <StickyTableCell stickytype="corner">
                                 {t('schedule.dayTime', 'Den/Čas')}
                             </StickyTableCell>
                             {TIME_BLOCKS.map((block, index) => (
-                                <StickyTableCell key={index} stickytype="time" sx={{ height: TIME_HEADER_HEIGHT }}>
-                                    <Typography variant="caption" display="block" fontWeight="bold">{block.label}</Typography>
-                                    {block.start} - {block.end}
+                                <StickyTableCell key={index} stickytype="time">
+                                    <Box sx={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        justifyContent: 'flex-start', // Label nahoře, pak časy
+                                        alignItems: 'center', // Centrovaný label
+                                        height: '100%',
+                                        lineHeight: 1.2, // Menší řádkování
+                                    }}>
+                                        <Typography variant="caption" display="block" fontWeight="bold" sx={{ fontSize: '0.75rem' /* Větší než časy */ }}>
+                                            {block.label}
+                                        </Typography>
+                                        <Typography component="div" variant="caption" sx={{ textAlign: 'left', width: '100%', fontSize: 'inherit' /* Dědí z StickyTableCell */ }}>
+                                            {block.start}
+                                        </Typography>
+                                        <Typography component="div" variant="caption" sx={{ textAlign: 'right', width: '100%', fontSize: 'inherit' /* Dědí z StickyTableCell */ }}>
+                                            {block.end}
+                                        </Typography>
+                                    </Box>
                                 </StickyTableCell>
                             ))}
                         </TableRow>

@@ -34,7 +34,8 @@
     "notSpecified": "Nezadáno",
     "unknownType": "Neznámý typ",
     "noAdditionalInfo": "Bez dalších informací",
-    "scheduleNotAvailable": "Rozvrh není k dispozici nebo se načítá."
+    "scheduleNotAvailable": "Rozvrh není k dispozici nebo se načítá.",
+    "workspaceNotInitializedYet": "Pracovní plocha ještě nebyla načtena."
   },
   "alerts": {
     "workspaceSaved": "Pracovní plocha uložena.",
@@ -249,12 +250,12 @@
       "noRolesAvailable": "Pro váš účet nejsou aktuálně k dispozici žádné STAG role nebo se je nepodařilo načíst."
     },
     "loadFromStudentRedirect": {
-      "title": "Načtení předmětů z plánu studenta",
-      "p1": "Pro načtení předmětů dle vašeho studijního plánu je nutné se přihlásit do informačního systému STAG.",
-      "p2": "Po kliknutí na \"Pokračovat\" budete přesměrováni na přihlašovací stránku ZČU (Orion login). Po úspěšném přihlášení budete automaticky vráceni zpět do aplikace Plánovač Rozvrhu.",
-      "p3": "Tato aplikace neukládá vaše přihlašovací údaje. Získaný dočasný přístupový klíč (ticket) se použije pouze pro komunikaci se STAG API během této relace.",
+      "title": "Načíst předměty dle studijního plánu",
+      "p1": "Pro načtení předmětů dle vašeho studijního plánu je potřeba se přihlásit do informačního systému STAG.",
+      "p2": "Po kliknutí na \"Pokračovat\" budete přesměrováni na přihlašovací stránku ZČU (Orion login). Po úspěšném přihlášení budete automaticky vráceni do aplikace Plánovač Rozvrhu.",
+      "p3": "Tato aplikace neukládá vaše přihlašovací údaje. Získaný dočasný přístupový klíč (ticket) je použit pouze pro komunikaci s STAG API během této session.",
       "faqLink": "Více informací o bezpečnosti a fungování přihlášení",
-      "continueButton": "Pokračovat na přihlášení"
+      "continueButton": "Pokračovat k přihlášení"
     },
     "loadCourseFromSTAG": {
       "title": "Načíst předmět ze STAGu",
@@ -272,7 +273,7 @@
     },
     "existingCourseWarning": {
       "title": "Předmět již existuje",
-      "message": "Předmět \"{{courseIdentifier}}\" již máte načtený. Přejete si přepsat jeho stávající data (rok, semestr, události) novými daty ze STAGu?",
+      "message": "Předmět \"{{courseIdentifier}}\" je již načten. Přejete si přepsat jeho stávající data (rok, semestr, akce) novými daty ze STAGu?",
       "confirmButton": "Přepsat"
     },
     "loadingProcess": {
@@ -284,22 +285,22 @@
       "courseDetails": "Rok: {{year}}, Semestr: {{semester}}"
     },
     "studentPlanOverwrite": {
-      "title": "Potvrdit načtení předmětů z plánu",
+      "title": "Potvrdit načtení předmětů",
       "message": "Následující akce může přidat nové předměty a přepsat existující předměty ve vaší pracovní ploše (pokud mají stejný kód katedry/předmětu) daty ze STAGu pro zadaný rok a semestr. Přejete si pokračovat?"
     }
   },
   "courseBar": {
     "loadSingleFromSTAG": "Načíst předmět ze STAGu",
-    "loadFromStudentPlan": "Načíst předměty z plánu studenta",
+    "loadFromStudentPlan": "Načíst předměty dle plánu",
     "removeAllCourses": "Odstranit všechny předměty",
     "removeAllCoursesTooltip": "Odstranit všechny načtené předměty a jejich zapsané akce.",
     "title": "Předměty"
   },
   "editorPage": {
     "mobileDrawer": {
-      "coursesTitle": "Kurzy",
+      "coursesTitle": "Předměty",
       "propertiesTitle": "Preference",
-      "coursesTab": "Kurzy",
+      "coursesTab": "Předměty",
       "propertiesTab": "Preference"
     }
   },
@@ -315,14 +316,14 @@
     },
     "functions": {
       "sectionTitle": "Klíčové Funkce",
-      "intro": "Objevte nástroje, které vám usnadní plánování semestru a maximalizují vaši efektivitu.",
+      "intro": "Objevte nástroje, které vám zjednoduší plánování semestru a maximalizují vaši efektivitu.",
       "func1": {
-        "title": "Načítání ze STAGu",
+        "title": "Načtení ze STAGu",
         "desc": "Importujte předměty a jejich rozvrhové akce přímo z univerzitního systému IS/STAG podle kódu předmětu nebo vašeho studijního plánu."
       },
       "func2": {
         "title": "Vizuální Editor Rozvrhu",
-        "desc": "Přehledně si sestavte a upravujte svůj rozvrh v intuitivním tabulkovém zobrazení českého formátu."
+        "desc": "Přehledně sestavujte a upravujte svůj rozvrh v intuitivním tabulkovém zobrazení v českém formátu."
       },
       "func3": {
         "title": "Správa Preferencí",
@@ -330,11 +331,11 @@
       },
       "func4": {
         "title": "Automatické Generování",
-        "desc": "Nechte aplikaci navrhnout optimální varianty rozvrhu na základě vašich předmětů a nastavených preferencí."
+        "desc": "Nechte si navrhnout optimální varianty rozvrhu na základě vašich předmětů a nastavených preferencí."
       },
       "func5": {
         "title": "Uložení a Export",
-        "desc": "Uložte si svou práci v prohlížeči, exportujte pracovní plochu do souboru nebo stáhněte hotový rozvrh jako obrázek."
+        "desc": "Ukládejte si svou práci v prohlížeči, exportujte pracovní plochu do souboru, nebo stáhněte hotový rozvrh jako obrázek."
       },
       "func6": {
         "title": "Responzivní Design",
@@ -345,53 +346,47 @@
       "sectionTitle": "Použité Technologie",
       "versionLabel": "Verze",
       "reactDesc": "Moderní JavaScriptová knihovna pro tvorbu uživatelských rozhraní.",
-      "muiDesc": "Rozsáhlá sada React komponent implementujících Material Design.",
-      "viteDesc": "Rychlý buildovací nástroj nové generace pro webové projekty.",
-      "i18nextDesc": "Výkonný framework pro internacionalizaci JavaScriptových aplikací."
+      "muiDesc": "Komplexní sada React komponent implementujících Material Design.",
+      "viteDesc": "Nástroj nové generace pro rychlé sestavování frontendových webových projektů.",
+      "i18nextDesc": "Výkonný internacionalizační framework pro JavaScriptové aplikace."
     },
     "author": {
       "sectionTitle": "O Projektu",
       "namePlaceholder": "Štěpán Bříza",
-      "summary": "Tento Plánovač Rozvrhu byl vytvořen jako součást bakalářské práce na Fakultě aplikovaných věd Západočeské univerzity v Plzni. Cílem bylo vytvořit moderní a uživatelsky přívětivý nástroj pro studenty.",
-      "githubButton": "Zdrojový kód na GitHubu"
+      "summary": "Tento Plánovač Rozvrhu vznikl jako součást bakalářské práce na Fakultě aplikovaných věd Západočeské univerzity v Plzni. Cílem bylo vytvořit moderní a uživatelsky přívětivý nástroj pro studenty.",
+      "githubButton": "Zdrojový Kód na GitHubu"
     }
   },
   "faqPage": {
-    "title": "Často kladené otázky (FAQ)",
+    "title": "Často Kladené Otázky (FAQ)",
     "q1": "Co je Plánovač Rozvrhu ZČU?",
-    "a1": "Plánovač Rozvrhu ZČU je nástroj navržený pro studenty Západočeské univerzity v Plzni, který jim pomáhá vizualizovat a plánovat jejich semestrální rozvrh. Umožňuje načítat předměty ze STAGu, přidávat je do rozvrhu, nastavovat preference a generovat možné varianty rozvrhu.",
-    "q2": "Jak mohu nahrát své předměty?",
-    "a2": "Předměty můžete načíst několika způsoby: jednotlivě pomocí kódu předmětu ze STAGu, hromadně pro celý studijní plán (vyžaduje přihlášení přes STAG), nebo importem dříve uložené pracovní plochy ze souboru.",
-    "q3": "Jak funguje přihlášení přes STAG? Je to bezpečné?",
-    "a3": "Pro načtení předmětů z vašeho studijního plánu využíváme standardní přihlašovací mechanismus systému STAG (prostřednictvím ZČU Orion login). Vaše přihlašovací údaje (jméno a heslo) zadáváte přímo na stránkách ZČU, naše aplikace k nim nemá přístup. Po úspěšném přihlášení získáme pouze dočasný anonymní klíč (tzv. \"ticket\"), který nám umožní načíst veřejně dostupné informace o předmětech a vašem studijním plánu. Tento klíč je platný pouze po omezenou dobu a neumožňuje provádět žádné změny ve vašem studiu. Aplikace tento klíč nikde neukládá.",
-    "q4": "Co se stane s mými daty po zavření aplikace?",
-    "a4": "Aplikace ukládá vaši pracovní plochu (načtené předměty, zapsané akce, preference) pouze do lokálního úložiště vašeho prohlížeče. Tato data nejsou odesílána na žádný server a zůstávají pouze u vás. Pokud si přejete, můžete pracovní plochu exportovat do souboru a později ji znovu importovat. Při vymazání dat prohlížeče nebo použití anonymního režimu mohou být data ztracena, pokud nebyla exportována.",
-    "q5": "Proč se mi nezobrazují některé předměty nebo rozvrhové akce?",
-    "a5": "Ujistěte se, že máte správně nastavený akademický rok a semestr pro načítání předmětů v dialogu \"Načíst předměty ze STAGu\" nebo \"Parametry pro načtení předmětů oboru\". Data ve STAGu nemusí být vždy kompletní, zejména pro budoucí období nebo pokud jde o méně časté typy akcí. Aplikace zobrazuje pouze data, která STAG API poskytne. Pokud problém přetrvává, ověřte dostupnost dat přímo v systému STAG.",
-    "q6": "Mohu si v aplikaci oficiálně zapsat předměty?",
-    "a6": "Ne. Tato aplikace slouží pouze k vizualizaci a plánování vašeho rozvrhu. Oficiální zápis předmětů a rozvrhových akcí musíte provést standardním způsobem přes informační systém STAG/Portál ZČU ve stanovených termínech.",
+    "a1": "Plánovač Rozvrhu ZČU je nástroj určený pro studenty Západočeské univerzity, který jim pomáhá vizualizovat a plánovat jejich semestrální rozvrhy. Umožňuje načítat předměty ze STAGu, přidávat je do rozvrhu, nastavovat preference a generovat možné varianty rozvrhu.",
+    "q2": "Jak mohu načíst své předměty?",
+    "a2": "Předměty můžete načíst několika způsoby: jednotlivě pomocí kódu předmětu ze STAGu, hromadně pro celý váš studijní plán (vyžaduje přihlášení do STAGu), nebo importem dříve uložené pracovní plochy ze souboru.",
+    "q3": "Jak funguje přihlášení do STAGu? Je to bezpečné?",
+    "a3": "Pro načtení předmětů z vašeho studijního plánu využíváme standardní přihlašovací mechanismus STAGu (přes Orion login ZČU). Vaše údaje (uživatelské jméno a heslo) zadáváte přímo na stránkách ZČU, naše aplikace k nim nemá přístup. Po úspěšném přihlášení získáme pouze dočasný anonymní klíč (tzv. \"ticket\"), který nám umožní načíst veřejně dostupné informace o předmětech a vašem studijním plánu. Tento klíč je platný jen omezenou dobu a neumožňuje provádět žádné změny ve vašem studiu. Aplikace tento klíč nikde neukládá.",
+    "q4": "Co se stane s mými daty, když zavřu aplikaci?",
+    "a4": "Aplikace ukládá vaši pracovní plochu (načtené předměty, zapsané akce, preference) pouze do lokálního úložiště vašeho prohlížeče. Tato data nejsou odesílána na žádný server a zůstávají pouze u vás. Pokud si přejete, můžete si pracovní plochu exportovat do souboru a později ji znovu importovat. Smazání dat prohlížeče nebo použití anonymního režimu může vést ke ztrátě dat, pokud nejsou exportována.",
+    "q5": "Proč se mi některé předměty nebo rozvrhové akce nezobrazují?",
+    "a5": "Ujistěte se, že máte správně nastavený akademický rok a semestr pro načítání předmětů v dialogu \"Načíst předmět ze STAGu\" nebo \"Parametry pro načtení předmětů oboru\". Data ve STAGu nemusí být vždy kompletní, zejména pro budoucí období nebo méně obvyklé typy akcí. Aplikace zobrazuje pouze data, která poskytne STAG API. Pokud problém přetrvává, ověřte dostupnost dat přímo v systému STAG.",
+    "q6": "Mohu se přes tuto aplikaci oficiálně zapsat na předměty?",
+    "a6": "Ne. Tato aplikace slouží pouze k vizualizaci a plánování vašeho rozvrhu. Oficiální zápis na předměty a rozvrhové akce je nutné provést přes standardní systém STAG/Portál ZČU v určených termínech.",
     "q7": "Jak funguje generování rozvrhu a preference?",
-    "a7": "Generátor rozvrhu se snaží najít takové kombinace zapsaných rozvrhových akcí, které nekolidují a zároveň splňují vámi zadané preference (např. volný den, preferovaný čas, preferovaný vyučující). Čím více preferencí zadáte, tím může být generování složitější a nemusí vždy vést k nalezení optimálního rozvrhu. Preference mají váhu (prioritu), kterou můžete měnit."
+    "a7": "Generátor rozvrhu se snaží najít takové kombinace zapsaných rozvrhových akcí, které spolu nekolidují a zároveň splňují vámi zadané preference (např. volný den, preferovaný čas, preferovaný vyučující). Čím více preferencí nastavíte, tím může být generování složitější a nemusí vždy vést k nalezení optimálního rozvrhu. Preference mají váhu (prioritu), kterou můžete měnit.",
+    "q8": "Co je DEMO režim a jak ho používat?",
+    "a8": "DEMO režim umožňuje testovat aplikaci s demo verzí systému STAG, která běží na adrese stag-demo.zcu.cz. Je určen pro vyzkoušení funkcionality bez ovlivnění reálných dat, například pro vyučující nebo uživatele bez aktivní studentské role na ZČU. Pro přihlášení do demo STAGu lze použít veřejně známé testovací účty a hesla poskytované provozovatelem STAGu (např. jméno 'student', heslo 'student', nebo jiné specifické pro danou roli). Přepnutím do DEMO režimu v aplikaci se veškeré požadavky na STAG API směřují na demo server. Produkční STAG API běží na stag-ws.zcu.cz."
   },
   "scheduleToolbar": {
-    "downloadImage": "Stáhnout PNG",
-    "downloadImageTooltip": "Stáhnout obrázek rozvrhu",
-    "exportWorkspace": "Exportovat JSON",
-    "exportWorkspaceTooltip": "Exportovat pracovní plochu (uložit do souboru)",
-    "importWorkspace": "Importovat JSON",
-    "importWorkspaceTooltip": "Importovat pracovní plochu (načíst ze souboru)",
-    "resetWorkspace": "Resetovat Plochu",
-    "resetWorkspaceTooltip": "Resetovat pracovní plochu",
-    "confirmResetWorkspace": "Opravdu si přejete vymazat celou pracovní plochu? Tato akce je nevratná.",
-    "compactView": "Kompaktní pohled",
-    "compactViewTooltip": "Přepnout na kompaktní zobrazení rozvrhu",
-    "fullWeekView": "Celý týden",
-    "fullWeekViewTooltip": "Zobrazit/skrýt víkendové dny v rozvrhu",
+    "downloadImageTooltip": "Stáhnout aktuální rozvrh jako obrázek (.png)",
+    "exportWorkspaceTooltip": "Exportovat aktuální pracovní plochu (předměty, rozvrh, preference) do souboru (.json)",
+    "importWorkspaceTooltip": "Importovat pracovní plochu ze souboru (.json)",
     "resetWorkspaceCleanTooltip": "Resetovat pracovní plochu (vymazat vše)",
-    "resetWorkspaceWithDummyTooltip": "Resetovat a načíst ukázková data",
     "resetWorkspaceCleanTitle": "Vymazat pracovní plochu?",
     "confirmResetWorkspaceClean": "Opravdu si přejete vymazat celou pracovní plochu? Tato akce je nevratná.",
-    "resetWorkspaceWithDummyTitle": "Resetovat a načíst ukázková data?",
-    "confirmResetWorkspaceWithDummy": "Tímto vymažete stávající pracovní plochu a nahradíte ji ukázkovými daty. Přejete si pokračovat?"
+    "switchToProdStagTooltip": "Přepnout na produkční STAG API",
+    "switchToDemoStagTooltip": "Přepnout na demo STAG API",
+    "activateDemoStagTooltip": "Aktivovat DEMO režim STAG API",
+    "deactivateDemoStagTooltip": "Deaktivovat DEMO režim (použít produkční STAG API)",
+    "faqButtonTooltip": "Nápověda a FAQ"
   }
 }
