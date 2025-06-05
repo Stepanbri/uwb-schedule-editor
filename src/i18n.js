@@ -15,7 +15,7 @@ i18n
             escapeValue: false, // React již escapuje, není nutné pro něj
         },
         backend: {
-            loadPath: '/locales/{{lng}}/{{ns}}.json', // Cesta k souborům s překlady
+            loadPath: `${import.meta.env.BASE_URL}locales/{{lng}}/{{ns}}.json`, // Cesta k souborům s překlady
         },
     });
 
