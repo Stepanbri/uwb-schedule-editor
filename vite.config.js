@@ -8,6 +8,7 @@ dns.setDefaultResultOrder('verbatim')
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  base: '/uwb-schedule-editor',
   server: {
     host: true,
     port: 3030,

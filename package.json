@@ -1,5 +1,6 @@
 {
   "name": "uur-final-refactor",
+  "homepage": "https://stepanbri.github.io/uwb-schedule-editor",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -7,7 +8,9 @@
     "dev": "vite --host",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -15,6 +18,7 @@
     "@mui/icons-material": "^7.1.0",
     "@mui/material": "^7.1.0",
     "@mui/x-tree-view": "^8.5.0",
+    "gh-pages": "^6.3.0",
     "html2canvas": "^1.4.1",
     "i18next": "^25.2.1",
     "i18next-browser-languagedetector": "^8.1.0",
