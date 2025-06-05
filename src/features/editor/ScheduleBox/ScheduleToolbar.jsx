@@ -7,9 +7,10 @@ import { useTranslation } from 'react-i18next';
 // Ikony pro toolbar
 import DownloadIcon from '@mui/icons-material/Download';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
-import SaveIcon from '@mui/icons-material/Save';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
+import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck';
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
 
 
 const ScheduleToolbar = ({
@@ -17,6 +18,7 @@ const ScheduleToolbar = ({
                              onExportWorkspace,
                              onImportWorkspace,
                              onResetWorkspace,
+                             onResetWorkspaceAndLoadDummyData,
                          }) => {
     const { t } = useTranslation();
     const theme = useTheme();
@@ -83,9 +85,15 @@ const ScheduleToolbar = ({
 
             <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />
 
-            <Tooltip title={t('scheduleToolbar.resetWorkspaceTooltip')}>
+            <Tooltip title={t('scheduleToolbar.resetWorkspaceCleanTooltip', 'Resetovat pracovní plochu (vymazat vše)')}>
                 <IconButton size="small" onClick={onResetWorkspace} color="error">
-                    <RefreshIcon />
+                    <RestartAltIcon />
+                </IconButton>
+            </Tooltip>
+
+            <Tooltip title={t('scheduleToolbar.resetWorkspaceWithDummyTooltip', 'Resetovat a načíst ukázková data')}>
+                <IconButton size="small" onClick={onResetWorkspaceAndLoadDummyData} color="warning">
+                    <PlaylistAddCheckIcon />
                 </IconButton>
             </Tooltip>
         </Paper>

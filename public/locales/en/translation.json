@@ -286,10 +286,11 @@
     }
   },
   "courseBar": {
-    "loadSingleFromSTAG": "Load Course from STAG",
-    "loadFromStudentPlan": "Courses from Student Plan",
-    "removeAllCourses": "Remove All Courses",
-    "removeAllCoursesTooltip": "Remove all loaded courses and their enrolled events from the schedule."
+    "loadSingleFromSTAG": "Load course from STAG",
+    "loadFromStudentPlan": "Load courses from student plan",
+    "removeAllCourses": "Remove all courses",
+    "removeAllCoursesTooltip": "Remove all loaded courses and their enrolled events.",
+    "title": "Courses"
   },
   "editorPage": {
     "mobileDrawer": {
@@ -371,17 +372,23 @@
   },
   "scheduleToolbar": {
     "downloadImage": "Download PNG",
-    "downloadImageTooltip": "Download current schedule as a PNG image",
+    "downloadImageTooltip": "Download schedule image",
     "exportWorkspace": "Export JSON",
-    "exportWorkspaceTooltip": "Export the entire workspace (courses, schedule, preferences) as a JSON file",
+    "exportWorkspaceTooltip": "Export workspace (save to file)",
     "importWorkspace": "Import JSON",
-    "importWorkspaceTooltip": "Import workspace from a JSON file (will replace current data!)",
+    "importWorkspaceTooltip": "Import workspace (load from file)",
     "resetWorkspace": "Reset Workspace",
-    "resetWorkspaceTooltip": "Clear all courses, schedule, and preferences and start over",
-    "confirmResetWorkspace": "Are you sure you want to reset the entire workspace? All unsaved data will be lost and this action is irreversible.",
+    "resetWorkspaceTooltip": "Reset workspace",
+    "confirmResetWorkspace": "Are you sure you want to reset the entire workspace? This action is irreversible.",
     "compactView": "Compact View",
     "compactViewTooltip": "Toggle compact schedule display",
     "fullWeekView": "Full Week",
-    "fullWeekViewTooltip": "Toggle display of weekend days in the schedule"
+    "fullWeekViewTooltip": "Toggle display of weekend days in the schedule",
+    "resetWorkspaceCleanTooltip": "Reset workspace (clear all)",
+    "resetWorkspaceWithDummyTooltip": "Reset and load demo data",
+    "resetWorkspaceCleanTitle": "Clear workspace?",
+    "confirmResetWorkspaceClean": "Are you sure you want to clear the entire workspace? This action is irreversible.",
+    "resetWorkspaceWithDummyTitle": "Reset and load demo data?",
+    "confirmResetWorkspaceWithDummy": "This will clear the current workspace and replace it with demo data. Do you wish to continue?"
   }
 }

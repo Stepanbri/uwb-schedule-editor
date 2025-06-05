@@ -120,6 +120,7 @@ function EditorPage() {
         clearFullWorkspace, handleExportWorkspace, handleImportWorkspace, handleSaveScheduleImage,
         handleRemoveAllCourses: removeAllCoursesFromContext,
         handleRemoveAllPreferences: removeAllPreferencesFromContext,
+        loadDummyDataToWorkspace,
     } = useWorkspace();
 
     const { stagUserTicket, isProcessingLoginCallback, userInfo, stagApiService } = useStagApi();
@@ -196,16 +197,34 @@ function EditorPage() {
         toggleEventInSchedule(eventToToggle, isCurrentlyEnrolled, courseContext);
     };
 
-    const confirmAndResetWorkspace = () => {
+    const confirmAndResetWorkspaceClean = () => {
         setResetWorkspaceDialog({
             open: true,
-            title: t('scheduleToolbar.resetWorkspace'),
-            message: t('scheduleToolbar.confirmResetWorkspace'),
+            title: t('scheduleToolbar.resetWorkspaceCleanTitle', 'Vymazat pracovní plochu?'),
+            message: t('scheduleToolbar.confirmResetWorkspaceClean', 'Opravdu si přejete vymazat celou pracovní plochu? Tato akce je nevratná.'),
             onConfirm: () => {
                 clearFullWorkspace();
                 setResetWorkspaceDialog({ open: false });
             },
             confirmButtonColor: "error"
+        });
+    };
+
+    const confirmAndResetWorkspaceWithDummy = () => {
+        setResetWorkspaceDialog({
+            open: true,
+            title: t('scheduleToolbar.resetWorkspaceWithDummyTitle', 'Resetovat a načíst ukázková data?'),
+            message: t('scheduleToolbar.confirmResetWorkspaceWithDummy', 'Tímto vymažete stávající pracovní plochu a nahradíte ji ukázkovými daty. Přejete si pokračovat?'),
+            onConfirm: () => {
+                if (loadDummyDataToWorkspace) {
+                    loadDummyDataToWorkspace();
+                } else {
+                    console.warn("loadDummyDataToWorkspace is not available from WorkspaceContext");
+                    clearFullWorkspace();
+                }
+                setResetWorkspaceDialog({ open: false });
+            },
+            confirmButtonColor: "warning"
         });
     };
 
@@ -282,10 +301,11 @@ function EditorPage() {
                 <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%'}}>
                     <Box ref={scheduleToolbarRef} sx={{px: 1, pt: 1, flexShrink: 0}}>
                         <ScheduleToolbar
-                            onDownloadScheduleImage={() => handleSaveScheduleImage(scheduleBoxRef.current)}
+                            onDownloadScheduleImage={handleSaveScheduleImage}
                             onExportWorkspace={handleExportWorkspace}
                             onImportWorkspace={handleImportWorkspace}
-                            onResetWorkspace={confirmAndResetWorkspace}
+                            onResetWorkspace={confirmAndResetWorkspaceClean}
+                            onResetWorkspaceAndLoadDummyData={confirmAndResetWorkspaceWithDummy}
                         />
                     </Box>
                     <ScheduleBoxWrapper ref={scheduleBoxRef} sx={{ height: scheduleBoxWrapperHeight, m:1, mt:0, flexGrow: 1 }}>
@@ -334,10 +354,11 @@ function EditorPage() {
                     <MainContentArea>
                         <Box ref={scheduleToolbarRef}>
                             <ScheduleToolbar
-                                onDownloadScheduleImage={() => handleSaveScheduleImage(scheduleBoxRef.current)}
+                                onDownloadScheduleImage={handleSaveScheduleImage}
                                 onExportWorkspace={handleExportWorkspace}
                                 onImportWorkspace={handleImportWorkspace}
-                                onResetWorkspace={confirmAndResetWorkspace}
+                                onResetWorkspace={confirmAndResetWorkspaceClean}
+                                onResetWorkspaceAndLoadDummyData={confirmAndResetWorkspaceWithDummy}
                             />
                         </Box>
                         <ScheduleBoxWrapper ref={scheduleBoxRef} sx={{ maxHeight: scheduleBoxWrapperHeight }}>

@@ -45,7 +45,9 @@ function ScheduleEventItem({ eventData, course, style }) {
     const courseShortCode = course.getShortCode(); // KATEDRA/PŘEDMĚT
     const capacityText = `${t('labels.maxCapacityPrefix', 'Max:')} ${eventData.maxCapacity}`; // Pouze maximální kapacita
     
-    let displayInstructorName = t('common.notSpecified');
+    let displayInstructorName = t('common.notSpecified'); // Toto je pro zobrazení přímo v položce rozvrhu (krátké)
+    const fullInstructorNameForPopover = (typeof eventData.instructor === 'object' ? eventData.instructor.name : eventData.instructor) || t('common.notSpecified'); // Toto je pro popover (celé)
+
     if (eventData.instructor) {
         const fullName = typeof eventData.instructor === 'object' ? eventData.instructor.name : eventData.instructor;
         if (fullName && typeof fullName === 'string') {
@@ -114,28 +116,17 @@ function ScheduleEventItem({ eventData, course, style }) {
                         {courseShortCode} <Chip label={typeDisplay} size="small" variant="outlined" sx={{ ml: 0.5, height: '12px', fontSize: '0.65rem', backgroundColor: alpha(theme.palette.common.white, 0.2)}} />
                     </Typography>
                     <Typography variant="caption" noWrap sx={{ fontSize: '0.7rem', lineHeight: 1.1 }}>
-                        {roomText}
+                        {roomText} {recurrenceDisplay && `(${recurrenceDisplay})`}
                     </Typography>
+                    
                     <Box display="flex" justifyContent="space-between" alignItems="center">
                         <Typography variant="caption" noWrap sx={{ fontSize: '0.7rem', lineHeight: 1.1 }}>
                             {displayInstructorName.substring(0,15)} {/* Zkráceno pro zobrazení */}
-                        </Typography>
-                        <Typography variant="caption" noWrap sx={{ fontSize: '0.7rem', lineHeight: 1.1, ml: 0.5 }}>
-                            {capacityText} {recurrenceDisplay && `(${recurrenceDisplay})`}
                         </Typography>
                     </Box>
                 </Box>
             </Tooltip>
 
-            {/* <EventDetailPopover
-                id={popoverId}
-                open={open}
-                anchorEl={anchorEl}
-                onClose={handleClose}
-                eventData={eventData}
-                course={course}
-            /> */}
-            {/* Prozatím Popover s jednoduchým obsahem, EventDetailPopover vytvoříme později */}
             <Popover
                 id={popoverId}
                 open={open}
@@ -156,7 +147,7 @@ function ScheduleEventItem({ eventData, course, style }) {
                     <Divider sx={{ my: 1 }} />
                     <Typography variant="body2">{t('labels.time', 'Čas')}: {`${eventData.startTime} - ${eventData.endTime}`}</Typography>
                     <Typography variant="body2">{t('labels.room', 'Místnost')}: {roomText}</Typography>
-                    <Typography variant="body2">{t('labels.instructor', 'Vyučující')}: {displayInstructorName}</Typography>
+                    <Typography variant="body2">{t('labels.instructor', 'Vyučující')}: {fullInstructorNameForPopover}</Typography>
                     <Typography variant="body2">{t('labels.capacity', 'Kapacita')}: {capacityText}</Typography>
                     <Typography variant="body2">{t('labels.recurrence', 'Opakování')}: {t(`courseEvent.${eventData.recurrence.toLowerCase().replace(/\s+/g, '')}`, eventData.recurrence)}</Typography>
                     {eventData.note && <Typography variant="body2" sx={{mt: 1, fontStyle: 'italic'}}>{t('labels.notes', 'Poznámka')}: {eventData.note}</Typography>}

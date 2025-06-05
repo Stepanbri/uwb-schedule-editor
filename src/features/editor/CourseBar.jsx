@@ -59,7 +59,10 @@ function CourseBar({
     const getItemId = (prefix, id) => `${prefix}-${id}`;
 
     return (
-        <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', p: { xs: 0.5, sm: 1 } }}>
+        <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', p: { xs: 1, sm: 2 } }}>
+            <Typography variant="h6" gutterBottom component="div" sx={{ px: { xs: 1, sm: 0 }, mb: 1 }}>
+                {t('courseBar.title', 'Předměty')}
+            </Typography>
             <Stack direction="column" spacing={1} sx={{ p: 1, borderBottom: 1, borderColor: 'divider', mb: 1, flexShrink: 0 }}>
                 <Button
                     variant="outlined"
@@ -161,10 +164,7 @@ function CourseBar({
                                                     let canEnroll = true;
                                                     let disabledTooltipText = '';
 
-                                                    if (event.currentCapacity >= event.maxCapacity) {
-                                                        canEnroll = false;
-                                                        disabledTooltipText = t('tooltips.enrollDisabledCapacityFull');
-                                                    } else if (typeRequirementMetForCourse && !isEnrolled) {
+                                                    if (typeRequirementMetForCourse && !isEnrolled) {
                                                         canEnroll = false;
                                                         disabledTooltipText = t('tooltips.enrollDisabledTypeMet', { eventType: t(`courseEvent.${eventTypeKey}`, event.type) });
                                                     }

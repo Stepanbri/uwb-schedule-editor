@@ -290,9 +290,10 @@
   },
   "courseBar": {
     "loadSingleFromSTAG": "Načíst předmět ze STAGu",
-    "loadFromStudentPlan": "Předměty z plánu studenta",
+    "loadFromStudentPlan": "Načíst předměty z plánu studenta",
     "removeAllCourses": "Odstranit všechny předměty",
-    "removeAllCoursesTooltip": "Odstranit všechny načtené předměty a jejich zapsané akce z rozvrhu."
+    "removeAllCoursesTooltip": "Odstranit všechny načtené předměty a jejich zapsané akce.",
+    "title": "Předměty"
   },
   "editorPage": {
     "mobileDrawer": {
@@ -374,17 +375,23 @@
   },
   "scheduleToolbar": {
     "downloadImage": "Stáhnout PNG",
-    "downloadImageTooltip": "Stáhnout aktuální rozvrh jako obrázek PNG",
+    "downloadImageTooltip": "Stáhnout obrázek rozvrhu",
     "exportWorkspace": "Exportovat JSON",
-    "exportWorkspaceTooltip": "Exportovat celou pracovní plochu (předměty, rozvrh, preference) jako JSON soubor",
+    "exportWorkspaceTooltip": "Exportovat pracovní plochu (uložit do souboru)",
     "importWorkspace": "Importovat JSON",
-    "importWorkspaceTooltip": "Importovat pracovní plochu z JSON souboru (nahradí aktuální data!)",
+    "importWorkspaceTooltip": "Importovat pracovní plochu (načíst ze souboru)",
     "resetWorkspace": "Resetovat Plochu",
-    "resetWorkspaceTooltip": "Vymazat všechny předměty, rozvrh a preference a začít znovu",
-    "confirmResetWorkspace": "Opravdu chcete resetovat celou pracovní plochu? Všechna neuložená data budou ztracena a akce je nevratná.",
+    "resetWorkspaceTooltip": "Resetovat pracovní plochu",
+    "confirmResetWorkspace": "Opravdu si přejete vymazat celou pracovní plochu? Tato akce je nevratná.",
     "compactView": "Kompaktní pohled",
     "compactViewTooltip": "Přepnout na kompaktní zobrazení rozvrhu",
     "fullWeekView": "Celý týden",
-    "fullWeekViewTooltip": "Zobrazit/skrýt víkendové dny v rozvrhu"
+    "fullWeekViewTooltip": "Zobrazit/skrýt víkendové dny v rozvrhu",
+    "resetWorkspaceCleanTooltip": "Resetovat pracovní plochu (vymazat vše)",
+    "resetWorkspaceWithDummyTooltip": "Resetovat a načíst ukázková data",
+    "resetWorkspaceCleanTitle": "Vymazat pracovní plochu?",
+    "confirmResetWorkspaceClean": "Opravdu si přejete vymazat celou pracovní plochu? Tato akce je nevratná.",
+    "resetWorkspaceWithDummyTitle": "Resetovat a načíst ukázková data?",
+    "confirmResetWorkspaceWithDummy": "Tímto vymažete stávající pracovní plochu a nahradíte ji ukázkovými daty. Přejete si pokračovat?"
   }
 }

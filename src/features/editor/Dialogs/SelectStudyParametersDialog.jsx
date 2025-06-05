@@ -15,7 +15,7 @@ const SelectStudyParametersDialog = ({ open, onClose, onSubmitParameters, studen
     const { t } = useTranslation();
     // Nový stav pro ročník studia
     const [studyYearNum, setStudyYearNum] = useState('1'); // Výchozí ročník
-    const [semester, setSemester] = useState('ZS');
+    const [semester, setSemester] = useState('%'); // Změna výchozí hodnoty na "Oba semestry"
     const [statuses, setStatuses] = useState({ A: true, B: true, C: false });
     const [error, setError] = useState('');
 
@@ -26,7 +26,7 @@ const SelectStudyParametersDialog = ({ open, onClose, onSubmitParameters, studen
     useEffect(() => {
         if (open) {
             setStudyYearNum('1'); // Reset na první ročník
-            setSemester('ZS');
+            setSemester('%'); // Změna resetované hodnoty na "Oba semestry"
             setStatuses({ A: true, B: true, C: false });
             setScheduleAcademicYear(defaultAcademicYear || new Date().getFullYear().toString() + '/' + (new Date().getFullYear() + 1).toString());
             setError('');
