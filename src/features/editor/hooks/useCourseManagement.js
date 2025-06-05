@@ -30,10 +30,7 @@ export const useCourseManagement = () => {
             let canEnroll = true;
             let alertMsg = "";
 
-            if (eventToToggle.currentCapacity >= eventToToggle.maxCapacity) {
-                alertMsg = t('alerts.eventFull', { eventType: eventToToggle.type, courseCode: eventToToggle.courseCode });
-                canEnroll = false;
-            } else if (courseContext) {
+            if (courseContext) {
                 const normalizedEventType = eventToToggle.type?.toLowerCase() || '';
                 const eventTypeKey = EVENT_TYPE_TO_KEY_MAP[normalizedEventType] || normalizedEventType;
                 const enrolledEventIds = new Set(activeSchedule.getAllEnrolledEvents().map(e => e.id));

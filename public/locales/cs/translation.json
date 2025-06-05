@@ -126,6 +126,7 @@
     "room": "Místnost",
     "virtualEvent": "Virtuální akce",
     "capacity": "Kapacita",
+    "maxCapacityPrefix": "Max:",
     "full": "Plno",
     "instructor": "Vyučující",
     "notes": "Poznámka",

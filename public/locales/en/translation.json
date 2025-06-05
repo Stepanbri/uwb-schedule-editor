@@ -123,6 +123,7 @@
     "room": "Room",
     "virtualEvent": "Virtual Event",
     "capacity": "Capacity",
+    "maxCapacityPrefix": "Max:",
     "full": "Full",
     "instructor": "Instructor",
     "notes": "Note",

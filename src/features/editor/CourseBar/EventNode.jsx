@@ -64,9 +64,7 @@ const EventNode = ({ event, isEnrolled, onToggleEvent, canEnroll, disabledToolti
                     {t('labels.room', 'Místnost')}: {event.isVirtual ? t('labels.virtualEvent', 'Virtuální akce') : (event.room || t('labels.notSpecified', 'Nezadáno'))}
                 </Typography>
                 <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
-                    {t('labels.capacity', 'Kapacita')}: {event.currentCapacity}/{event.maxCapacity}
-                    {event.currentCapacity >= event.maxCapacity && !isEnrolled &&
-                        <Typography component="span" variant="caption" color="error" sx={{ ml: 0.5 }}>({t('labels.full', 'Plno')})</Typography>}
+                    {t('labels.capacity', 'Kapacita')}: {event.maxCapacity}
                 </Typography>
                 <Typography variant="body2" sx={{ mb: event.note ? 0.5 : 0, fontSize: '0.8rem' }}>
                     {t('labels.recurrence', 'Opakování')}: {recurrenceStr}

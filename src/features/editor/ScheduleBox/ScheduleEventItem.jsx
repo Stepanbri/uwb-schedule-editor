@@ -43,7 +43,7 @@ function ScheduleEventItem({ eventData, course, style }) {
 
     // Informace k zobrazení v eventu
     const courseShortCode = course.getShortCode(); // KATEDRA/PŘEDMĚT
-    const capacityText = `${eventData.currentCapacity}/${eventData.maxCapacity}`; // Obsazenost/kapacita
+    const capacityText = `${t('labels.maxCapacityPrefix', 'Max:')} ${eventData.maxCapacity}`; // Pouze maximální kapacita
     const instructorName = typeof eventData.instructor === 'object' ? eventData.instructor.name : eventData.instructor; // Vyučující
     const roomText = eventData.isVirtual ? t('labels.virtualEvent', 'Virtuální') : eventData.room; // Místnost
     // Opakovatelnost - např. "KT", "ST", "LT"
