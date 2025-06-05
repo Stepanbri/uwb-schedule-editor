@@ -30,10 +30,18 @@ export const PREFERENCE_CONFIG = {
         shortLabelKey: 'preferences.types.PREFER_INSTRUCTOR.shortLabel',
         defaultLabel: 'Preferovat vyučujícího',
         params: [
-            { name: 'courseCode', labelKey: 'preferences.params.courseCode', type: 'text', defaultValue: '' }, // Může být select z načtených kurzů
-            { name: 'instructorName', labelKey: 'preferences.params.instructorName', type: 'text', defaultValue: '' }, // Může být select z dostupných vyučujících pro daný kurz
+            { name: 'courseCode', labelKey: 'preferences.params.courseCode', type: 'customCourseSelect', defaultValue: '' },
+            { name: 'eventType', labelKey: 'preferences.params.eventType', type: 'customEventTypeSelect', defaultValue: '' },
+            { name: 'instructorName', labelKey: 'preferences.params.instructorName', type: 'customInstructorSelect', defaultValue: '' },
         ],
-        displayFormatter: (params, t) => t('preferences.displayLabels.preferInstructor', { instructorName: params.instructorName, courseCode: params.courseCode })
+        displayFormatter: (params, t) => {
+            const eventTypeDisplay = params.eventType ? t(`courseEvent.${params.eventType.toLowerCase()}`, params.eventType) : t('common.notSpecified');
+            return t('preferences.displayLabels.preferInstructor', { 
+                instructorName: params.instructorName || t('common.notSpecified'), 
+                courseCode: params.courseCode || t('common.notSpecified'),
+                eventType: eventTypeDisplay
+            });
+        }
     }
 };
 
@@ -96,6 +104,8 @@ export const usePreferenceManagement = () => {
                     if (paramDef.type === 'select' && paramDef.optionsKey === 'dayOptions' && preference.params && preference.params[paramDef.name]) {
                         formattedParams[paramDef.name] = t(`preferences.dayOptions.${preference.params[paramDef.name]}`, preference.params[paramDef.name]);
                     }
+                    // Přidáme formátování pro nový typ preference, pokud je potřeba specifické zobrazení parametru
+                    // Pro PREFER_INSTRUCTOR se o formátování stará přímo jeho displayFormatter
                 });
             }
             return config.displayFormatter(formattedParams, t);

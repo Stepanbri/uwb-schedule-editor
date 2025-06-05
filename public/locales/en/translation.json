@@ -185,12 +185,13 @@
       "startTime": "Start time",
       "endTime": "End time",
       "courseCode": "Course Code",
-      "instructorName": "Instructor Name"
+      "instructorName": "Instructor Name",
+      "eventType": "Event Type"
     },
     "displayLabels": {
       "freeDay": "Free day: {{day}}",
       "avoidTimes": "Unavailable {{day}}: {{startTime}} - {{endTime}}",
-      "preferInstructor": "Prefer {{instructorName}} for {{courseCode}}"
+      "preferInstructor": "Prefer {{instructorName}} for {{courseCode}} ({{eventType}})"
     },
     "dayOptions": {
       "PO": "Monday",

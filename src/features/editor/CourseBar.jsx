@@ -1,5 +1,5 @@
 // src/features/editor/CourseBar.jsx
-import React from 'react';
+import React, { useState } from 'react';
 import { Box, Typography, CircularProgress, Button, Stack, alpha, Tooltip } from '@mui/material';
 import { SimpleTreeView, TreeItem } from '@mui/x-tree-view';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -24,6 +24,11 @@ function CourseBar({
                        onRemoveAllCourses, // Nová prop
                    }) {
     const { t } = useTranslation();
+    const [expandedItems, setExpandedItems] = useState([]);
+
+    const handleExpandedItemsChange = (event, itemIds) => {
+        setExpandedItems(itemIds);
+    };
 
     if (isLoading) {
         return (
@@ -104,6 +109,8 @@ function CourseBar({
                     <SimpleTreeView
                         defaultCollapseIcon={<ExpandMoreIcon />}
                         defaultExpandIcon={<ChevronRightIcon />}
+                        expandedItems={expandedItems}
+                        onExpandedItemsChange={handleExpandedItemsChange}
                         sx={{ flexGrow: 1 }}
                     >
                         {Object.entries(coursesByDepartment).map(([departmentCode, deptCourses]) => (
@@ -118,14 +125,16 @@ function CourseBar({
                                 sx={{ '& > .MuiTreeItem-content': { py: '2px', '&:hover': { backgroundColor: (theme) => alpha(theme.palette.action.hover, 0.04) } } }}
                             >
                                 {deptCourses.map((course) => {
+                                    const courseItemId = getItemId('course', course.id);
+                                    const isCourseExpanded = expandedItems.includes(courseItemId);
                                     const enrolledCounts = course.getEnrolledCounts(enrolledEventIds);
                                     const neededEnrollmentsDisplay = course.getDisplayableNeededEnrollments(enrolledEventIds);
                                     const areAllReqsMet = course.areAllEnrollmentRequirementsMet(enrolledEventIds);
 
                                     return (
                                         <TreeItem
-                                            key={getItemId('course', course.id)}
-                                            itemId={getItemId('course', course.id)}
+                                            key={courseItemId}
+                                            itemId={courseItemId}
                                             label={
                                                 <CourseNodeHeader
                                                     course={course}
@@ -133,6 +142,7 @@ function CourseBar({
                                                     neededEnrollmentsDisplay={neededEnrollmentsDisplay}
                                                     areAllRequirementsMet={areAllReqsMet}
                                                     onRemoveCourse={onRemoveCourse}
+                                                    isExpanded={isCourseExpanded}
                                                 />
                                             }
                                             sx={{

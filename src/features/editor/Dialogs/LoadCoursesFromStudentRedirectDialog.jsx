@@ -1,4 +1,3 @@
-// PROJEKT/NEW/src/features/editor/Dialogs/LoadCoursesFromStudentRedirectDialog.jsx
 import React from 'react';
 import {
     Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button, Link, Typography, Box

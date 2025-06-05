@@ -3,14 +3,21 @@ import React, { useState, useEffect } from 'react';
 import {
     Box, Typography, Button, Divider, Dialog, DialogTitle,
     DialogContent, DialogActions, Select, MenuItem, TextField,
-    FormControl, InputLabel, Tooltip // Přidán Tooltip
+    FormControl, InputLabel, Tooltip
 } from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import DeleteSweepIcon from '@mui/icons-material/DeleteSweep'; // Ikona pro odstranění všech
+import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
 import { useTranslation } from 'react-i18next';
 import PreferenceList from './PreferenceList';
 import { usePreferenceManagement, PREFERENCE_CONFIG, PREFERENCE_OPTIONS } from '../hooks/usePreferenceManagement';
+import { useWorkspace } from '../../../contexts/WorkspaceContext';
+
+// Pomocná funkce pro získání unikátních hodnot (můžeme ji později přesunout do utils, pokud bude potřeba jinde)
+const getUniqueValues = (array, keyAccessor) => {
+    const values = array.map(item => keyAccessor(item));
+    return [...new Set(values)].filter(Boolean); // Odstraní null/undefined/prázdné stringy
+};
 
 function PropertiesBar() {
     const { t } = useTranslation();
@@ -18,17 +25,25 @@ function PropertiesBar() {
         preferences,
         addPreference,
         deletePreference,
-        handleRemoveAllPreferences, // Nová funkce z hooku
+        handleRemoveAllPreferences,
         changePreferencePriority,
         togglePreferenceActive,
         handleGenerateSchedule,
         getPreferenceDisplayLabel,
     } = usePreferenceManagement();
 
+    const { courses } = useWorkspace();
+
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const [selectedPreferenceType, setSelectedPreferenceType] = useState(Object.keys(PREFERENCE_CONFIG)[0]);
     const [currentPreferenceParams, setCurrentPreferenceParams] = useState({});
 
+    // Stavy pro dynamické selecty PREFER_INSTRUCTOR
+    const [selectedCourseEvents, setSelectedCourseEvents] = useState([]);
+    const [availableEventTypes, setAvailableEventTypes] = useState([]);
+    const [availableInstructors, setAvailableInstructors] = useState([]);
+
+    // Efekt pro resetování a naplnění parametrů při změně typu preference nebo otevření dialogu
     useEffect(() => {
         if (isAddDialogOpen) {
             const config = PREFERENCE_CONFIG[selectedPreferenceType];
@@ -36,19 +51,87 @@ function PropertiesBar() {
             if (config && config.params) {
                 config.params.forEach(p => {
                     newParams[p.name] = p.defaultValue !== undefined ? p.defaultValue : '';
-                    if (p.type === 'text' && p.name === 'courseCode' && PREFERENCE_CONFIG[selectedPreferenceType]?.defaultCourseCodeProvider) {
-                        // Zde by mohla být logika pro načtení kódu prvního kurzu, pokud je to požadováno
-                        // newParams[p.name] = PREFERENCE_CONFIG[selectedPreferenceType].defaultCourseCodeProvider();
-                    }
                 });
             }
             setCurrentPreferenceParams(newParams);
+
+            // Reset dynamických polí, pokud typ není PREFER_INSTRUCTOR
+            if (selectedPreferenceType !== 'PREFER_INSTRUCTOR') {
+                setSelectedCourseEvents([]);
+                setAvailableEventTypes([]);
+                setAvailableInstructors([]);
+            } else {
+                // Pokud je PREFER_INSTRUCTOR a jsou již nějaké parametry (např. dialog se znovu otevřel se starými hodnotami),
+                // pokusíme se je znovu načíst.
+                if (newParams.courseCode) {
+                    const foundCourse = courses.find(c => c.getShortCode() === newParams.courseCode);
+                    if (foundCourse) {
+                        setSelectedCourseEvents(foundCourse.events || []);
+                        const types = getUniqueValues(foundCourse.events || [], event => event.type);
+                        setAvailableEventTypes(types);
+                        if (newParams.eventType) {
+                            const instructors = getUniqueValues(
+                                (foundCourse.events || []).filter(event => event.type === newParams.eventType),
+                                event => typeof event.instructor === 'object' ? event.instructor.name : event.instructor
+                            );
+                            setAvailableInstructors(instructors);
+                        } else {
+                             setAvailableInstructors([]);
+                        }
+                    } else {
+                         setSelectedCourseEvents([]);
+                         setAvailableEventTypes([]);
+                         setAvailableInstructors([]);
+                    }
+                } else {
+                    // Žádný kurz není vybrán, resetujeme vše
+                    setSelectedCourseEvents([]);
+                    setAvailableEventTypes([]);
+                    setAvailableInstructors([]);
+                }
+            }
         }
-    }, [selectedPreferenceType, isAddDialogOpen]);
+    }, [selectedPreferenceType, isAddDialogOpen, courses]);
+
+    // Efekt pro aktualizaci dostupných typů akcí při změně vybraného kurzu
+    useEffect(() => {
+        if (selectedPreferenceType === 'PREFER_INSTRUCTOR' && currentPreferenceParams.courseCode) {
+            const selectedCourse = courses.find(c => c.getShortCode() === currentPreferenceParams.courseCode);
+            if (selectedCourse) {
+                setSelectedCourseEvents(selectedCourse.events || []);
+                const types = getUniqueValues(selectedCourse.events || [], event => event.type);
+                setAvailableEventTypes(types);
+            } else {
+                setSelectedCourseEvents([]);
+                setAvailableEventTypes([]);
+            }
+            // Reset eventType a instructorName, protože se změnil kurz
+            setCurrentPreferenceParams(prev => ({ ...prev, eventType: '', instructorName: '' }));
+            setAvailableInstructors([]);
+        }
+    }, [currentPreferenceParams.courseCode, selectedPreferenceType, courses]);
+
+    // Efekt pro aktualizaci dostupných vyučujících při změně typu akce
+    useEffect(() => {
+        if (selectedPreferenceType === 'PREFER_INSTRUCTOR' && currentPreferenceParams.eventType && selectedCourseEvents.length > 0) {
+            const instructors = getUniqueValues(
+                selectedCourseEvents.filter(event => event.type === currentPreferenceParams.eventType),
+                event => typeof event.instructor === 'object' ? event.instructor.name : event.instructor
+            );
+            setAvailableInstructors(instructors);
+        } else {
+            setAvailableInstructors([]);
+        }
+        // Reset instructorName, protože se změnil typ akce
+        setCurrentPreferenceParams(prev => ({ ...prev, instructorName: '' }));
+    }, [currentPreferenceParams.eventType, selectedCourseEvents, selectedPreferenceType]);
 
 
     const handleOpenAddDialog = () => {
         setSelectedPreferenceType(Object.keys(PREFERENCE_CONFIG)[0]);
+        setSelectedCourseEvents([]);
+        setAvailableEventTypes([]);
+        setAvailableInstructors([]);
         setIsAddDialogOpen(true);
     };
 
@@ -61,7 +144,13 @@ function PropertiesBar() {
     const handleConfirmAddPreference = () => {
         addPreference({
             type: selectedPreferenceType,
-            params: { ...currentPreferenceParams }
+            params: Object.keys(currentPreferenceParams).reduce((acc, key) => {
+                const paramDef = PREFERENCE_CONFIG[selectedPreferenceType]?.params.find(p => p.name === key);
+                if (paramDef) {
+                    acc[key] = currentPreferenceParams[key];
+                }
+                return acc;
+            }, {})
         });
         handleCloseAddDialog();
     };
@@ -88,19 +177,20 @@ function PropertiesBar() {
                 variant="outlined"
                 startIcon={<AddCircleOutlineIcon />}
                 onClick={handleOpenAddDialog}
-                sx={{ mb: 1 }} // Zmenšena mezera
+                sx={{ mb: 1, textTransform: 'none' }}
                 fullWidth
+                size="small"
             >
                 {t('propertiesBar.addPreferenceButton')}
             </Button>
 
-            {preferences && preferences.length > 0 && ( // Zobrazit jen pokud jsou nějaké preference
+            {preferences && preferences.length > 0 && (
                 <Tooltip title={t('propertiesBar.removeAllPreferencesTooltip')}>
                     <Button
                         variant="outlined"
                         color="error"
                         startIcon={<DeleteSweepIcon />}
-                        onClick={handleRemoveAllPreferences} // Použití nové funkce
+                        onClick={handleRemoveAllPreferences}
                         sx={{ mb: 2, textTransform: 'none' }}
                         fullWidth
                         size="small"
@@ -109,7 +199,6 @@ function PropertiesBar() {
                     </Button>
                 </Tooltip>
             )}
-
 
             <Box sx={{ flexGrow: 1, overflowY: 'auto', minHeight: 0, mb: 2 }}>
                 <PreferenceList
@@ -121,7 +210,7 @@ function PropertiesBar() {
                 />
             </Box>
 
-            <Divider sx={{ mt: 'auto' }} /> {/* Posunuto dolů, pokud je seznam krátký */}
+            <Divider sx={{ mt: 'auto' }} />
 
             <Button
                 variant="contained"
@@ -130,7 +219,8 @@ function PropertiesBar() {
                 onClick={handleGenerateSchedule}
                 fullWidth
                 disabled={preferences.length > 0 && activePreferencesCount === 0}
-                sx={{ mt: 2 }} // Mezera nad tlačítkem generování
+                sx={{ mt: 2, textTransform: 'none' }}
+                size="small"
             >
                 {t('propertiesBar.generateButton')}
             </Button>
@@ -181,6 +271,63 @@ function PropertiesBar() {
                                     </Select>
                                 </>
                             )}
+                            {param.type === 'customCourseSelect' && (
+                                <>
+                                    <InputLabel id={`${param.name}-label`}>{t(param.labelKey, param.name)}</InputLabel>
+                                    <Select
+                                        labelId={`${param.name}-label`}
+                                        value={currentPreferenceParams[param.name] || ''}
+                                        label={t(param.labelKey, param.name)}
+                                        onChange={(e) => handleParamChange(param.name, e.target.value)}
+                                        variant="filled"
+                                        disabled={courses.length === 0}
+                                    >
+                                        {courses.map(course => (
+                                            <MenuItem key={course.id} value={course.getShortCode()}>
+                                                {`${course.name} (${course.getShortCode()})`}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </>
+                            )}
+                            {param.type === 'customEventTypeSelect' && (
+                                <>
+                                    <InputLabel id={`${param.name}-label`}>{t(param.labelKey, param.name)}</InputLabel>
+                                    <Select
+                                        labelId={`${param.name}-label`}
+                                        value={currentPreferenceParams[param.name] || ''}
+                                        label={t(param.labelKey, param.name)}
+                                        onChange={(e) => handleParamChange(param.name, e.target.value)}
+                                        variant="filled"
+                                        disabled={!currentPreferenceParams.courseCode || availableEventTypes.length === 0}
+                                    >
+                                        {availableEventTypes.map(eventType => (
+                                            <MenuItem key={eventType} value={eventType}>
+                                                {t(`courseEvent.${eventType.toLowerCase()}`, eventType)}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </>
+                            )}
+                            {param.type === 'customInstructorSelect' && (
+                                <>
+                                    <InputLabel id={`${param.name}-label`}>{t(param.labelKey, param.name)}</InputLabel>
+                                    <Select
+                                        labelId={`${param.name}-label`}
+                                        value={currentPreferenceParams[param.name] || ''}
+                                        label={t(param.labelKey, param.name)}
+                                        onChange={(e) => handleParamChange(param.name, e.target.value)}
+                                        variant="filled"
+                                        disabled={!currentPreferenceParams.eventType || availableInstructors.length === 0}
+                                    >
+                                        {availableInstructors.map(instructor => (
+                                            <MenuItem key={instructor} value={instructor}>
+                                                {instructor}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </>
+                            )}
                             {param.type === 'time' && (
                                 <TextField
                                     label={t(param.labelKey, param.name)}
@@ -192,20 +339,19 @@ function PropertiesBar() {
                                     variant="filled"
                                 />
                             )}
-                            {param.type === 'text' && ( // Přidáno pro textové parametry jako courseCode
+                            {param.type === 'text' && (
                                 <TextField
                                     label={t(param.labelKey, param.name)}
                                     type="text"
                                     value={currentPreferenceParams[param.name] || param.defaultValue || ''}
                                     onChange={(e) => handleParamChange(param.name, e.target.value)}
                                     variant="filled"
-                                    // Zde by mohla být nápověda nebo placeholder, např. "KIV/PPA1"
                                 />
                             )}
                         </FormControl>
                     ))}
                 </DialogContent>
-                <DialogActions>
+                <DialogActions sx={{ padding: '16px 24px' }}>
                     <Button onClick={handleCloseAddDialog}>{t('common.cancel')}</Button>
                     <Button type="submit" variant="contained">{t('common.add')}</Button>
                 </DialogActions>

@@ -188,12 +188,13 @@
       "startTime": "Čas od",
       "endTime": "Čas do",
       "courseCode": "Kód předmětu",
-      "instructorName": "Jméno vyučujícího"
+      "instructorName": "Jméno vyučujícího",
+      "eventType": "Typ rozvrhové akce"
     },
     "displayLabels": {
       "freeDay": "Volný den: {{day}}",
       "avoidTimes": "Nevolno {{day}}: {{startTime}} - {{endTime}}",
-      "preferInstructor": "Preferovat {{instructorName}} pro {{courseCode}}"
+      "preferInstructor": "Preferovat {{instructorName}} pro {{courseCode}} ({{eventType}})"
     },
     "dayOptions": {
       "PO": "Pondělí",

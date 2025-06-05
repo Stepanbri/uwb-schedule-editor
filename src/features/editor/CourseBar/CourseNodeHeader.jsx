@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { ENROLLMENT_KEYS_ORDER } from '../../../services/CourseClass';
 import GenericConfirmationDialog from '../Dialogs/GenericConfirmationDialog'; // Import dialogu
 
-const CourseNodeHeader = ({ course, enrolledCounts, neededEnrollmentsDisplay, areAllRequirementsMet, onRemoveCourse }) => {
+const CourseNodeHeader = ({ course, enrolledCounts, neededEnrollmentsDisplay, areAllRequirementsMet, onRemoveCourse, isExpanded }) => {
     const { t } = useTranslation();
     const [isConfirmDeleteDialogOpen, setIsConfirmDeleteDialogOpen] = useState(false);
 
@@ -44,21 +44,23 @@ const CourseNodeHeader = ({ course, enrolledCounts, neededEnrollmentsDisplay, ar
                             {course.courseCode} - {course.name}
                         </Typography>
                     </Tooltip>
-                    <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
-                        <Tooltip title={t('tooltips.requiredEnrollments', { enrolledReqStr: enrolledReqStr } )}>
-                            <Chip
-                                icon={areAllRequirementsMet ? <CheckCircleOutlineIcon fontSize="small" /> : <HourglassEmptyIcon fontSize="small" />}
-                                label={areAllRequirementsMet
-                                    ? t('labels.requirementsMet', { count: enrolledCounts.total })
-                                    : t('labels.remaining', { needed: neededStr || '0', enrolledCount: enrolledCounts.total })
-                                }
-                                size="small"
-                                color={areAllRequirementsMet ? "success" : "warning"}
-                                variant="outlined"
-                                sx={{fontSize: '0.7rem', cursor: 'default' }}
-                            />
-                        </Tooltip>
-                    </Stack>
+                    {isExpanded && (
+                        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+                            <Tooltip title={t('tooltips.requiredEnrollments', { enrolledReqStr: enrolledReqStr } )}>
+                                <Chip
+                                    icon={areAllRequirementsMet ? <CheckCircleOutlineIcon fontSize="small" /> : <HourglassEmptyIcon fontSize="small" />}
+                                    label={areAllRequirementsMet
+                                        ? t('labels.requirementsMet', { count: enrolledCounts.total })
+                                        : t('labels.remaining', { needed: neededStr || '0', enrolledCount: enrolledCounts.total })
+                                    }
+                                    size="small"
+                                    color={areAllRequirementsMet ? "success" : "warning"}
+                                    variant="outlined"
+                                    sx={{fontSize: '0.7rem', cursor: 'default' }}
+                                />
+                            </Tooltip>
+                        </Stack>
+                    )}
                 </Stack>
                 <Tooltip disableInteractive title={t('tooltips.removeCourse', { courseName: course.name })}>
                     <IconButton

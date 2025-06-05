@@ -44,7 +44,35 @@ function ScheduleEventItem({ eventData, course, style }) {
     // Informace k zobrazení v eventu
     const courseShortCode = course.getShortCode(); // KATEDRA/PŘEDMĚT
     const capacityText = `${t('labels.maxCapacityPrefix', 'Max:')} ${eventData.maxCapacity}`; // Pouze maximální kapacita
-    const instructorName = typeof eventData.instructor === 'object' ? eventData.instructor.name : eventData.instructor; // Vyučující
+    
+    let displayInstructorName = t('common.notSpecified');
+    if (eventData.instructor) {
+        const fullName = typeof eventData.instructor === 'object' ? eventData.instructor.name : eventData.instructor;
+        if (fullName && typeof fullName === 'string') {
+            const parts = fullName.split(','); // Oddělit jméno od titulů za
+            const namePart = parts[0].trim();
+            const nameTokens = namePart.split(' ').filter(token => token.length > 0); // Rozdělit na slova a odstranit prázdné tokeny
+            if (nameTokens.length > 0) {
+                // Zkusíme najít slovo, které neobsahuje tečku (není titul před jménem)
+                // a je pravděpodobně příjmení (obvykle poslední nebo předposlední, pokud je za ním titul)
+                let lastName = nameTokens[nameTokens.length - 1];
+                // Jednoduchá heuristika: pokud poslední slovo neobsahuje tečku, je to pravděpodobně příjmení.
+                // Pokud obsahuje, a existuje předchozí slovo, které také neobsahuje tečku, zkusíme to.
+                // Toto je zjednodušení a nemusí pokrýt všechny případy (např. víceslovná příjmení, cizí jména).
+                // Pro robustnější řešení by bylo potřeba detailnější parsování nebo strukturovanější data.
+                if (!lastName.includes('.')) {
+                    displayInstructorName = lastName;
+                } else if (nameTokens.length > 1 && !nameTokens[nameTokens.length - 2].includes('.')) {
+                    displayInstructorName = nameTokens[nameTokens.length - 2];
+                } else {
+                    // Fallback na poslední slovo, i když může být titul (např. "Novák Ph.D.")
+                    // nebo pokud je to jediné slovo (např. "Novák")
+                     displayInstructorName = lastName; 
+                }
+            }
+        }
+    }
+
     const roomText = eventData.isVirtual ? t('labels.virtualEvent', 'Virtuální') : eventData.room; // Místnost
     // Opakovatelnost - např. "KT", "ST", "LT"
     let recurrenceDisplay = '';
@@ -90,7 +118,7 @@ function ScheduleEventItem({ eventData, course, style }) {
                     </Typography>
                     <Box display="flex" justifyContent="space-between" alignItems="center">
                         <Typography variant="caption" noWrap sx={{ fontSize: '0.7rem', lineHeight: 1.1 }}>
-                            {instructorName?.substring(0,15) || t('common.notSpecified')} {/* Zkráceno pro zobrazení */}
+                            {displayInstructorName.substring(0,15)} {/* Zkráceno pro zobrazení */}
                         </Typography>
                         <Typography variant="caption" noWrap sx={{ fontSize: '0.7rem', lineHeight: 1.1, ml: 0.5 }}>
                             {capacityText} {recurrenceDisplay && `(${recurrenceDisplay})`}
@@ -128,7 +156,7 @@ function ScheduleEventItem({ eventData, course, style }) {
                     <Divider sx={{ my: 1 }} />
                     <Typography variant="body2">{t('labels.time', 'Čas')}: {`${eventData.startTime} - ${eventData.endTime}`}</Typography>
                     <Typography variant="body2">{t('labels.room', 'Místnost')}: {roomText}</Typography>
-                    <Typography variant="body2">{t('labels.instructor', 'Vyučující')}: {instructorName || t('common.notSpecified')}</Typography>
+                    <Typography variant="body2">{t('labels.instructor', 'Vyučující')}: {displayInstructorName}</Typography>
                     <Typography variant="body2">{t('labels.capacity', 'Kapacita')}: {capacityText}</Typography>
                     <Typography variant="body2">{t('labels.recurrence', 'Opakování')}: {t(`courseEvent.${eventData.recurrence.toLowerCase().replace(/\s+/g, '')}`, eventData.recurrence)}</Typography>
                     {eventData.note && <Typography variant="body2" sx={{mt: 1, fontStyle: 'italic'}}>{t('labels.notes', 'Poznámka')}: {eventData.note}</Typography>}
