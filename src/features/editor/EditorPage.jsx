@@ -129,6 +129,16 @@ function EditorPage() {
     const stagCourseLoader = useStagCourseLoader();
     const stagStudentPlanLoader = useStagStudentPlanLoader();
 
+    // Handler pro tlačítko na stažení obrázku rozvrhu
+    const triggerDownloadScheduleImage = () => {
+        if (scheduleBoxRef.current) {
+            handleSaveScheduleImage(scheduleBoxRef.current);
+        } else {
+            console.error("triggerDownloadScheduleImage: scheduleBoxRef.current není k dispozici.");
+            // Zde by se mohla zobrazit notifikace uživateli
+        }
+    };
+
     const [resetWorkspaceDialog, setResetWorkspaceDialog] = useState({ open: false, onConfirm: () => {} });
     const [removeAllCoursesDialog, setRemoveAllCoursesDialog] = useState({ open: false, onConfirm: () => {} });
     const [removeAllPrefsDialog, setRemoveAllPrefsDialog] = useState({ open: false, onConfirm: () => {} });
@@ -301,7 +311,7 @@ function EditorPage() {
                 <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%'}}>
                     <Box ref={scheduleToolbarRef} sx={{px: 1, pt: 1, flexShrink: 0}}>
                         <ScheduleToolbar
-                            onDownloadScheduleImage={handleSaveScheduleImage}
+                            onDownloadScheduleImage={triggerDownloadScheduleImage}
                             onExportWorkspace={handleExportWorkspace}
                             onImportWorkspace={handleImportWorkspace}
                             onResetWorkspace={confirmAndResetWorkspaceClean}
@@ -354,7 +364,7 @@ function EditorPage() {
                     <MainContentArea>
                         <Box ref={scheduleToolbarRef}>
                             <ScheduleToolbar
-                                onDownloadScheduleImage={handleSaveScheduleImage}
+                                onDownloadScheduleImage={triggerDownloadScheduleImage}
                                 onExportWorkspace={handleExportWorkspace}
                                 onImportWorkspace={handleImportWorkspace}
                                 onResetWorkspace={confirmAndResetWorkspaceClean}

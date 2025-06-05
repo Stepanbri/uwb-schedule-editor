@@ -327,28 +327,136 @@ class WorkspaceService {
         }
     }
 
-    async saveScheduleImage(scheduleElement, filename = 'rozvrh.png') {
-        if (!scheduleElement) {
-            console.error("Element rozvrhu nebyl poskytnut pro uložení obrázku.");
+    async saveScheduleImage(scheduleWrapperElement, filename = 'rozvrh.png') {
+        console.log("saveScheduleImage: Start. Přijatý scheduleWrapperElement:", scheduleWrapperElement); // Log pro vstupní element
+
+        if (!scheduleWrapperElement) {
+            console.error("saveScheduleImage: scheduleWrapperElement (očekávaná obálka rozvrhu) nebyl poskytnut.");
             return false;
         }
+
+        if (!(scheduleWrapperElement instanceof HTMLElement)) {
+            console.error("saveScheduleImage: scheduleWrapperElement není HTMLElement. Typ prvku:", typeof scheduleWrapperElement, scheduleWrapperElement);
+            return false;
+        }
+        console.log("saveScheduleImage: scheduleWrapperElement je HTMLElement.");
+
+        const scheduleBoxPaperElement = scheduleWrapperElement.firstElementChild;
+        if (!scheduleBoxPaperElement) {
+            console.error("saveScheduleImage: Nepodařilo se najít scheduleBoxPaperElement (očekávaný Paper uvnitř Wrapperu) pomocí firstElementChild.", { wrapperChildrenCount: scheduleWrapperElement.childElementCount });
+            return false;
+        }
+        if (!(scheduleBoxPaperElement instanceof HTMLElement)) {
+            console.error("saveScheduleImage: scheduleBoxPaperElement (nalezený přes firstElementChild) není HTMLElement.", scheduleBoxPaperElement);
+            return false; // Přidáno pro konzistenci
+        }
+        console.log("saveScheduleImage: Nalezen scheduleBoxPaperElement (Paper):", scheduleBoxPaperElement);
+
+        const scheduleContentElement = scheduleBoxPaperElement.firstElementChild;
+        if (!scheduleContentElement) {
+            console.error("saveScheduleImage: Nepodařilo se najít scheduleContentElement (očekávaný StyledTableContainer uvnitř Paperu) pomocí firstElementChild.", { paperChildrenCount: scheduleBoxPaperElement.childElementCount });
+            return false;
+        }
+        if (!(scheduleContentElement instanceof HTMLElement)) {
+            console.error("saveScheduleImage: scheduleContentElement (nalezený přes firstElementChild) není HTMLElement.", scheduleContentElement);
+            return false; // Přidáno pro konzistenci
+        }
+        console.log("saveScheduleImage: Nalezen scheduleContentElement (StyledTableContainer):", scheduleContentElement);
+
+        if (typeof scheduleContentElement.scrollHeight === 'undefined' || typeof scheduleContentElement.scrollWidth === 'undefined') {
+            console.error("saveScheduleImage: scheduleContentElement (StyledTableContainer) nemá definované scrollHeight nebo scrollWidth.", scheduleContentElement);
+            return false;
+        }
+
+        // Uložení původních stylů
+        const originalStyles = {
+            content: {
+                overflow: scheduleContentElement.style.overflow,
+                height: scheduleContentElement.style.height,
+                width: scheduleContentElement.style.width,
+                maxHeight: scheduleContentElement.style.maxHeight,
+            },
+            paper: {
+                overflow: scheduleBoxPaperElement.style.overflow,
+                height: scheduleBoxPaperElement.style.height,
+                maxHeight: scheduleBoxPaperElement.style.maxHeight,
+            },
+            wrapper: {
+                overflow: scheduleWrapperElement.style.overflow,
+                height: scheduleWrapperElement.style.height,
+                maxHeight: scheduleWrapperElement.style.maxHeight,
+            }
+        };
+
         try {
-            const canvas = await html2canvas(scheduleElement, {
+            // Dočasná úprava stylů pro plné zobrazení obsahu
+            console.log("saveScheduleImage: Aplikuji dočasné styly pro plné zobrazení.");
+            scheduleContentElement.style.overflow = 'visible';
+            scheduleContentElement.style.height = scheduleContentElement.scrollHeight + 'px';
+            scheduleContentElement.style.width = scheduleContentElement.scrollWidth + 'px';
+            scheduleContentElement.style.maxHeight = 'none';
+
+            scheduleBoxPaperElement.style.overflow = 'visible';
+            scheduleBoxPaperElement.style.height = 'auto';
+            scheduleBoxPaperElement.style.maxHeight = 'none';
+
+            scheduleWrapperElement.style.overflow = 'visible';
+            scheduleWrapperElement.style.height = 'auto';
+            scheduleWrapperElement.style.maxHeight = 'none';
+
+            // Je možné, že po změně stylů a `auto` výšky/šířky se `scrollWidth` a `scrollHeight` 
+            // `scheduleContentElement` mírně změní nebo budou přesnější. Změříme je znovu.
+            const currentScrollWidth = scheduleContentElement.scrollWidth;
+            const currentScrollHeight = scheduleContentElement.scrollHeight;
+
+            const computedStyle = window.getComputedStyle(scheduleContentElement);
+            const bgColor = computedStyle.backgroundColor;
+            const finalBgColor = (bgColor === 'rgba(0, 0, 0, 0)' || bgColor === 'transparent')
+                ? (window.getComputedStyle(scheduleBoxPaperElement).backgroundColor || 'white') 
+                : bgColor;
+            
+            console.log(`saveScheduleImage: Použije se (po úpravě stylů) scrollWidth: ${currentScrollWidth}, scrollHeight: ${currentScrollHeight}, bgColor: ${finalBgColor}`);
+
+            const canvas = await html2canvas(scheduleContentElement, {
                 useCORS: true,
                 scale: 2,
-                logging: false, // Reduce console noise from html2canvas
-                // Ensure background is captured if it's not a direct style of the element
-                backgroundColor: window.getComputedStyle(document.body).backgroundColor,
+                logging: false,
+                backgroundColor: finalBgColor,
+                width: currentScrollWidth, // Použijeme aktuální scrollWidth
+                height: currentScrollHeight, // Použijeme aktuální scrollHeight
+                windowWidth: currentScrollWidth,
+                windowHeight: currentScrollHeight,
+                scrollX: 0, 
+                scrollY: 0,
+                x: 0,       
+                y: 0,       
             });
+
             const image = canvas.toDataURL('image/png');
             const link = document.createElement('a');
             link.download = filename;
             link.href = image;
             link.click();
+            console.log("saveScheduleImage: Obrázek by měl být stažen.");
             return true;
         } catch (error) {
-            console.error("Chyba při ukládání rozvrhu jako obrázku:", error);
+            console.error("Chyba při generování nebo ukládání obrázku rozvrhu pomocí html2canvas:", error);
             return false;
+        } finally {
+            // Obnovení původních stylů
+            console.log("saveScheduleImage: Obnovuji původní styly.");
+            scheduleContentElement.style.overflow = originalStyles.content.overflow;
+            scheduleContentElement.style.height = originalStyles.content.height;
+            scheduleContentElement.style.width = originalStyles.content.width;
+            scheduleContentElement.style.maxHeight = originalStyles.content.maxHeight;
+
+            scheduleBoxPaperElement.style.overflow = originalStyles.paper.overflow;
+            scheduleBoxPaperElement.style.height = originalStyles.paper.height;
+            scheduleBoxPaperElement.style.maxHeight = originalStyles.paper.maxHeight;
+
+            scheduleWrapperElement.style.overflow = originalStyles.wrapper.overflow;
+            scheduleWrapperElement.style.height = originalStyles.wrapper.height;
+            scheduleWrapperElement.style.maxHeight = originalStyles.wrapper.maxHeight;
         }
     }
 
