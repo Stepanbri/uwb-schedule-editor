@@ -12,12 +12,12 @@ export default defineConfig({
   server: {
     host: true,
     port: 3030,
-    proxy: {
+    proxy: { // proxy pro přístup k STAG-WS - bez proxy by se nepodařilo přistupovat k STAG-WS na localhostu.
       '/api/stag-production/': {
         target: 'https://stag-ws.zcu.cz/',       // Produkční STAG ZČU
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/stag-production/, ''),
-        secure: false, // V produkčním nasazení by mělo být true, pokud server má platný certifikát
+        secure: true, // Má STAG-WS platný certifikát
       },
       '/api/stag-demo/': {
         target: 'https://stag-demo.zcu.cz/',    // Demo STAG ZČU
