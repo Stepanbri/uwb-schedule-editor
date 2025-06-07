@@ -4,34 +4,31 @@ import { Paper, Tooltip, Divider, IconButton, ToggleButton, Typography, Box, alp
 import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { useStagApi } from '../../../contexts/StagApiContext'; // Import kontextu
+import { useStagApi } from '../../../contexts/StagApiContext';
 import { useWorkspace } from '../../../contexts/WorkspaceContext';
 
 // Ikony pro toolbar
-import DownloadIcon from '@mui/icons-material/Download';
-import UploadFileIcon from '@mui/icons-material/UploadFile';
-// import RefreshIcon from '@mui/icons-material/Refresh'; // RefreshIcon se zdá být nepoužitý, ale je zde
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import FileUploadIcon from '@mui/icons-material/FileUpload';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
-// import PlaylistAddCheckIcon from '@mui/icons-material/PlaylistAddCheck'; // Odebráno
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
-import ScienceIcon from '@mui/icons-material/Science'; // Ikona pro Demo STAG
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline'; // Přidáno
+import ScienceIcon from '@mui/icons-material/Science';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import PaletteIcon from '@mui/icons-material/Palette';
-// PublicIcon se již nebude přímo používat v obsahu tlačítka, ale ponechme import pro případné budoucí změny
-// import PublicIcon from '@mui/icons-material/Public'; 
+
 
 
 const ScheduleToolbar = ({
                              onDownloadScheduleImage,
                              onExportWorkspace,
                              onImportWorkspace,
-                             onResetWorkspace, // Prop onResetWorkspaceAndLoadDummyData odebrána
+                             onResetWorkspace,
                          }) => {
     const { t } = useTranslation();
     const theme = useTheme();
     const navigate = useNavigate();
     const importFileRef = useRef(null);
-    const { useDemoApi, toggleUseDemoApi } = useStagApi(); // Získání stavu a funkce z kontextu
+    const { useDemoApi, toggleUseDemoApi } = useStagApi();
     const { scheduleColorMode, toggleScheduleColorMode } = useWorkspace();
 
     const handleImportClick = () => {
@@ -45,7 +42,7 @@ const ScheduleToolbar = ({
         if (file) {
             onImportWorkspace(file);
         }
-        // Reset value of input so the same file can be selected again
+        
         if (importFileRef.current) {
             importFileRef.current.value = "";
         }
@@ -92,17 +89,17 @@ const ScheduleToolbar = ({
                 </IconButton>
             </Tooltip>
 
-                <Divider orientation="vertical" flexItem sx={{ mx: 0.5, display: { xs: 'none', sm: 'block' } }} />
+                
 
             <Tooltip title={t('scheduleToolbar.exportWorkspaceTooltip')}>
                     <IconButton size="small" onClick={onExportWorkspace} color="primary">
-                    <DownloadIcon />
+                    <FileDownloadIcon />
                 </IconButton>
             </Tooltip>
 
             <Tooltip title={t('scheduleToolbar.importWorkspaceTooltip')}>
                     <IconButton size="small" onClick={handleImportClick} color="primary">
-                    <UploadFileIcon />
+                    <FileUploadIcon />
                 </IconButton>
             </Tooltip>
             <input
@@ -121,7 +118,6 @@ const ScheduleToolbar = ({
                     </IconButton>
                 </Tooltip>
 
-                {/* Odebráno tlačítko pro reset s dummy daty */}
             </Box>
 
             <Box sx={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 0.5 }}> {/* Pravá skupina */}

@@ -13,10 +13,9 @@ import PreferenceList from './PreferenceList';
 import { usePreferenceManagement, PREFERENCE_CONFIG, PREFERENCE_OPTIONS } from '../hooks/usePreferenceManagement';
 import { useWorkspace } from '../../../contexts/WorkspaceContext';
 
-// Pomocná funkce pro získání unikátních hodnot (můžeme ji později přesunout do utils, pokud bude potřeba jinde)
 const getUniqueValues = (array, keyAccessor) => {
     const values = array.map(item => keyAccessor(item));
-    return [...new Set(values)].filter(Boolean); // Odstraní null/undefined/prázdné stringy
+    return [...new Set(values)].filter(Boolean);
 };
 
 function PropertiesBar() {
@@ -167,7 +166,7 @@ function PropertiesBar() {
                 backgroundColor: (theme) => theme.palette.background.paper,
                 flexGrow: 1,
                 overflowY: 'auto',
-                scrollbarGutter: 'stable',
+                scrollbarGutter: 'unset',
                 minHeight: 0,
             }}
         >
@@ -178,7 +177,7 @@ function PropertiesBar() {
                 variant="outlined"
                 startIcon={<AddCircleOutlineIcon />}
                 onClick={handleOpenAddDialog}
-                sx={{ mb: 1, textTransform: 'none' }}
+                sx={{ mb: 1, textTransform: 'none', justifyContent: 'flex-start' }}
                 fullWidth
                 size="small"
             >
@@ -192,7 +191,7 @@ function PropertiesBar() {
                         color="error"
                         startIcon={<DeleteSweepIcon />}
                         onClick={handleRemoveAllPreferences}
-                        sx={{ mb: 2, textTransform: 'none' }}
+                        sx={{mb: 2, textTransform: 'none', justifyContent: 'flex-start' }}
                         fullWidth
                         size="small"
                     >
@@ -220,7 +219,7 @@ function PropertiesBar() {
                 onClick={handleGenerateSchedule}
                 fullWidth
                 disabled={preferences.length > 0 && activePreferencesCount === 0}
-                sx={{ mt: 2, textTransform: 'none' }}
+                sx={{ mt: 2, textTransform: 'none'}}
                 size="small"
             >
                 {t('propertiesBar.generateButton')}

@@ -44,7 +44,7 @@ const CourseNodeHeader = ({ course, enrolledCounts, neededEnrollmentsDisplay, ar
     const contextInfo = `${course.year}, ${t(`Dialogs.selectStudyParams.semester${course.semester}`, course.semester)}`;
     const enrollmentStatusInfo = t('tooltips.requiredEnrollments', { enrolledReqStr: enrolledReqStr });
 
-    const combinedTooltipText = `${baseInfo}\n${contextInfo}\n\n${t('labels.enrollmentStatus', 'Stav zápisu')}: ${enrollmentStatusInfo}`;
+    const combinedTooltipText = `${baseInfo}\n${contextInfo}\n\n${enrollmentStatusInfo}`;
 
     return (
         <>
@@ -82,16 +82,14 @@ const CourseNodeHeader = ({ course, enrolledCounts, neededEnrollmentsDisplay, ar
                             </Stack>
                         )}
                     </Stack>
-                    <Tooltip disableInteractive title={t('tooltips.removeCourse', { courseName: course.name })}>
-                        <IconButton
-                            onClick={handleOpenConfirmDialog}
-                            size="small"
-                            sx={{ flexShrink: 0 }}
-                            aria-label={t('tooltips.removeCourse', { courseName: course.name })}
-                        >
-                            <DeleteIcon fontSize="small" />
-                        </IconButton>
-                    </Tooltip>
+                    <IconButton
+                        onClick={handleOpenConfirmDialog}
+                        size="small"
+                        sx={{ flexShrink: 0 }}
+                        aria-label={t('tooltips.removeCourse', { courseName: course.name })}
+                    >
+                        <DeleteIcon fontSize="small" />
+                    </IconButton>
                 </Box>
             </Tooltip>
             <GenericConfirmationDialog

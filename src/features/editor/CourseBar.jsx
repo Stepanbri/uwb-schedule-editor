@@ -6,7 +6,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import AddIcon from '@mui/icons-material/Add';
 import SchoolIcon from '@mui/icons-material/School';
-import DeleteSweepIcon from '@mui/icons-material/DeleteSweep'; // Ikona pro odstranění všech
+import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
 import { useTranslation } from 'react-i18next';
 
 import CourseNodeHeader from './CourseBar/CourseNodeHeader';

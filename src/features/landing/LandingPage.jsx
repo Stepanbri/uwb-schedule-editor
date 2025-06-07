@@ -4,7 +4,7 @@ import {
     Button,
     Container,
     Box,
-    Grid, // Stále použito pro Hero a další layouty, ale ne pro Funkce
+    Grid,
     Divider,
     Card,
     CardContent,
@@ -25,7 +25,7 @@ function LandingPage() {
     const { t } = useTranslation();
     const theme = useTheme();
     const UNIVERSITY_URL = "https://www.zcu.cz";
-    const PROJECT_GITHUB_URL = "https://github.com/YOUR_USERNAME/YOUR_REPOSITORY_NAME"; // AKTUALIZUJTE!
+    const PROJECT_GITHUB_URL = "https://github.com/stepanbri/uwb-scheduler";
 
     const technologies = [
         { name: 'React', logoSrc: '/src/assets/react-logo.svg', descriptionKey: 'landingPage.tech.reactDesc', version: "18.2.0" },

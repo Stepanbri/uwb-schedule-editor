@@ -113,23 +113,24 @@ const SelectStudyParametersDialog = ({ open, onClose, onSubmitParameters, studen
                 <Grid container spacing={2} sx={{pt: 1}}>
                     <Grid item xs={12} sm={6}>
                         <TextField
-                            label={t('Dialogs.selectStudyParams.studyYearNumLabel', 'Ročník studia předmětů')}
+                            label={t('Dialogs.selectStudyParams.studyYearNumLabel', 'Ročník')}
                             type="number"
                             value={studyYearNum}
                             onChange={(e) => setStudyYearNum(e.target.value)}
                             fullWidth
                             required
-                            inputProps={{ min: 1, max: 7 }} // Omezení vstupu
+                            slotProps={{ input: { min: 1, max: 7 } }} // Omezení vstupu
                             error={!!error && error.includes(t('Dialogs.selectStudyParams.errorStudyYearInvalid','Ročník'))}
                             helperText={error.includes('Ročník') ? error : ""}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={12} sm={6} sx={{width: '7.5rem'}}>
                         <Autocomplete
                             disableClearable
                             options={academicYearsOptions}
                             getOptionLabel={(option) => option.label || ''}
                             value={academicYearsOptions.find(opt => opt.value === scheduleAcademicYear) || null}
+                            fullWidth
                             onChange={(event, newValue) => {
                                 setScheduleAcademicYear(newValue ? newValue.value : null);
                             }}

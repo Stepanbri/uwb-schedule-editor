@@ -74,7 +74,7 @@ const LoadCourseFromSTAGDialog = ({ open, onClose, onSubmit }) => {
                             autoFocus
                         />
                     </Grid>
-                    <Grid item xs={12} sm={8}>
+                    <Grid item xs={12} sm={8} sx={{width: '7.5rem'}}>
                         <Autocomplete
                             disableClearable
                             options={academicYearsOptions}
@@ -87,7 +87,7 @@ const LoadCourseFromSTAGDialog = ({ open, onClose, onSubmit }) => {
                             renderInput={(params) => (
                                 <TextField
                                     {...params}
-                                    label={t('Dialogs.loadCourseFromSTAG.academicYearLabel', 'Akademický rok')}
+                                    label={t('Dialogs.loadCourseFromSTAG.academicYearLabel', 'Verze')}
                                     required
                                     error={!!errors.academicYear}
                                     helperText={errors.academicYear}
@@ -105,6 +105,7 @@ const LoadCourseFromSTAGDialog = ({ open, onClose, onSubmit }) => {
                             required
                             error={!!errors.semester}
                             helperText={errors.semester}
+                            variant="filled"
                         >
                             <MenuItem value="ZS">{t('Dialogs.loadCourseFromSTAG.semesterZS', 'Zimní (ZS)')}</MenuItem>
                             <MenuItem value="LS">{t('Dialogs.loadCourseFromSTAG.semesterLS', 'Letní (LS)')}</MenuItem>
