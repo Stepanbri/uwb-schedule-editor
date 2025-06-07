@@ -1,5 +1,5 @@
 {
-  "appTitle": "WCU Schedule Planner",
+  "appTitle": "UWB Schedule Planner",
   "appTitleShort": "Schedule Planner",
   "nav": {
     "editor": "Schedule Editor",
@@ -314,10 +314,10 @@
   },
   "landingPage": {
     "hero": {
-      "title": "Schedule Planner for WCU",
+      "title": "Schedule Planner for UWB",
       "description": "Easily plan your semester schedule, optimize your time, and be prepared for enrollments. An intuitive tool for students of the University of West Bohemia.",
       "editorButton": "Launch Planner",
-      "universityButton": "WCU Website"
+      "universityButton": "UWB Website"
     },
     "functions": {
       "sectionTitle": "Key Features",
@@ -364,22 +364,26 @@
   },
   "faqPage": {
     "title": "Frequently Asked Questions (FAQ)",
-    "q1": "What is the WCU Schedule Planner?",
-    "a1": "The WCU Schedule Planner is a tool designed for students of the University of West Bohemia to help them visualize and plan their semester schedules. It allows loading courses from STAG, adding them to the schedule, setting preferences, and generating possible schedule variants.",
+    "q1": "What is the UWB Schedule Planner?",
+    "a1": "The UWB Schedule Planner is a tool designed for students of the University of West Bohemia to help them visualize and plan their semester schedules. It allows loading courses from STAG, adding them to the schedule, setting preferences, and generating possible schedule variants.",
     "q2": "How can I load my courses?",
     "a2": "You can load courses in several ways: individually using the course code from STAG, collectively for your entire study plan (requires logging into STAG), or by importing a previously saved workspace from a file.",
     "q3": "How does STAG login work? Is it secure?",
-    "a3": "To load courses from your study plan, we use the standard STAG login mechanism (via WCU Orion login). You enter your credentials (username and password) directly on the WCU pages; our application does not have access to them. After successful login, we only receive a temporary anonymous key (a \"ticket\"), which allows us to retrieve publicly available information about courses and your study plan. This key is valid for a limited time and does not permit any changes to your studies. The application does not store this key anywhere.",
+    "a3": "To load courses from your study plan, we use the standard STAG login mechanism (via UWB Orion login). You enter your credentials (username and password) directly on the UWB pages; our application does not have access to them. After successful login, we only receive a temporary anonymous key (a \"ticket\"), which allows us to retrieve publicly available information about courses and your study plan. This key is valid for a limited time and does not permit any changes to your studies. The application does not store this key anywhere.",
     "q4": "What happens to my data when I close the application?",
     "a4": "The application saves your workspace (loaded courses, enrolled events, preferences) only in your browser's local storage. This data is not sent to any server and remains solely with you. If you wish, you can export your workspace to a file and later import it again. Clearing browser data or using incognito mode may lead to data loss if not exported.",
     "q5": "Why are some of my courses or schedule events not displaying?",
     "a5": "Ensure you have the correct academic year and semester set for loading courses in the \"Load Course from STAG\" or \"Parameters for Loading Field of Study Courses\" dialogs. Data in STAG may not always be complete, especially for future periods or less common event types. The application only displays data provided by the STAG API. If the problem persists, verify data availability directly in the STAG system.",
     "q6": "Can I officially enroll in courses through this application?",
-    "a6": "No. This application is solely for visualizing and planning your schedule. Official enrollment in courses and schedule events must be done through the standard STAG/Portal ZČU system within the designated periods.",
-    "q7": "How does schedule generation and preferences work?",
-    "a7": "The schedule generator attempts to find combinations of enrolled schedule events that do not conflict and also meet your specified preferences (e.g., a free day, preferred time, preferred instructor). The more preferences you set, the more complex generation can be, and it may not always lead to finding an optimal schedule. Preferences have a weight (priority) that you can adjust.",
-    "q8": "What is DEMO mode and how to use it?",
-    "a8": "DEMO mode allows testing the application with a demo version of the STAG system, which runs at stag-demo.zcu.cz. It is intended for trying out functionality without affecting real data, for example, for teachers or users without an active student role at WCU. To log into the demo STAG, publicly known test accounts and passwords provided by the STAG operator can be used (e.g., username 'student', password 'student', or others specific to the role). Switching to DEMO mode in the application directs all STAG API requests to the demo server. The production STAG API runs on stag-ws.zcu.cz."
+    "a6": "No. This application is solely for visualizing and planning your schedule. Official enrollment in courses and schedule events must be done through the standard STAG/Portal UWB system within the designated periods.",
+    "q7": "I found a bug or have an idea for an improvement. What should I do?",
+    "a7": "Great! As this is a student project, feedback is very welcome. To report bugs or suggest new features, please use the 'Issues' tab on the project's GitHub: [Link to GitHub Issues](https://github.com/stepanbri/uwb-scheduler/issues).",
+    "q8": "Why do I have to log in through an external UWB page?",
+    "a8": "This process is called OAuth 2.0 and it is a standard and secure way to grant a third-party application (like this one) limited access to your data without having to share your password with it. By entering your password on the UWB pages, you can be sure that our application will never see it. The application only receives a temporary, limited-validity 'ticket' that authorizes it to retrieve your study data from STAG. It's the same principle as when you log into other services using your Google or Facebook account.",
+    "q9": "What do the colors in the schedule mean?",
+    "a9": "Schedule events can be color-coded in two ways, which can be switched using a button in the toolbar:\n1. Colors by event type: This is the default mode. Each event type (lecture, practical, seminar) has its own specific color (e.g., red for lectures, green for practicals). This helps to quickly visually distinguish event types in the schedule.\n2. Colors by course: In this mode, each course (e.g., KIV/PPA) is assigned its own unique color. All events belonging to this course will then have this background color. To distinguish the event type, a small colored 'notch' on the left side of each event is used, the color of which corresponds to the color of the event type (lecture, practical...).",
+    "q10": "What do the event recurrence abbreviations (EW, EvenW, OddW) mean?",
+    "a10": "These abbreviations, taken from the STAG system, determine how often the given schedule event takes place:\n- EW (Every Week): The event takes place every week of the semester.\n- EvenW (Even Week): The event takes place only in the even weeks of the semester.\n- OddW (Odd Week): The event takes place only in the odd weeks of the semester.\n- Once (One-time): The event takes place only on a single specific date."
   },
   "scheduleToolbar": {
     "downloadImage": "Download PNG",

@@ -134,12 +134,42 @@ function ScheduleBox() {
     }, [scheduledEvents, courses]);
 
 
+    const timeToBlockPosition = (timeInMinutes) => {
+        const firstBlockStart = timeToMinutes(TIME_BLOCKS[0].start);
+        if (timeInMinutes <= firstBlockStart) return 0;
+
+        const lastBlockEnd = timeToMinutes(TIME_BLOCKS[TIME_BLOCKS.length - 1].end);
+        if (timeInMinutes >= lastBlockEnd) return TIME_BLOCKS.length;
+
+        for (let i = 0; i < TIME_BLOCKS.length; i++) {
+            const block = TIME_BLOCKS[i];
+            const blockStart = timeToMinutes(block.start);
+            const blockEnd = timeToMinutes(block.end);
+
+            if (timeInMinutes >= blockStart && timeInMinutes <= blockEnd) {
+                const progressInBlock = (blockEnd - blockStart > 0) ? (timeInMinutes - blockStart) / (blockEnd - blockStart) : 0;
+                return i + progressInBlock;
+            }
+
+            if (i < TIME_BLOCKS.length - 1) {
+                const nextBlockStart = timeToMinutes(TIME_BLOCKS[i + 1].start);
+                if (timeInMinutes > blockEnd && timeInMinutes < nextBlockStart) {
+                    return i + 1; // Snap to the end of the current block
+                }
+            }
+        }
+        return TIME_BLOCKS.length; // Fallback
+    };
+
     const renderEvent = (eventData, levelIndex) => {
         const eventStartMinutes = timeToMinutes(eventData.startTime);
         const eventEndMinutes = timeToMinutes(eventData.endTime);
 
-        const leftPercent = ((eventStartMinutes - SCHEDULE_START_TIME_MINUTES) / TOTAL_SCHEDULE_DURATION_MINUTES) * 100;
-        const widthPercent = ((eventEndMinutes - eventStartMinutes) / TOTAL_SCHEDULE_DURATION_MINUTES) * 100;
+        const startBlockPos = timeToBlockPosition(eventStartMinutes);
+        const endBlockPos = timeToBlockPosition(eventEndMinutes);
+
+        const leftPercent = (startBlockPos / TIME_BLOCKS.length) * 100;
+        const widthPercent = ((endBlockPos - startBlockPos) / TIME_BLOCKS.length) * 100;
 
         return (
             <ScheduleEventItem

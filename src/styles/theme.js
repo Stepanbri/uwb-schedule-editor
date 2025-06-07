@@ -15,25 +15,25 @@ const textDark = '#e4e9e9';
 const accentDark = '#23ebed';
 
 const eventColors = {
-    lectureLight: alpha('#ffcdd2', 0.7),
-    lectureLightBorder: '#ef9a9a',
-    lectureDark: alpha('#b71c1c', 0.5),
-    lectureDarkBorder: '#e57373',
+    // Barvy pozadí (s průhledností)
+    lectureBgLight: alpha('#ef5350', 0.5),
+    lectureBgDark: alpha('#d32f2f', 0.6),
+    practicalBgLight: alpha('#66bb6a', 0.5),
+    practicalBgDark: alpha('#388e3c', 0.6),
+    seminarBgLight: alpha('#ffee58', 0.5),
+    seminarBgDark: alpha('#fbc02d', 0.6),
+    otherBgLight: alpha('#e0e0e0', 0.5),
+    otherBgDark: alpha('#616161', 0.6),
 
-    practicalLight: alpha('#c8e6c9', 0.7),
-    practicalLightBorder: '#a5d6a7',
-    practicalDark: alpha('#2e7d32', 0.5),
-    practicalDarkBorder: '#81c784',
-
-    seminarLight: alpha('#fff9c4', 0.7),
-    seminarLightBorder: '#fff59d',
-    seminarDark: alpha('#f9a825', 0.5),
-    seminarDarkBorder: '#ffeb3b',
-
-    otherLight: alpha('#e0e0e0', 0.7),
-    otherLightBorder: '#bdbdbd',
-    otherDark: alpha('#616161', 0.5),
-    otherDarkBorder: '#9e9e9e',
+    // Plné barvy patky/okraje (bez průhlednosti)
+    lectureSolidLight: '#e53935', // red 600
+    lectureSolidDark: '#ef5350',  // red 400
+    practicalSolidLight: '#43a047',// green 600
+    practicalSolidDark: '#66bb6a', // green 400
+    seminarSolidLight: '#fdd835', // yellow 600
+    seminarSolidDark: '#ffee58',  // yellow 400
+    otherSolidLight: '#9e9e9e',   // grey 500
+    otherSolidDark: '#bdbdbd',    // grey 400
 };
 
 const getDesignTokens = (mode) => ({
@@ -61,14 +61,15 @@ const getDesignTokens = (mode) => ({
                     disabled: alpha(textLight, 0.5),
                 },
                 eventTypes: {
-                    lecture: eventColors.lectureLight,
-                    lectureBorder: eventColors.lectureLightBorder,
-                    practical: eventColors.practicalLight,
-                    practicalBorder: eventColors.practicalLightBorder,
-                    seminar: eventColors.seminarLight,
-                    seminarBorder: eventColors.seminarLightBorder,
-                    other: eventColors.otherLight,
-                    otherBorder: eventColors.otherLightBorder,
+                    lecture: eventColors.lectureBgLight,
+                    practical: eventColors.practicalBgLight,
+                    seminar: eventColors.seminarBgLight,
+                    other: eventColors.otherBgLight,
+                    // Solid colors for notches/borders
+                    lectureSolid: eventColors.lectureSolidLight,
+                    practicalSolid: eventColors.practicalSolidLight,
+                    seminarSolid: eventColors.seminarSolidLight,
+                    otherSolid: eventColors.otherSolidLight,
                 },
                 common: {
                     black: '#000',
@@ -96,14 +97,15 @@ const getDesignTokens = (mode) => ({
                     disabled: alpha(textDark, 0.5),
                 },
                 eventTypes: {
-                    lecture: eventColors.lectureDark,
-                    lectureBorder: eventColors.lectureDarkBorder,
-                    practical: eventColors.practicalDark,
-                    practicalBorder: eventColors.practicalDarkBorder,
-                    seminar: eventColors.seminarDark,
-                    seminarBorder: eventColors.seminarDarkBorder,
-                    other: eventColors.otherDark,
-                    otherBorder: eventColors.otherDarkBorder,
+                    lecture: eventColors.lectureBgDark,
+                    practical: eventColors.practicalBgDark,
+                    seminar: eventColors.seminarBgDark,
+                    other: eventColors.otherBgDark,
+                    // Solid colors for notches/borders
+                    lectureSolid: eventColors.lectureSolidDark,
+                    practicalSolid: eventColors.practicalSolidDark,
+                    seminarSolid: eventColors.seminarSolidDark,
+                    otherSolid: eventColors.otherSolidDark,
                 },
                 common: {
                     black: '#000',

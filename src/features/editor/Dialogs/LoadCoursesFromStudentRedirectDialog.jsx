@@ -12,7 +12,7 @@ const LoadCoursesFromStudentRedirectDialog = ({ open, onClose, onContinueToSTAGL
     const navigate = useNavigate();
 
     const handleFaqLinkClick = () => {
-        navigate('/faq');
+        navigate('/faq#q8');
         onClose();
     };
 

@@ -7,10 +7,10 @@ import { EVENT_TYPE_TO_KEY_MAP } from '../../../services/CourseClass'; // Pro ma
 import { ENROLLMENT_KEY_TO_SHORT_I18N_KEY } from '../../../constants/constants.js';
 // import EventDetailPopover from './EventDetailPopover'; // Vytvoříme později
 
-const getEventTypeThemeColor = (eventType, theme) => {
-    const typeKey = EVENT_TYPE_TO_KEY_MAP[eventType?.toLowerCase()] || 'other'; // 'other' jako fallback
-    // Nyní vrací pouze barvu, ne objekt s border
-    return theme.palette.eventTypes[typeKey] || theme.palette.eventTypes.other;
+const getEventTypeThemeColor = (eventType, theme, variant = 'background') => {
+    const typeKey = EVENT_TYPE_TO_KEY_MAP[eventType?.toLowerCase()] || 'other';
+    const colorKey = variant === 'solid' ? `${typeKey}Solid` : typeKey;
+    return theme.palette.eventTypes[colorKey] || theme.palette.eventTypes.other;
 };
 
 const EventWrapper = styled(Box)(({ theme, eventColor, notchColor }) => ({
@@ -64,13 +64,14 @@ function ScheduleEventItem({ eventData, course, style, scheduleColorMode }) {
     if (!eventData || !course) return null;
 
     // Získání barev
-    const eventTypeColor = getEventTypeThemeColor(eventData.type, theme);
+    const eventTypeBgColor = getEventTypeThemeColor(eventData.type, theme, 'background');
+    const eventTypeSolidColor = getEventTypeThemeColor(eventData.type, theme, 'solid');
     const courseColor = course.color || theme.palette.grey[500]; // Fallback na šedou, pokud předmět nemá barvu
 
     // Rozhodnutí, která barva bude pro pozadí a která pro patku
     const isCourseColorMode = scheduleColorMode === 'course';
-    const backgroundColor = isCourseColorMode ? courseColor : eventTypeColor;
-    const notchColor = isCourseColorMode ? eventTypeColor : courseColor;
+    const backgroundColor = isCourseColorMode ? courseColor : eventTypeBgColor;
+    const notchColor = isCourseColorMode ? eventTypeSolidColor : courseColor;
 
 
     const shortTypeKey = EVENT_TYPE_TO_KEY_MAP[eventData.type?.toLowerCase()];
@@ -79,7 +80,7 @@ function ScheduleEventItem({ eventData, course, style, scheduleColorMode }) {
 
     // Informace k zobrazení v eventu
     const courseShortCode = course.getShortCode(); // KATEDRA/PŘEDMĚT
-    const capacityText = `${t('labels.maxCapacityPrefix', 'Max:')} ${eventData.maxCapacity}`; // Pouze maximální kapacita
+    const capacityText = `${eventData.maxCapacity}`; // Pouze maximální kapacita
     
     const rawInstructor = eventData.instructor; // Může být string nebo prázdný string
     const fullInstructorNameForPopover = rawInstructor || '-';
@@ -124,7 +125,8 @@ function ScheduleEventItem({ eventData, course, style, scheduleColorMode }) {
                     notchColor={notchColor}
                 >
                     <Typography variant="caption" fontWeight="bold" noWrap sx={{ lineHeight: 1.2, overflow: "visible" }}>
-                        {courseShortCode} <Chip label={typeDisplay} size="small" variant="outlined" sx={{ ml: 0.5, height: '12px', fontSize: '0.65rem', backgroundColor: alpha(theme.palette.common.white, 0.2), borderColor: alpha(theme.palette.common.white, 0.4)}} />
+                        {courseShortCode} 
+                        {/*<Chip label={typeDisplay} size="small" variant="outlined" sx={{ ml: 0.5, height: '12px', fontSize: '0.65rem', backgroundColor: alpha(theme.palette.common.white, 0.2), borderColor: alpha(theme.palette.common.white, 0.4)}} />*/}
                     </Typography>
                     <Typography variant="caption" noWrap sx={{ fontSize: '0.7rem', lineHeight: 1.1 }}>
                         {roomText || '-'} {recurrenceDisplay && `(${recurrenceDisplay})`}

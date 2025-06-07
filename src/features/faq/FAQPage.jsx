@@ -27,6 +27,8 @@ function FAQPage() {
         { id: 'q2', question: t('faqPage.q2'), answer: t('faqPage.a2') },
         { id: 'q3', question: t('faqPage.q3'), answer: t('faqPage.a3') },
         { id: 'q4', question: t('faqPage.q4'), answer: t('faqPage.a4') },
+        { id: 'q9', question: t('faqPage.q9'), answer: t('faqPage.a9') },
+        { id: 'q10', question: t('faqPage.q10'), answer: t('faqPage.a10') },
         { id: 'q5', question: t('faqPage.q5'), answer: t('faqPage.a5') },
         { id: 'q6', question: t('faqPage.q6'), answer: t('faqPage.a6') },
         { id: 'q7', question: t('faqPage.q7'), answer: t('faqPage.a7') },
