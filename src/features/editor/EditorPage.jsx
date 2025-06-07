@@ -31,6 +31,7 @@ import CourseLoadingProcessDialog from './Dialogs/CourseLoadingProcessDialog';
 import LoadCoursesFromStudentRedirectDialog from './Dialogs/LoadCoursesFromStudentRedirectDialog';
 import SelectSTAGIdentityDialog from './Dialogs/SelectSTAGIdentityDialog';
 import SelectStudyParametersDialog from './Dialogs/SelectStudyParametersDialog';
+import CourseLoadSummaryDialog from './Dialogs/CourseLoadSummaryDialog';
 
 
 const LEFT_SIDEBAR_WIDTH_DESKTOP = '320px';
@@ -438,6 +439,12 @@ function EditorPage() {
                 title={removeAllPrefsDialog.title}
                 message={removeAllPrefsDialog.message}
                 confirmButtonColor={removeAllPrefsDialog.confirmButtonColor}
+            />
+
+            <CourseLoadSummaryDialog
+                open={stagStudentPlanLoader.summaryDialog.open}
+                onClose={stagStudentPlanLoader.closeSummaryDialog}
+                summary={stagStudentPlanLoader.summaryDialog.summary}
             />
 
             <CourseLoadingProcessDialog

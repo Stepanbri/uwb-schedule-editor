@@ -285,16 +285,25 @@
       "courseDetails": "Rok: {{year}}, Semestr: {{semester}}"
     },
     "studentPlanOverwrite": {
-      "title": "Potvrdit načtení předmětů",
-      "message": "Následující akce může přidat nové předměty a přepsat existující předměty ve vaší pracovní ploše (pokud mají stejný kód katedry/předmětu) daty ze STAGu pro zadaný rok a semestr. Přejete si pokračovat?"
+      "title": "Potvrdit načtení předmětů z plánu",
+      "message": "Následující akce může přidat nové a přepsat existující předměty ve vaší pracovní ploše (pokud mají shodnou katedru/kód předmětu) daty ze STAGu pro zadaný rok a semestr. Přejete si pokračovat?"
+    },
+    "summary": {
+      "title": "Výsledek načítání předmětů",
+      "overallResult": "Proces načítání předmětů ze studijního plánu byl dokončen.",
+      "addedCourses": "Úspěšně přidané předměty",
+      "overwrittenCourses": "Přepsané předměty",
+      "failedCourses": "Předměty, které se nepodařilo zpracovat",
+      "noItems": "Žádné položky v této kategorii."
     }
   },
   "courseBar": {
     "loadSingleFromSTAG": "Načíst předmět ze STAGu",
-    "loadFromStudentPlan": "Načíst předměty dle plánu",
+    "loadFromStudentPlan": "Načíst předměty dle studijního plánu",
     "removeAllCourses": "Odstranit všechny předměty",
-    "removeAllCoursesTooltip": "Odstranit všechny načtené předměty a jejich zapsané akce.",
-    "title": "Předměty"
+    "removeAllCoursesTooltip": "Odstraní všechny načtené předměty a jejich zapsané akce.",
+    "title": "Předměty",
+    "fromDemoStagTooltip": "Načteno z DEMO STAGu"
   },
   "editorPage": {
     "mobileDrawer": {

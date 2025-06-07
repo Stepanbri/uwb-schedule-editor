@@ -167,6 +167,7 @@ function PropertiesBar() {
                 backgroundColor: (theme) => theme.palette.background.paper,
                 flexGrow: 1,
                 overflowY: 'auto',
+                scrollbarGutter: 'stable',
                 minHeight: 0,
             }}
         >
@@ -200,7 +201,7 @@ function PropertiesBar() {
                 </Tooltip>
             )}
 
-            <Box sx={{ flexGrow: 1, overflowY: 'auto', minHeight: 0, mb: 2 }}>
+            <Box sx={{ flexGrow: 1, overflowY: 'auto', minHeight: 0, mb: 2, scrollbarGutter: 'stable' }}>
                 <PreferenceList
                     preferences={preferences}
                     onPriorityChange={changePreferencePriority}

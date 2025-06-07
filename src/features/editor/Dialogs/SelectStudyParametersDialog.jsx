@@ -1,12 +1,13 @@
 // PROJEKT/NEW/src/features/editor/Dialogs/SelectStudyParametersDialog.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
     Dialog, DialogTitle, DialogContent, DialogActions, Button,
     TextField, FormControl, InputLabel, Select, MenuItem, Grid,
-    FormGroup, FormControlLabel, Checkbox, FormHelperText, Typography, Box, Alert
+    FormGroup, FormControlLabel, Checkbox, FormHelperText, Typography, Box, Alert, Autocomplete
 } from '@mui/material';
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 import { useTranslation } from 'react-i18next';
+import { getCurrentAcademicYear, generateAcademicYears } from '../../../utils/academicYearUtils';
 
 // academicYearsSource a currentAcademicYear již nebudou primárně použity pro tento dialog
 // ale ponecháme je, pokud by byly potřeba pro defaultní hodnotu jiného pole (např. rok pro rozvrhové akce)
@@ -20,15 +21,16 @@ const SelectStudyParametersDialog = ({ open, onClose, onSubmitParameters, studen
     const [error, setError] = useState('');
 
     // Rok pro načítání rozvrhových akcí, může být jiný než ročník studia předmětů
-    const [scheduleAcademicYear, setScheduleAcademicYear] = useState(defaultAcademicYear || new Date().getFullYear().toString() + '/' + (new Date().getFullYear() + 1).toString());
+    const [scheduleAcademicYear, setScheduleAcademicYear] = useState(defaultAcademicYear || getCurrentAcademicYear());
 
+    const academicYearsOptions = useMemo(() => generateAcademicYears(), []);
 
     useEffect(() => {
         if (open) {
             setStudyYearNum('1'); // Reset na první ročník
             setSemester('%'); // Změna resetované hodnoty na "Oba semestry"
             setStatuses({ A: true, B: true, C: false });
-            setScheduleAcademicYear(defaultAcademicYear || new Date().getFullYear().toString() + '/' + (new Date().getFullYear() + 1).toString());
+            setScheduleAcademicYear(defaultAcademicYear || getCurrentAcademicYear());
             setError('');
         }
     }, [open, defaultAcademicYear]);
@@ -108,7 +110,7 @@ const SelectStudyParametersDialog = ({ open, onClose, onSubmitParameters, studen
                 )}
                 <Box sx={{borderTop: 1, borderColor: 'divider', pt: 2, mt: studentContext ? 2 : 0}} />
 
-                <Grid container spacing={3} sx={{pt: 1}}>
+                <Grid container spacing={2} sx={{pt: 1}}>
                     <Grid item xs={12} sm={6}>
                         <TextField
                             label={t('Dialogs.selectStudyParams.studyYearNumLabel', 'Ročník studia předmětů')}
@@ -123,21 +125,25 @@ const SelectStudyParametersDialog = ({ open, onClose, onSubmitParameters, studen
                         />
                     </Grid>
                     <Grid item xs={12} sm={6}>
-                        <FormControl fullWidth required error={!!error && error.includes(t('Dialogs.selectStudyParams.errorScheduleYearInvalid', 'Akademický rok'))}>
-                            <InputLabel id="schedule-academic-year-select-label">{t('Dialogs.selectStudyParams.scheduleAcademicYearLabel', 'Akademický rok rozvrhu')}</InputLabel>
-                            <Select
-                                labelId="schedule-academic-year-select-label"
-                                value={scheduleAcademicYear}
-                                label={t('Dialogs.selectStudyParams.scheduleAcademicYearLabel', 'Akademický rok rozvrhu')}
-                                onChange={(e) => setScheduleAcademicYear(e.target.value)}
-                                variant={"filled"}
-                            >
-                                {academicYearsSourceForSchedule().map(year => (
-                                    <MenuItem key={year} value={year}>{year}</MenuItem>
-                                ))}
-                            </Select>
-                            {error.includes('Akademický rok') && <FormHelperText>{error}</FormHelperText>}
-                        </FormControl>
+                        <Autocomplete
+                            disableClearable
+                            options={academicYearsOptions}
+                            getOptionLabel={(option) => option.label || ''}
+                            value={academicYearsOptions.find(opt => opt.value === scheduleAcademicYear) || null}
+                            onChange={(event, newValue) => {
+                                setScheduleAcademicYear(newValue ? newValue.value : null);
+                            }}
+                            isOptionEqualToValue={(option, value) => option.value === value.value}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    label={t('Dialogs.selectStudyParams.scheduleAcademicYearLabel', 'Akademický rok rozvrhu')}
+                                    required
+                                    error={!!error && error.includes(t('Dialogs.selectStudyParams.errorScheduleYearInvalid', 'Akademický rok'))}
+                                    helperText={error.includes('Akademický rok') ? error : ""}
+                                />
+                            )}
+                        />
                     </Grid>
                     <Grid item xs={12}>
                         <FormControl fullWidth required error={!!error && error.includes(t('Dialogs.selectStudyParams.errorSemesterRequired', 'Semestr'))}>

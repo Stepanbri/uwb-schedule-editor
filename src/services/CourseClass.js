@@ -25,6 +25,8 @@ class CourseClass {
                     events = [],
                     semester = '', // např. ZS, LS
                     year = '',     // např. 2023/2024
+                    source = 'prod',
+                    color = null
                 }) {
         // ID je nyní jen KATEDRA/KOD_PREDMETU
         this.id = `${departmentCode}/${courseCode}`;
@@ -41,6 +43,8 @@ class CourseClass {
         // Atributy roku a semestru jsou důležité pro data předmětu
         this.year = year;
         this.semester = semester;
+        this.source = source;
+        this.color = color;
         // Události jsou vždy vázány na aktuální rok a semestr předmětu
         this.events = events.map(eventData => eventData instanceof CourseEventClass ? eventData : new CourseEventClass({...eventData, courseId: this.id, courseCode: this.getShortCode(), departmentCode: this.departmentCode, year: this.year, semester: this.semester }));
     }
@@ -70,6 +74,8 @@ class CourseClass {
             }),
             semester: this.semester,
             year: this.year,
+            source: this.source,
+            color: this.color,
         };
     }
 

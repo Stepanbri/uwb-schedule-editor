@@ -108,7 +108,7 @@ function CourseBar({
                     </Typography>
                 </Box>
             ) : (
-                <Box sx={{ flexGrow: 1, overflowY: 'auto' }}>
+                <Box sx={{ flexGrow: 1, overflowY: 'auto', scrollbarGutter: 'stable' }}>
                     <SimpleTreeView
                         defaultCollapseIcon={<ExpandMoreIcon />}
                         defaultExpandIcon={<ChevronRightIcon />}
@@ -156,7 +156,23 @@ function CourseBar({
                                             }}
                                         >
                                             {course.events && course.events.length > 0 ? (
-                                                course.events.map((event) => {
+                                                [...course.events].sort((a, b) => {
+                                                    const typeOrder = { 'PŘEDNÁŠKA': 1, 'CVIČENÍ': 2, 'SEMINÁŘ': 3 };
+                                                    const typeA = typeOrder[a.type.toUpperCase()] || 99;
+                                                    const typeB = typeOrder[b.type.toUpperCase()] || 99;
+
+                                                    if (typeA !== typeB) {
+                                                        return typeA - typeB;
+                                                    }
+
+                                                    if (a.day !== b.day) {
+                                                        return a.day - b.day;
+                                                    }
+
+                                                    const timeA = a.startTime.split(':').map(Number);
+                                                    const timeB = b.startTime.split(':').map(Number);
+                                                    return (timeA[0] * 60 + timeA[1]) - (timeB[0] * 60 + timeB[1]);
+                                                }).map((event) => {
                                                     const isEnrolled = enrolledEventIds.has(event.id);
                                                     const normalizedEventType = event.type?.toLowerCase() || '';
                                                     const eventTypeKey = EVENT_TYPE_TO_KEY_MAP[normalizedEventType] || normalizedEventType;

@@ -13,7 +13,7 @@ const getStagApiYear = (academicYearString) => {
 };
 
 export const useStagStudentPlanLoader = () => {
-    const { stagApiService, redirectToStagLogin, setRole, clearStagAuthData, userInfo } = useStagApi();
+    const { stagApiService, redirectToStagLogin, setRole, clearStagAuthData, userInfo, useDemoApi } = useStagApi();
     const { workspaceService, addCourse } = useWorkspace();
     const { showSnackbar } = useSnackbar();
     const { t, i18n } = useTranslation();
@@ -38,6 +38,11 @@ export const useStagStudentPlanLoader = () => {
         onConfirm: () => {},
     });
 
+    const [summaryDialog, setSummaryDialog] = useState({
+        open: false,
+        summary: { added: [], overwritten: [], failed: [] }
+    });
+
     const resetAllPlanLoaderStates = () => {
         setIsRedirectDialogOpen(false);
         setIsIdentityDialogOpen(false);
@@ -46,6 +51,7 @@ export const useStagStudentPlanLoader = () => {
         setIsLoadingCourseDetails(false);
         setCurrentStudentContextForDialog(null);
         setOverwritePlanDialogState({ open: false, coursesToProcess: [], coursesToAdd: [], coursesToOverwrite: [], planParams: null, onConfirm: () => {} });
+        setSummaryDialog({ open: false, summary: { added: [], overwritten: [], failed: [] }});
         clearStagAuthData();
     };
 
@@ -149,9 +155,9 @@ export const useStagStudentPlanLoader = () => {
         setIsStudentPlanLoadingActive(true); // Ujistíme se, že je stále true
         showSnackbar(t('alerts.fetchingSubjectDetailsCount', { count: coursesToProcess.length }), 'info');
 
-        let coursesAddedCount = 0;
-        let coursesOverwrittenCount = 0;
-        let coursesFailedCount = 0;
+        let coursesAdded = [];
+        let coursesOverwritten = [];
+        let coursesFailed = [];
         const lang = i18n.language === 'cs' ? 'cs' : 'en';
         const stagApiYearForCourseEvents = getStagApiYear(planParams.scheduleAcademicYear);
 
@@ -242,18 +248,32 @@ export const useStagStudentPlanLoader = () => {
                         semester: courseEffectiveSemester,
                         year: planParams.scheduleAcademicYear,
                         events: transformedEvents,
+                        source: useDemoApi ? 'demo' : 'prod',
                     };
 
                     addCourse(courseDataForWorkspace);
-                    if (subjectData.operation === 'overwritten') coursesOverwrittenCount++;
-                    else coursesAddedCount++;
+                    const subjectIdentifier = { name: `${subjectData.rawSubject.katedra}/${subjectData.rawSubject.zkratka} - ${subjectData.rawSubject.nazev}` };
+                    if (subjectData.operation === 'overwritten') {
+                        coursesOverwritten.push(subjectIdentifier);
+                    } else {
+                        coursesAdded.push(subjectIdentifier);
+                    }
 
                 } catch (innerError) {
                     console.error(`Chyba při zpracování předmětu ${subjectData.rawSubject.katedra}/${subjectData.rawSubject.zkratka}:`, innerError);
-                    coursesFailedCount++;
+                    coursesFailed.push({ name: `${subjectData.rawSubject.katedra}/${subjectData.rawSubject.zkratka} - ${subjectData.rawSubject.nazev}` });
                 }
             }
-            showSnackbar(t('studyPlanLoadSummary', { count: coursesAddedCount + coursesOverwrittenCount + coursesFailedCount, added: coursesAddedCount, overwritten: coursesOverwrittenCount, failed: coursesFailedCount }), (coursesAddedCount + coursesOverwrittenCount > 0) ? 'success' : (coursesFailedCount > 0 ? 'error' : 'info'));
+            // Zobrazíme souhrnný dialog místo snackbaru
+            setSummaryDialog({
+                open: true,
+                summary: {
+                    added: coursesAdded,
+                    overwritten: coursesOverwritten,
+                    failed: coursesFailed
+                }
+            });
+
         } catch (e) {
             // Catch any unexpected error during the loop or setup
             console.error("Neočekávaná chyba během zpracování předmětů plánu:", e);
@@ -361,7 +381,7 @@ export const useStagStudentPlanLoader = () => {
             resetAllPlanLoaderStates();
         }
         // Zde již není setIsStudentPlanLoadingActive(false), to se řeší v actuallyProcess nebo cancel
-    }, [stagApiService, currentStudentContextForDialog, showSnackbar, t, i18n.language, workspaceService, addCourse]);
+    }, [stagApiService, currentStudentContextForDialog, showSnackbar, t, i18n.language, workspaceService, addCourse, useDemoApi]);
 
     const closeOverwritePlanDialog = (userCancelled = false) => {
         setOverwritePlanDialogState(prev => ({ ...prev, open: false, coursesToProcess: [], coursesToAdd: [], coursesToOverwrite: [] }));
@@ -370,6 +390,10 @@ export const useStagStudentPlanLoader = () => {
             resetAllPlanLoaderStates();
         }
         // Pokud nebyl dialog zrušen, tak isStudentPlanLoadingActive a isLoadingCourseDetails se řídí v actuallyProcessCoursesFromPlan
+    };
+
+    const closeSummaryDialog = () => {
+        setSummaryDialog({ open: false, summary: { added: [], overwritten: [], failed: [] }});
     };
 
     return {
@@ -381,5 +405,7 @@ export const useStagStudentPlanLoader = () => {
         isLoadingCourseDetails,
         overwritePlanDialogState,
         closeOverwritePlanDialog,
+        summaryDialog,
+        closeSummaryDialog,
     };
 };

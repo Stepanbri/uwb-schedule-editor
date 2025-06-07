@@ -13,7 +13,7 @@ const getStagApiYear = (academicYearString) => {
 };
 
 export const useStagCourseLoader = () => {
-    const { stagApiService } = useStagApi();
+    const { stagApiService, useDemoApi } = useStagApi();
     const { workspaceService, addCourse } = useWorkspace();
     const { showSnackbar } = useSnackbar();
     const { t, i18n } = useTranslation();
@@ -115,6 +115,7 @@ export const useStagCourseLoader = () => {
                 semester: formData.semester,
                 year: formData.year,
                 events: transformedEvents,
+                source: useDemoApi ? 'demo' : 'prod',
             };
 
             const courseIdentifier = `${subjectInfo.katedra}/${subjectInfo.zkratka}`;
@@ -142,7 +143,7 @@ export const useStagCourseLoader = () => {
             showSnackbar(error.message || t('alerts.stagLoadError'), 'error');
             setIsProcessingCourse(false);
         }
-    }, [stagApiService, addCourse, closeLoadCourseDialog, showSnackbar, t, i18n.language, workspaceService]);
+    }, [stagApiService, addCourse, closeLoadCourseDialog, showSnackbar, t, i18n.language, workspaceService, useDemoApi]);
 
     return {
         isLoadCourseDialogOpen, openLoadCourseDialog, closeLoadCourseDialog, handleSubmitLoadCourse,

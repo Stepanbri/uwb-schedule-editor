@@ -5,6 +5,7 @@ import { useTheme } from '@mui/material/styles';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useStagApi } from '../../../contexts/StagApiContext'; // Import kontextu
+import { useWorkspace } from '../../../contexts/WorkspaceContext';
 
 // Ikony pro toolbar
 import DownloadIcon from '@mui/icons-material/Download';
@@ -15,6 +16,7 @@ import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import ScienceIcon from '@mui/icons-material/Science'; // Ikona pro Demo STAG
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline'; // Přidáno
+import PaletteIcon from '@mui/icons-material/Palette';
 // PublicIcon se již nebude přímo používat v obsahu tlačítka, ale ponechme import pro případné budoucí změny
 // import PublicIcon from '@mui/icons-material/Public'; 
 
@@ -30,6 +32,7 @@ const ScheduleToolbar = ({
     const navigate = useNavigate();
     const importFileRef = useRef(null);
     const { useDemoApi, toggleUseDemoApi } = useStagApi(); // Získání stavu a funkce z kontextu
+    const { scheduleColorMode, toggleScheduleColorMode } = useWorkspace();
 
     const handleImportClick = () => {
         if (importFileRef.current) {
@@ -67,32 +70,48 @@ const ScheduleToolbar = ({
             }}
         >
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}> {/* Levá skupina tlačítek */}
+                <Tooltip title={t('scheduleToolbar.colorModeTooltip', 'Přepnout barvy rozvrhu (dle předmětu / typu akce)')}>
+                    <ToggleButton
+                        value="colorMode"
+                        selected={scheduleColorMode === 'course'}
+                        onChange={toggleScheduleColorMode}
+                        size="small"
+                        sx={{
+                             '&.Mui-selected': {
+                                color: 'primary.main',
+                                backgroundColor: alpha(theme.palette.primary.main, 0.12),
+                             }
+                        }}
+                    >
+                        <PaletteIcon />
+                    </ToggleButton>
+                </Tooltip>
                 <Tooltip title={t('scheduleToolbar.downloadImageTooltip')}>
                     <IconButton size="small" onClick={onDownloadScheduleImage} color="primary">
-                        <PhotoCameraIcon />
-                    </IconButton>
-                </Tooltip>
+                    <PhotoCameraIcon />
+                </IconButton>
+            </Tooltip>
 
                 <Divider orientation="vertical" flexItem sx={{ mx: 0.5, display: { xs: 'none', sm: 'block' } }} />
 
-                <Tooltip title={t('scheduleToolbar.exportWorkspaceTooltip')}>
+            <Tooltip title={t('scheduleToolbar.exportWorkspaceTooltip')}>
                     <IconButton size="small" onClick={onExportWorkspace} color="primary">
-                        <DownloadIcon />
-                    </IconButton>
-                </Tooltip>
+                    <DownloadIcon />
+                </IconButton>
+            </Tooltip>
 
-                <Tooltip title={t('scheduleToolbar.importWorkspaceTooltip')}>
+            <Tooltip title={t('scheduleToolbar.importWorkspaceTooltip')}>
                     <IconButton size="small" onClick={handleImportClick} color="primary">
-                        <UploadFileIcon />
-                    </IconButton>
-                </Tooltip>
-                <input
-                    type="file"
-                    ref={importFileRef}
-                    onChange={handleFileImport}
-                    accept=".json"
-                    style={{ display: 'none' }}
-                />
+                    <UploadFileIcon />
+                </IconButton>
+            </Tooltip>
+            <input
+                type="file"
+                ref={importFileRef}
+                onChange={handleFileImport}
+                accept=".json"
+                style={{ display: 'none' }}
+            />
 
                 <Divider orientation="vertical" flexItem sx={{ mx: 0.5, display: { xs: 'none', sm: 'block' } }} />
 
@@ -109,8 +128,8 @@ const ScheduleToolbar = ({
                 <Tooltip title={t('scheduleToolbar.faqButtonTooltip', 'Nápověda a FAQ')}>
                     <IconButton size="small" onClick={() => navigate('/faq#q8')} color="inherit" sx={{ color: theme.palette.action.active }}>
                         <HelpOutlineIcon />
-                    </IconButton>
-                </Tooltip>
+                </IconButton>
+            </Tooltip>
                 <Tooltip title={stagApiTooltipText}>
                     <ToggleButton
                         value="check"

@@ -2,7 +2,7 @@
 import React, { useMemo } from 'react';
 import { Paper, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, styled, Box } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { useCourseManagement } from '../hooks/useCourseManagement';
+import { useWorkspace } from '../../../contexts/WorkspaceContext';
 import { timeToMinutes } from '../../../utils/timeUtils';
 import { DAY_I18N_KEYS } from '../../../constants/constants';
 import ScheduleEventItem from './ScheduleEventItem';
@@ -54,9 +54,10 @@ const StickyTableCell = styled(TableCell)(({ theme, stickytype }) => ({
     ...(stickytype === 'time' && {
         top: 0,
         textAlign: 'center',
-        padding: '2px 4px',
+        padding: 0,
         fontSize: '0.7rem',
         minWidth: '55px',
+        borderLeft: `1px solid ${theme.palette.divider}`,
     }),
     ...(stickytype === 'corner' && {
         left: 0,
@@ -117,7 +118,7 @@ export const layoutEvents = (eventsForDay) => {
 
 function ScheduleBox() {
     const { t } = useTranslation();
-    const { activeSchedule, courses } = useCourseManagement();
+    const { activeSchedule, courses, scheduleColorMode } = useWorkspace();
 
     const scheduledEvents = activeSchedule ? activeSchedule.getAllEnrolledEvents() : [];
 
@@ -145,6 +146,7 @@ function ScheduleBox() {
                 key={eventData.id + '-' + levelIndex}
                 eventData={eventData}
                 course={eventData.course}
+                scheduleColorMode={scheduleColorMode}
                 style={{
                     position: 'absolute',
                     left: `${leftPercent}%`,
@@ -170,20 +172,42 @@ function ScheduleBox() {
                                     <Box sx={{
                                         display: 'flex',
                                         flexDirection: 'column',
-                                        justifyContent: 'flex-start', // Label nahoře, pak časy
-                                        alignItems: 'center', // Centrovaný label
+                                        justifyContent: 'flex-start',
+                                        alignItems: 'center',
                                         height: '100%',
-                                        lineHeight: 1.2, // Menší řádkování
+                                        lineHeight: 1.2,
                                     }}>
-                                        <Typography variant="caption" display="block" fontWeight="bold" sx={{ fontSize: '0.75rem' /* Větší než časy */ }}>
+                                        <Typography
+                                            variant="caption"
+                                            display="block"
+                                            fontWeight="bold"
+                                            sx={{
+                                                fontSize: '0.75rem',
+                                                backgroundColor: theme => theme.palette.divider,
+                                                color: theme => theme.palette.text.primary,
+                                                width: '100%',
+                                                py: '2px',
+                                            }}
+                                        >
                                             {block.label}
                                         </Typography>
-                                        <Typography component="div" variant="caption" sx={{ textAlign: 'left', width: '100%', fontSize: 'inherit' /* Dědí z StickyTableCell */ }}>
-                                            {block.start}
-                                        </Typography>
-                                        <Typography component="div" variant="caption" sx={{ textAlign: 'right', width: '100%', fontSize: 'inherit' /* Dědí z StickyTableCell */ }}>
-                                            {block.end}
-                                        </Typography>
+                                        <Box sx={{ 
+                                            display: 'flex', 
+                                            flexDirection: 'column', 
+                                            justifyContent: 'space-between',
+                                            alignItems: 'stretch',
+                                            width: '100%', 
+                                            px: '4px',
+                                            pb: '4px',
+                                            flexGrow: 1 
+                                        }}>
+                                            <Typography component="div" variant="caption" sx={{ fontSize: 'inherit', lineHeight: 1.1, textAlign: 'left' }}>
+                                                {block.start}
+                                            </Typography>
+                                            <Typography component="div" variant="caption" sx={{ fontSize: 'inherit', lineHeight: 1.1, textAlign: 'right' }}>
+                                                {block.end}
+                                            </Typography>
+                                        </Box>
                                     </Box>
                                 </StickyTableCell>
                             ))}

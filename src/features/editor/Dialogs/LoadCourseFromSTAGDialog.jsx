@@ -1,33 +1,27 @@
 // PROJEKT/NEW/src/features/editor/Dialogs/LoadCourseFromSTAGDialog.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
     Dialog, DialogTitle, DialogContent, DialogActions, Button,
-    TextField, FormControl, InputLabel, Select, MenuItem, Grid, FormHelperText
+    TextField, FormControl, InputLabel, Select, MenuItem, Grid, FormHelperText, Autocomplete
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-
-const currentAcademicYear = () => {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = today.getMonth(); // 0 (Jan) - 11 (Dec)
-    // Assuming academic year changes around July/August
-    return month >= 7 ? `${year}/${year + 1}` : `${year - 1}/${year}`;
-};
+import { getCurrentAcademicYear, generateAcademicYears } from '../../../utils/academicYearUtils';
 
 const LoadCourseFromSTAGDialog = ({ open, onClose, onSubmit }) => {
     const { t } = useTranslation();
     const [courseCodeFull, setCourseCodeFull] = useState(''); // e.g., KIV/PPA1
-    const [academicYear, setAcademicYear] = useState(currentAcademicYear());
+    const [academicYear, setAcademicYear] = useState(getCurrentAcademicYear());
     const [semester, setSemester] = useState('ZS'); // ZS or LS
     const [errors, setErrors] = useState({});
 
+    const academicYearsOptions = useMemo(() => generateAcademicYears(), []);
+
     useEffect(() => {
         if (open) {
-            // Reset form on open, if desired, or retain last values
-            // setCourseCodeFull('');
-            // setAcademicYear(currentAcademicYear());
-            // setSemester('ZS');
+            // Resetovat pouze chyby, ostatní hodnoty ponechat pro pohodlí uživatele
             setErrors({});
+            // Ujistíme se, že je vybrán aktuální rok při každém otevření, pokud je to žádoucí
+            setAcademicYear(getCurrentAcademicYear());
         }
     }, [open]);
 
@@ -38,9 +32,9 @@ const LoadCourseFromSTAGDialog = ({ open, onClose, onSubmit }) => {
         } else if (!/^[A-Z]{2,5}\/[A-Z0-9-]{2,10}$/i.test(courseCodeFull.trim())) {
             newErrors.courseCodeFull = t('Dialogs.loadCourseFromSTAG.errorCourseCodeFormat', 'Neplatný formát kódu (např. KIV/PPA1).');
         }
-        if (!academicYear.trim()) {
+        if (!academicYear) {
             newErrors.academicYear = t('Dialogs.loadCourseFromSTAG.errorYearRequired', 'Akademický rok je povinný.');
-        } else if (!/^\d{4}\/\d{4}$/.test(academicYear.trim())) {
+        } else if (!/^\d{4}\/\d{4}$/.test(academicYear)) {
             newErrors.academicYear = t('Dialogs.loadCourseFromSTAG.errorYearFormat', 'Neplatný formát roku (např. 2023/2024).');
         }
         if (!semester) {
@@ -56,22 +50,12 @@ const LoadCourseFromSTAGDialog = ({ open, onClose, onSubmit }) => {
             onSubmit({
                 departmentCode,
                 subjectCode,
-                year: academicYear.trim(),
+                year: academicYear,
                 semester,
             });
             onClose(); // Close dialog after submit
         }
     };
-
-    const academicYears = () => {
-        const years = [];
-        const currentYearStart = new Date().getFullYear();
-        for (let i = 2; i >= -2; i--) { // 2 years back, current, 2 years forward
-            years.push(`${currentYearStart - i}/${currentYearStart - i + 1}`);
-        }
-        return years;
-    };
-
 
     return (
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
@@ -90,38 +74,41 @@ const LoadCourseFromSTAGDialog = ({ open, onClose, onSubmit }) => {
                             autoFocus
                         />
                     </Grid>
-                    <Grid item xs={12} sm={6}>
-                        <FormControl fullWidth required error={!!errors.academicYear}>
-                            <InputLabel id="academic-year-select-label">{t('Dialogs.loadCourseFromSTAG.academicYearLabel', 'Akademický rok')}</InputLabel>
-                            <Select
-                                labelId="academic-year-select-label"
-                                value={academicYear}
-                                variant={"filled"}
-                                label={t('Dialogs.loadCourseFromSTAG.academicYearLabel', 'Akademický rok')}
-                                onChange={(e) => setAcademicYear(e.target.value)}
-                            >
-                                {academicYears().map(year => (
-                                    <MenuItem key={year} value={year}>{year}</MenuItem>
-                                ))}
-                            </Select>
-                            {errors.academicYear && <FormHelperText>{errors.academicYear}</FormHelperText>}
-                        </FormControl>
+                    <Grid item xs={12} sm={8}>
+                        <Autocomplete
+                            disableClearable
+                            options={academicYearsOptions}
+                            getOptionLabel={(option) => option.label || ''}
+                            value={academicYearsOptions.find(opt => opt.value === academicYear) || null}
+                            onChange={(event, newValue) => {
+                                setAcademicYear(newValue ? newValue.value : null);
+                            }}
+                            isOptionEqualToValue={(option, value) => option.value === value.value}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    label={t('Dialogs.loadCourseFromSTAG.academicYearLabel', 'Akademický rok')}
+                                    required
+                                    error={!!errors.academicYear}
+                                    helperText={errors.academicYear}
+                                />
+                            )}
+                        />
                     </Grid>
-                    <Grid item xs={12} sm={6}>
-                        <FormControl fullWidth required error={!!errors.semester}>
-                            <InputLabel id="semester-select-label">{t('Dialogs.loadCourseFromSTAG.semesterLabel', 'Semestr')}</InputLabel>
-                            <Select
-                                labelId="semester-select-label"
-                                value={semester}
-                                variant={"filled"}
-                                label={t('Dialogs.loadCourseFromSTAG.semesterLabel', 'Semestr')}
-                                onChange={(e) => setSemester(e.target.value)}
-                            >
-                                <MenuItem value="ZS">{t('Dialogs.loadCourseFromSTAG.semesterZS', 'Zimní (ZS)')}</MenuItem>
-                                <MenuItem value="LS">{t('Dialogs.loadCourseFromSTAG.semesterLS', 'Letní (LS)')}</MenuItem>
-                            </Select>
-                            {errors.semester && <FormHelperText>{errors.semester}</FormHelperText>}
-                        </FormControl>
+                    <Grid item xs={12} sm={4}>
+                        <TextField
+                            select
+                            label={t('Dialogs.loadCourseFromSTAG.semesterLabel', 'Semestr')}
+                            value={semester}
+                            onChange={(e) => setSemester(e.target.value)}
+                            fullWidth
+                            required
+                            error={!!errors.semester}
+                            helperText={errors.semester}
+                        >
+                            <MenuItem value="ZS">{t('Dialogs.loadCourseFromSTAG.semesterZS', 'Zimní (ZS)')}</MenuItem>
+                            <MenuItem value="LS">{t('Dialogs.loadCourseFromSTAG.semesterLS', 'Letní (LS)')}</MenuItem>
+                        </TextField>
                     </Grid>
                 </Grid>
             </DialogContent>

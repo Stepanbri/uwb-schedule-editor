@@ -283,6 +283,14 @@
     "studentPlanOverwrite": {
       "title": "Confirm Load Courses from Plan",
       "message": "The following action may add new courses and overwrite existing courses in your workspace (if they have the same department/course code) with data from STAG for the specified year and semester. Do you wish to continue?"
+    },
+    "summary": {
+      "title": "Course Loading Results",
+      "overallResult": "The process of loading courses from the study plan has been completed.",
+      "addedCourses": "Successfully added courses",
+      "overwrittenCourses": "Overwritten courses",
+      "failedCourses": "Courses that failed to process",
+      "noItems": "No items in this category."
     }
   },
   "courseBar": {
@@ -290,7 +298,8 @@
     "loadFromStudentPlan": "Load courses from student plan",
     "removeAllCourses": "Remove all courses",
     "removeAllCoursesTooltip": "Remove all loaded courses and their enrolled events.",
-    "title": "Courses"
+    "title": "Courses",
+    "fromDemoStagTooltip": "Loaded from DEMO STAG"
   },
   "editorPage": {
     "mobileDrawer": {

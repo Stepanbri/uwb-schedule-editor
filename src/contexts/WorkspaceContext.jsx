@@ -22,6 +22,7 @@ export const WorkspaceProvider = ({ children }) => {
     const [isWorkspaceInitialized, setIsWorkspaceInitialized] = useState(false);
     const [workspaceYear, setWorkspaceYear] = useState('');
     const [workspaceSemester, setWorkspaceSemester] = useState('');
+    const [scheduleColorMode, setScheduleColorMode] = useState('type');
 
     const syncStateFromService = useCallback((showSaveNotification = false) => {
         setCourses([...workspaceService.getAllCourses()]);
@@ -44,6 +45,7 @@ export const WorkspaceProvider = ({ children }) => {
         setPreferences({ ...workspaceService.preferences });
         setWorkspaceYear(workspaceService.year);
         setWorkspaceSemester(workspaceService.semester);
+        setScheduleColorMode(workspaceService.scheduleColorMode || 'type');
 
         if (isWorkspaceInitialized) {
             workspaceService.saveWorkspace();
@@ -241,9 +243,16 @@ export const WorkspaceProvider = ({ children }) => {
         return workspaceService.findEventByIdGlobal(eventId);
     }, [workspaceService]);
 
+    const toggleScheduleColorMode = useCallback(() => {
+        const newMode = workspaceService.scheduleColorMode === 'type' ? 'course' : 'type';
+        workspaceService.scheduleColorMode = newMode;
+        syncStateFromService(true);
+    }, [workspaceService, syncStateFromService]);
+
     const value = {
         workspaceService, courses, activeSchedule, generatedSchedules, activeScheduleIndex,
         preferences, isLoadingWorkspace, isWorkspaceInitialized, workspaceYear, workspaceSemester,
+        scheduleColorMode, toggleScheduleColorMode,
         initializeWorkspace, addCourse, removeCourse, handleRemoveAllCourses, toggleEventInSchedule,
         updateWorkspaceSettings, addPreference, deletePreference, handleRemoveAllPreferences,
         updatePreference, updatePreferencePriority, togglePreferenceActive, generateAndSetSchedules,

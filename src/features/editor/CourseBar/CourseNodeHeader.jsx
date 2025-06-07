@@ -4,6 +4,7 @@ import { Box, Typography, IconButton, Tooltip, Chip, Stack } from '@mui/material
 import DeleteIcon from '@mui/icons-material/Delete';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
+import ScienceIcon from '@mui/icons-material/Science';
 import { useTranslation } from 'react-i18next';
 import { ENROLLMENT_KEYS_ORDER } from '../../../services/CourseClass';
 import GenericConfirmationDialog from '../Dialogs/GenericConfirmationDialog'; // Import dialogu
@@ -35,18 +36,38 @@ const CourseNodeHeader = ({ course, enrolledCounts, neededEnrollmentsDisplay, ar
         .map(key => `${enrolledCounts[key]}/${course.neededEnrollments[key]}${t(`enrollmentShort.${key}`, key.substring(0,1).toUpperCase())}`)
         .join(' | ');
 
+    // Sestavení textu pro sjednocený tooltip
+    const baseInfo = course.source === 'demo'
+        ? `${t('courseBar.fromDemoStagTooltip', 'Načteno z DEMO STAGu')}\n${course.name} (${course.getShortCode()})`
+        : `${course.name} (${course.getShortCode()})`;
+    
+    const contextInfo = `${course.year}, ${t(`Dialogs.selectStudyParams.semester${course.semester}`, course.semester)}`;
+    const enrollmentStatusInfo = t('tooltips.requiredEnrollments', { enrolledReqStr: enrolledReqStr });
+
+    const combinedTooltipText = `${baseInfo}\n${contextInfo}\n\n${t('labels.enrollmentStatus', 'Stav zápisu')}: ${enrollmentStatusInfo}`;
+
     return (
         <>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', py: '4px' }}>
-                <Stack direction="column" spacing={0.5} flexGrow={1} overflow="hidden" pr={1}>
-                    <Tooltip disableInteractive title={`${course.name} (${course.departmentCode}/${course.courseCode}) - ${course.year}, ${t(`Dialogs.selectStudyParams.semester${course.semester}`, course.semester)}`}>
-                        <Typography variant="subtitle1" sx={{ fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: 500 }}>
-                            {course.courseCode} - {course.name}
+            <Tooltip
+                disableInteractive
+                title={<div style={{ whiteSpace: 'pre-line' }}>{combinedTooltipText}</div>}
+            >
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', py: '4px' }}>
+                    <Stack direction="column" spacing={0.5} flexGrow={1} overflow="hidden" pr={1}>
+                        <Typography variant="subtitle1" sx={{ fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', fontWeight: 500, display: 'flex', alignItems: 'center' }}>
+                            {course.source === 'demo' && (
+                                <ScienceIcon
+                                    fontSize="inherit"
+                                    color="warning"
+                                    sx={{ mr: 0.5, verticalAlign: 'middle' }}
+                                />
+                            )}
+                            <Box component="span" sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>
+                                {course.courseCode} - {course.name}
+                            </Box>
                         </Typography>
-                    </Tooltip>
-                    {isExpanded && (
-                        <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
-                            <Tooltip title={t('tooltips.requiredEnrollments', { enrolledReqStr: enrolledReqStr } )}>
+                        {isExpanded && (
+                            <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
                                 <Chip
                                     icon={areAllRequirementsMet ? <CheckCircleOutlineIcon fontSize="small" /> : <HourglassEmptyIcon fontSize="small" />}
                                     label={areAllRequirementsMet
@@ -58,21 +79,21 @@ const CourseNodeHeader = ({ course, enrolledCounts, neededEnrollmentsDisplay, ar
                                     variant="outlined"
                                     sx={{fontSize: '0.7rem', cursor: 'default' }}
                                 />
-                            </Tooltip>
-                        </Stack>
-                    )}
-                </Stack>
-                <Tooltip disableInteractive title={t('tooltips.removeCourse', { courseName: course.name })}>
-                    <IconButton
-                        onClick={handleOpenConfirmDialog}
-                        size="small"
-                        sx={{ flexShrink: 0 }}
-                        aria-label={t('tooltips.removeCourse', { courseName: course.name })}
-                    >
-                        <DeleteIcon fontSize="small" />
-                    </IconButton>
-                </Tooltip>
-            </Box>
+                            </Stack>
+                        )}
+                    </Stack>
+                    <Tooltip disableInteractive title={t('tooltips.removeCourse', { courseName: course.name })}>
+                        <IconButton
+                            onClick={handleOpenConfirmDialog}
+                            size="small"
+                            sx={{ flexShrink: 0 }}
+                            aria-label={t('tooltips.removeCourse', { courseName: course.name })}
+                        >
+                            <DeleteIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                </Box>
+            </Tooltip>
             <GenericConfirmationDialog
                 open={isConfirmDeleteDialogOpen}
                 onClose={handleCloseConfirmDialog}

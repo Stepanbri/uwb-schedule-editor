@@ -3,6 +3,7 @@ import CourseClass from './CourseClass';
 import ScheduleClass from './ScheduleClass';
 import CourseEventClass from './CourseEventClass';
 import { EVENT_TYPE_TO_KEY_MAP } from './CourseClass'; // Obnovený import
+import { getColorForCourse } from '../utils/colorUtils';
 import html2canvas from 'html2canvas'; // Import pro ukládání obrázku
 
 const MAX_GENERATED_SCHEDULES = 10;
@@ -23,6 +24,7 @@ class WorkspaceService {
         this.primarySchedule = new ScheduleClass();
         this.generatedSchedules = [];
         this.activeScheduleIndex = -1;
+        this.scheduleColorMode = 'type'; // Výchozí režim barev
         console.log("WorkspaceService: State reset to empty.");
     }
 
@@ -60,6 +62,7 @@ class WorkspaceService {
             existingCourse.neededEnrollments = courseData.neededEnrollments || existingCourse.neededEnrollments;
             existingCourse.year = courseData.year;
             existingCourse.semester = courseData.semester;
+            existingCourse.source = courseData.source || existingCourse.source;
             existingCourse.events = [];
             if (courseData.events && Array.isArray(courseData.events)) {
                 courseData.events.forEach(eventData => {
@@ -79,6 +82,7 @@ class WorkspaceService {
         }
 
         const course = new CourseClass(courseData);
+        course.color = getColorForCourse(this.courses.length); // Přiřadí barvu novému předmětu
         this.courses.push(course);
         return course;
     }
@@ -196,6 +200,7 @@ class WorkspaceService {
             })),
             activeScheduleIndex: this.activeScheduleIndex,
             preferences: this.preferences,
+            scheduleColorMode: this.scheduleColorMode,
         };
     }
 
@@ -258,7 +263,7 @@ class WorkspaceService {
                     const newSchedule = new ScheduleClass();
                     if (scheduleData.enrolledEventIds && Array.isArray(scheduleData.enrolledEventIds)) {
                         const eventsForGenerated = scheduleData.enrolledEventIds
-                            .map(eventId => this.findEventByIdGlobal(eventId))
+                        .map(eventId => this.findEventByIdGlobal(eventId))
                             .filter(event => event !== null);
                         eventsForGenerated.forEach(event => newSchedule.addEvent(event));
                     }
@@ -273,6 +278,8 @@ class WorkspaceService {
                 this._normalizePriorities(); // Zajistíme validní priority
             }
 
+            this.scheduleColorMode = data.scheduleColorMode === 'course' ? 'course' : 'type';
+
             console.log("Workspace importován z JSON.");
             return true;
         } catch (error) {
@@ -281,7 +288,7 @@ class WorkspaceService {
             return false;
         }
     }
-    
+
     async saveScheduleImage(scheduleWrapperElement, filename = 'rozvrh.png') {
         if (!scheduleWrapperElement) {
             console.error('Chyba: Element pro vyfocení rozvrhu nebyl poskytnut.');
@@ -380,8 +387,8 @@ class WorkspaceService {
     }
 
     loadWorkspace() {
-        const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
-        if (savedData) {
+            const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+            if (savedData) {
             try {
                 const data = JSON.parse(savedData);
                 // Validace základní struktury dat
@@ -390,10 +397,10 @@ class WorkspaceService {
                     this.semester = data.semester || '';
                     this.courses = data.courses.map(courseData => new CourseClass(courseData));
 
-                    this.primarySchedule = new ScheduleClass();
+                this.primarySchedule = new ScheduleClass();
                     if (data.primaryScheduleEvents && Array.isArray(data.primaryScheduleEvents)) {
                         const eventsToEnroll = data.primaryScheduleEvents
-                            .map(eventRef => this.findEventByIdGlobal(eventRef.id))
+                        .map(eventRef => this.findEventByIdGlobal(eventRef.id))
                             .filter(event => event !== null);
                         eventsToEnroll.forEach(event => this.primarySchedule.addEvent(event));
                     }
@@ -402,7 +409,7 @@ class WorkspaceService {
                         const newSchedule = new ScheduleClass();
                         if (scheduleData.enrolledEventIds && Array.isArray(scheduleData.enrolledEventIds)) {
                              const eventsForGenerated = scheduleData.enrolledEventIds
-                                .map(eventId => this.findEventByIdGlobal(eventId))
+                            .map(eventId => this.findEventByIdGlobal(eventId))
                                 .filter(event => event !== null);
                             eventsForGenerated.forEach(event => newSchedule.addEvent(event));
                         }
@@ -416,9 +423,11 @@ class WorkspaceService {
                         this._normalizePriorities();
                     }
 
-                    console.log("WorkspaceService: Workspace loaded from localStorage.");
+                    this.scheduleColorMode = data.scheduleColorMode === 'course' ? 'course' : 'type';
+
+                console.log("WorkspaceService: Workspace loaded from localStorage.");
                     return true; // Data byla úspěšně načtena z localStorage
-                } else {
+            } else {
                     console.warn("WorkspaceService: Data v localStorage nejsou ve validním formátu. Inicializuji prázdný workspace.");
                     this.resetToEmptyState();
                     return false; // Data nebyla validní
@@ -558,7 +567,7 @@ class WorkspaceService {
                     const combsWithoutFirst = getCombinations(withoutFirst, k);
                     return [...combsWithFirst, ...combsWithoutFirst];
                 }
-                
+
                 const combinations = getCombinations(eventsOfThisType, neededCount);
 
                 for (const combination of combinations) {

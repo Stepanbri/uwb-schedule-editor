@@ -1,23 +1,51 @@
 // src/features/editor/ScheduleBox/ScheduleEventItem.jsx
 import React, { useState } from 'react';
-import {Box, Typography, Popover, Divider, Paper, Tooltip, Chip, alpha} from '@mui/material';
+import {Box, Typography, Popover, Divider, Paper, Tooltip, Chip, alpha, styled} from '@mui/material';
 import { useTheme } from '@mui/material/styles';
-import { useTranslation }
-    from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 import { EVENT_TYPE_TO_KEY_MAP } from '../../../services/CourseClass'; // Pro mapování typů a barev
 import { ENROLLMENT_KEY_TO_SHORT_I18N_KEY } from '../../../constants/constants.js';
 // import EventDetailPopover from './EventDetailPopover'; // Vytvoříme později
 
 const getEventTypeThemeColor = (eventType, theme) => {
     const typeKey = EVENT_TYPE_TO_KEY_MAP[eventType?.toLowerCase()] || 'other'; // 'other' jako fallback
-    return {
-        backgroundColor: theme.palette.eventTypes[typeKey] || theme.palette.eventTypes.other,
-        borderColor: theme.palette.eventTypes[`${typeKey}Border`] || theme.palette.eventTypes.otherBorder,
-    };
+    // Nyní vrací pouze barvu, ne objekt s border
+    return theme.palette.eventTypes[typeKey] || theme.palette.eventTypes.other;
 };
 
+const EventWrapper = styled(Box)(({ theme, eventColor, notchColor }) => ({
+    backgroundColor: eventColor,
+    border: `1px solid ${alpha(theme.palette.common.black, 0.2)}`,
+    borderRadius: '4px',
+    padding: '2px 4px 2px 8px', // Více místa vlevo pro patku
+    overflow: 'hidden',
+    cursor: 'pointer',
+    boxSizing: 'border-box',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    position: 'relative', // Pro pozicování patky
+    color: theme.palette.getContrastText(eventColor),
+    '&:hover': {
+        borderColor: theme.palette.primary.main,
+        boxShadow: theme.shadows[2],
+    },
+    // Patka vlevo
+    '&::before': {
+        content: '""',
+        position: 'absolute',
+        left: 0,
+        top: 0,
+        bottom: 0,
+        width: '5px',
+        backgroundColor: notchColor,
+        borderTopLeftRadius: '3px',
+        borderBottomLeftRadius: '3px',
+    }
+}));
 
-function ScheduleEventItem({ eventData, course, style }) {
+
+function ScheduleEventItem({ eventData, course, style, scheduleColorMode }) {
     const { t } = useTranslation();
     const theme = useTheme();
     const [anchorEl, setAnchorEl] = useState(null);
@@ -35,7 +63,15 @@ function ScheduleEventItem({ eventData, course, style }) {
 
     if (!eventData || !course) return null;
 
-    const eventStyleColors = getEventTypeThemeColor(eventData.type, theme);
+    // Získání barev
+    const eventTypeColor = getEventTypeThemeColor(eventData.type, theme);
+    const courseColor = course.color || theme.palette.grey[500]; // Fallback na šedou, pokud předmět nemá barvu
+
+    // Rozhodnutí, která barva bude pro pozadí a která pro patku
+    const isCourseColorMode = scheduleColorMode === 'course';
+    const backgroundColor = isCourseColorMode ? courseColor : eventTypeColor;
+    const notchColor = isCourseColorMode ? eventTypeColor : courseColor;
+
 
     const shortTypeKey = EVENT_TYPE_TO_KEY_MAP[eventData.type?.toLowerCase()];
     const typeDisplay = shortTypeKey ? t(ENROLLMENT_KEY_TO_SHORT_I18N_KEY[shortTypeKey], eventData.type.substring(0,2).toUpperCase()) : eventData.type.substring(0,2).toUpperCase();
@@ -80,30 +116,15 @@ function ScheduleEventItem({ eventData, course, style }) {
                 title={`${courseShortCode} - ${t(`courseEvent.${eventData.type.toLowerCase()}`, eventData.type)} (${eventData.startTime} - ${eventData.endTime})`}
                 arrow
             >
-                <Box
+                <EventWrapper
                     aria-describedby={popoverId}
                     onClick={handleClick}
-                    sx={{
-                        ...style, // position, left, width, top, height z ScheduleBox
-                        backgroundColor: eventStyleColors.backgroundColor,
-                        border: `1px solid ${eventStyleColors.borderColor}`,
-                        borderRadius: '4px',
-                        padding: '2px 4px',
-                        overflow: 'hidden',
-                        cursor: 'pointer',
-                        boxSizing: 'border-box',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'space-between',
-                        '&:hover': {
-                            borderColor: theme.palette.primary.main,
-                            boxShadow: theme.shadows[2],
-                        },
-                        color: theme.palette.getContrastText(eventStyleColors.backgroundColor),
-                    }}
+                    sx={{ ...style }} // position, left, width, top, height z ScheduleBox
+                    eventColor={backgroundColor}
+                    notchColor={notchColor}
                 >
                     <Typography variant="caption" fontWeight="bold" noWrap sx={{ lineHeight: 1.2, overflow: "visible" }}>
-                        {courseShortCode} <Chip label={typeDisplay} size="small" variant="outlined" sx={{ ml: 0.5, height: '12px', fontSize: '0.65rem', backgroundColor: alpha(theme.palette.common.white, 0.2)}} />
+                        {courseShortCode} <Chip label={typeDisplay} size="small" variant="outlined" sx={{ ml: 0.5, height: '12px', fontSize: '0.65rem', backgroundColor: alpha(theme.palette.common.white, 0.2), borderColor: alpha(theme.palette.common.white, 0.4)}} />
                     </Typography>
                     <Typography variant="caption" noWrap sx={{ fontSize: '0.7rem', lineHeight: 1.1 }}>
                         {roomText || '-'} {recurrenceDisplay && `(${recurrenceDisplay})`}
@@ -114,7 +135,7 @@ function ScheduleEventItem({ eventData, course, style }) {
                             {(displayInstructorName || '-').substring(0,15)} {/* Zkráceno a fallback na pomlčku */}
                         </Typography>
                     </Box>
-                </Box>
+                </EventWrapper>
             </Tooltip>
 
             <Popover
