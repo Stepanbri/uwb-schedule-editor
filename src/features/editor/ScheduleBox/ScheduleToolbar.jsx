@@ -122,7 +122,7 @@ const ScheduleToolbar = ({
 
             <Box sx={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 0.5 }}> {/* Pravá skupina */}
                 <Tooltip title={t('scheduleToolbar.faqButtonTooltip', 'Nápověda a FAQ')}>
-                    <IconButton size="small" onClick={() => navigate('/faq#q8')} color="inherit" sx={{ color: theme.palette.action.active }}>
+                    <IconButton size="small" onClick={() => navigate('/faq#q4')} color="inherit" sx={{ color: theme.palette.action.active }}>
                         <HelpOutlineIcon />
                 </IconButton>
             </Tooltip>
