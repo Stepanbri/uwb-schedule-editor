@@ -1,24 +1,8 @@
-# example netlify.toml
+# Konfigurace buildu a nasazení pro Netlify
 [build]
   command = "vite build"
   functions = "netlify/functions"
   publish = "dist"
-
-  ## Uncomment to use this redirect for Single Page Applications like create-react-app.
-  ## Not needed for static site generators.
-  [[redirects]]
-    from = "/*"
-    to = "/index.html"
-    status = 200
-
-  ## (optional) Settings for Netlify Dev
-  ## https://github.com/netlify/cli/blob/main/docs/netlify-dev.md#project-detection
-  #[dev]
-  #  command = "yarn start" # Command to start your dev server
-  #  port = 3000 # Port that the dev server will be listening on
-  #  publish = "dist" # Folder with the static content for _redirect file
-
-  ## more info on configuring this file: https://ntl.fyi/file-based-build-config
 
 # API proxy pro production STAG systém
 [[redirects]]
@@ -26,7 +10,12 @@
   to = "https://stag-ws.zcu.cz/:splat"
   status = 200
   force = true
-  headers = {X-Forwarded-Host = "true"}
+  headers = {
+    X-Forwarded-Host = "true", 
+    Access-Control-Allow-Origin = "*", 
+    Access-Control-Allow-Methods = "GET, POST, OPTIONS", 
+    Access-Control-Allow-Headers = "Origin, X-Requested-With, Content-Type, Accept"
+  }
 
 # API proxy pro demo STAG systém
 [[redirects]]
@@ -34,7 +23,12 @@
   to = "https://stag-demo.zcu.cz/:splat"
   status = 200
   force = true
-  headers = {X-Forwarded-Host = "true"}
+  headers = {
+    X-Forwarded-Host = "true", 
+    Access-Control-Allow-Origin = "*", 
+    Access-Control-Allow-Methods = "GET, POST, OPTIONS", 
+    Access-Control-Allow-Headers = "Origin, X-Requested-With, Content-Type, Accept"
+  }
 
 # Cache SVG souborů pro lepší výkon
 [[headers]]
@@ -47,3 +41,9 @@
   for = "/*.(js|css|woff|woff2|ttf|png|jpg|jpeg)"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+
+# Přesměrování pro Single Page Application (musí být poslední)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
