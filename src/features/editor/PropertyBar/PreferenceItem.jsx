@@ -1,13 +1,9 @@
 // src/features/editor/PropertyBar/PreferenceItem.jsx
-import React, { useState } from 'react'; // Přidán useState
-import {
-    Paper, Typography, IconButton, Switch, Box
-} from '@mui/material';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import GenericConfirmationDialog from '../Dialogs/GenericConfirmationDialog'; // Import dialogu
+import { Paper, Stack, Switch, IconButton, Typography, Box, Tooltip } from '@mui/material';
+import { Delete as DeleteIcon, ArrowUpward as ArrowUpwardIcon, ArrowDownward as ArrowDownwardIcon } from '@mui/icons-material';
+import GenericConfirmationDialog from '../Dialogs/GenericConfirmationDialog';
 
 function PreferenceItem({
                             preference,
@@ -19,93 +15,93 @@ function PreferenceItem({
                             displayLabel
                         }) {
     const { t } = useTranslation();
-    const [isConfirmDeleteDialogOpen, setIsConfirmDeleteDialogOpen] = useState(false);
+    const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
 
-    const handleOpenConfirmDialog = () => {
-        setIsConfirmDeleteDialogOpen(true);
-    };
-
-    const handleCloseConfirmDialog = () => {
-        setIsConfirmDeleteDialogOpen(false);
-    };
+    const handleOpenConfirmDialog = () => setConfirmDialogOpen(true);
+    const handleCloseConfirmDialog = () => setConfirmDialogOpen(false);
 
     const handleConfirmDelete = () => {
         onDelete(preference.id);
         handleCloseConfirmDialog();
     };
 
-    const handleIncreasePriority = () => {
-        if (!isFirst) {
-            onPriorityChange(preference.id, 'up');
-        }
-    };
-
-    const handleDecreasePriority = () => {
-        if (!isLast) {
-            onPriorityChange(preference.id, 'down');
-        }
-    };
+    const handleIncreasePriority = () => onPriorityChange(preference.id, 'up');
+    const handleDecreasePriority = () => onPriorityChange(preference.id, 'down');
 
     return (
         <>
             <Paper
                 elevation={1}
                 sx={{
-                    p: 1, mb: 1, display: 'flex', alignItems: 'center', gap: 0.5,
+                    p: '4px 8px',
+                    my: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1.5,
                     opacity: preference.isActive ? 1 : 0.65,
-                    transition: 'opacity 0.3s ease, background-color 0.3s ease',
-                    '&:hover': { backgroundColor: (theme) => theme.palette.action.hover },
-                    minHeight: '56px',
+                    transition: 'opacity 0.3s ease',
                 }}
             >
-                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', alignSelf: 'stretch', pr: 0.5 }}>
-                    <IconButton
-                        size="small" onClick={handleIncreasePriority} disabled={isFirst || !preference.isActive}
-                        aria-label={t('propertiesBar.preferenceItem.increasePriority')} sx={{ p: 0.25, flex: 1 }}
-                    >
-                        <ArrowUpwardIcon sx={{ fontSize: '1rem' }} />
-                    </IconButton>
-                    <Typography variant="body2" component="div" sx={{ fontWeight: 'bold', lineHeight: 1.2, p: '2px 0', textAlign: 'center', minWidth: '20px' }}>
+                {/* Left part: Priority controls */}
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', alignSelf: 'stretch' }}>
+                    <Tooltip title={t('tooltips.increasePriority')}>
+                        <span>
+                            <IconButton size="small" onClick={handleIncreasePriority} disabled={isFirst}>
+                                <ArrowUpwardIcon sx={{ fontSize: '1rem' }} />
+                            </IconButton>
+                        </span>
+                    </Tooltip>
+                    <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
                         {preference.priority}
                     </Typography>
-                    <IconButton
-                        size="small" onClick={handleDecreasePriority} disabled={isLast || !preference.isActive}
-                        aria-label={t('propertiesBar.preferenceItem.decreasePriority')} sx={{ p: 0.25, flex: 1 }}
-                    >
-                        <ArrowDownwardIcon sx={{ fontSize: '1rem' }} />
-                    </IconButton>
+                    <Tooltip title={t('tooltips.decreasePriority')}>
+                         <span>
+                            <IconButton size="small" onClick={handleDecreasePriority} disabled={isLast}>
+                                <ArrowDownwardIcon sx={{ fontSize: '1rem' }} />
+                            </IconButton>
+                        </span>
+                    </Tooltip>
                 </Box>
 
-                <Box sx={{ flexGrow: 1, overflow: 'hidden', py: 0.5, alignSelf: 'center' }}>
-                    <Typography variant="caption" component="div" sx={{ fontWeight: 500, display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textTransform: 'uppercase', color: 'text.secondary' }}>
-                        {t(`preferences.types.${preference.type}.shortLabel`, preference.type)}
-                    </Typography>
-                    <Typography variant="body2" component="div" sx={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={displayLabel}>
-                        {displayLabel}
-                    </Typography>
-                </Box>
+                {/* Middle part: Display Label */}
+                <Typography
+                    variant="body2"
+                    title={displayLabel}
+                    sx={{
+                        flexGrow: 1,
+                        textAlign: 'left',
+                        whiteSpace: 'normal',
+                        wordBreak: 'break-word',
+                        lineHeight: '1.4',
+                    }}
+                >
+                    {displayLabel}
+                </Typography>
 
-                <Box sx={{ display: 'flex', alignItems: 'center', pl: 0.5 }}>
-                    <Switch
-                        checked={preference.isActive} onChange={() => onToggleActive(preference.id)} size="small"
-                        aria-label={t('propertiesBar.preferenceItem.toggleActive')}
-                    />
-                    <IconButton
-                        size="small" onClick={handleOpenConfirmDialog} // Otevře dialog
-                        aria-label={t('propertiesBar.preferenceItem.deletePreference')}
-                        sx={{ color: (theme) => theme.palette.text.secondary, '&:hover': { color: (theme) => theme.palette.error.main } }}
-                    >
-                        <DeleteOutlineIcon sx={{ fontSize: '1.1rem' }} />
-                    </IconButton>
-                </Box>
+                {/* Right part: Actions */}
+                <Stack direction="row" alignItems="center">
+                    <Tooltip title={preference.isActive ? t('tooltips.deactivatePreference') : t('tooltips.activatePreference')}>
+                        <Switch
+                            checked={preference.isActive}
+                            onChange={() => onToggleActive(preference.id)}
+                            size="small"
+                        />
+                    </Tooltip>
+                    <Tooltip title={t('tooltips.deletePreference')}>
+                        <IconButton size="small" onClick={handleOpenConfirmDialog}>
+                            <DeleteIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                </Stack>
             </Paper>
+
             <GenericConfirmationDialog
-                open={isConfirmDeleteDialogOpen}
+                open={confirmDialogOpen}
                 onClose={handleCloseConfirmDialog}
                 onConfirm={handleConfirmDelete}
-                title={t('preferences.alerts.confirmDeleteTitle', 'Odstranit preferenci?')}
-                message={t('preferences.alerts.confirmDeleteMessage', { displayLabel })}
-                confirmButtonText={t('common.delete', 'Smazat')}
+                title={t('Dialogs.deletePreference.title')}
+                message={t('Dialogs.deletePreference.message', { preferenceLabel: displayLabel })}
+                confirmButtonText={t('common.delete')}
                 confirmButtonColor="error"
             />
         </>

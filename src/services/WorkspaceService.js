@@ -501,14 +501,18 @@ class WorkspaceService {
             return false;
         }
 
-        const allEventTypes = {};
+        // Předpočítání všech událostí seskupených podle typu pro každý předmět
+        const allEventGroups = {};
         relevantCourses.forEach(course => {
-            allEventTypes[course.id] = {};
+            allEventGroups[course.id] = {};
             course.events.forEach(event => {
-                if (!allEventTypes[course.id][event.type]) {
-                    allEventTypes[course.id][event.type] = [];
+                const typeKey = EVENT_TYPE_TO_KEY_MAP[event.type.toLowerCase()];
+                if (typeKey) {
+                    if (!allEventGroups[course.id][typeKey]) {
+                        allEventGroups[course.id][typeKey] = [];
+                    }
+                    allEventGroups[course.id][typeKey].push(event);
                 }
-                allEventTypes[course.id][event.type].push(event);
             });
         });
         
@@ -520,19 +524,22 @@ class WorkspaceService {
             }
 
             if (courseIdx === relevantCourses.length) {
+                // Úspěšně nalezen kompletní rozvrh
                 this.generatedSchedules.push(currentScheduleInProgress.clone());
                 solutionsFound++;
                 return;
             }
 
             const course = relevantCourses[courseIdx];
-            const eventTypesForCourse = allEventTypes[course.id];
-            const typeKeys = Object.keys(eventTypesForCourse);
+            const eventGroupsForCourse = allEventGroups[course.id];
+            const groupKeys = Object.keys(eventGroupsForCourse);
 
-            const generateEventCombinationsForCourse = (typeKeyIndex, tempEventsForCourse) => {
+            // Rekurzivní funkce pro generování kombinací událostí pro jeden předmět
+            const generateEventCombinationsForCourse = (groupKeyIndex, tempEventsForCourse) => {
                 if (solutionsFound >= MAX_GENERATED_SCHEDULES) return;
 
-                if (typeKeyIndex === typeKeys.length) {
+                if (groupKeyIndex === groupKeys.length) {
+                    // Máme platnou sadu událostí pro tento předmět, zkusíme je přidat do hlavního rozvrhu
                     const nextScheduleCandidate = currentScheduleInProgress.clone();
                     let possibleToAddAll = true;
                     for (const eventToAdd of tempEventsForCourse) {
@@ -544,38 +551,78 @@ class WorkspaceService {
                     }
 
                     if (possibleToAddAll) {
+                        // Pokud je kombinace bezkonfliktní, pokračujeme s dalším předmětem
                         findSchedulesRecursive(courseIdx + 1, nextScheduleCandidate);
                     }
                     return;
                 }
 
-                const currentEventTypeKey = typeKeys[typeKeyIndex];
-                const eventsOfThisType = eventTypesForCourse[currentEventTypeKey];
-                const neededCount = course.neededEnrollments[EVENT_TYPE_TO_KEY_MAP[currentEventTypeKey]] || 0;
+                const currentGroupKey = groupKeys[groupKeyIndex];
+                const eventsOfThisGroup = eventGroupsForCourse[currentGroupKey];
+                const neededHours = course.neededHours[currentGroupKey] || 0;
 
-                if (neededCount === 0) {
-                    generateEventCombinationsForCourse(typeKeyIndex + 1, tempEventsForCourse);
+                if (neededHours === 0) {
+                    // Pro tento typ události nejsou potřeba žádné hodiny, pokračujeme dál
+                    generateEventCombinationsForCourse(groupKeyIndex + 1, tempEventsForCourse);
                     return;
                 }
 
-                function getCombinations(array, k) {
-                    if (k === 0) return [[]];
-                    if (array.length < k) return [];
-                    const first = array[0];
-                    const withoutFirst = array.slice(1);
-                    const combsWithFirst = getCombinations(withoutFirst, k - 1).map(comb => [first, ...comb]);
-                    const combsWithoutFirst = getCombinations(withoutFirst, k);
-                    return [...combsWithFirst, ...combsWithoutFirst];
-                }
+                // Funkce pro nalezení všech podmnožin událostí, které splňují hodinový požadavek
+                function getCombinationsThatMeetHours(events, targetHours) {
+                    const result = [];
+                    
+                    function findSubsets(startIndex, currentSum, currentSubset) {
+                        if (currentSum >= targetHours) {
+                            // Našli jsme platnou kombinaci
+                            result.push([...currentSubset]);
+                            // V této větvi můžeme skončit, pokud hledáme minimální sady,
+                            // ale pro úplnost je lepší projít všechny možnosti.
+                        }
+                        
+                        // Pokud jsme již přesáhli součet a máme další prvky, můžeme skončit dříve,
+                        // pokud víme, že hodiny jsou vždy kladné.
+                        if (currentSum >= targetHours) return;
 
-                const combinations = getCombinations(eventsOfThisType, neededCount);
+                        if (startIndex === events.length) {
+                            return;
+                        }
+
+                        for (let i = startIndex; i < events.length; i++) {
+                            const newSum = currentSum + (events[i].durationHours || 0);
+                            currentSubset.push(events[i]);
+                            findSubsets(i + 1, newSum, currentSubset);
+                            currentSubset.pop(); // backtrack
+                        }
+                    }
+
+                    findSubsets(0, 0, []);
+
+                    // Odstranění duplicitních sad (pokud by k nim mohlo dojít) a nadbytečných supersetů
+                    // Pro jednoduchost teď vezmeme všechny, co splňují podmínku
+                    const uniqueCombinations = [];
+                    const seenCombinations = new Set();
+                    result.forEach(comb => {
+                        const combId = comb.map(e => e.id).sort().join(',');
+                        if(!seenCombinations.has(combId)) {
+                            uniqueCombinations.push(comb);
+                            seenCombinations.add(combId);
+                        }
+                    });
+
+                    return uniqueCombinations;
+                }
+                
+                // Získáme všechny platné kombinace (podmnožiny) událostí pro daný typ
+                const combinations = getCombinationsThatMeetHours(eventsOfThisGroup, neededHours);
 
                 for (const combination of combinations) {
                     if (solutionsFound >= MAX_GENERATED_SCHEDULES) return;
-                    generateEventCombinationsForCourse(typeKeyIndex + 1, [...tempEventsForCourse, ...combination]);
+                    // Pro každou platnou kombinaci pokračujeme v rekurzi pro další typ události
+                    generateEventCombinationsForCourse(groupKeyIndex + 1, [...tempEventsForCourse, ...combination]);
                 }
             }
-
+            
+            // Spustíme generování kombinací pro první typ události daného předmětu
             generateEventCombinationsForCourse(0, []);
         }
         

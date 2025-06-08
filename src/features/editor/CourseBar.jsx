@@ -59,8 +59,8 @@ function CourseBar({
     const getItemId = (prefix, id) => `${prefix}-${id}`;
 
     return (
-        <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', p: { xs: 1, sm: 2 } }}>
-            <Typography variant="h6" gutterBottom component="div" sx={{ px: { xs: 1, sm: 0 }, mb: 1 }}>
+        <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', paddingTop: { xs: 1, sm: 2 }}}>
+            <Typography variant="h6" gutterBottom component="div" sx={{ px: { xs: 2, sm: 1 }, mb: 1 }}>
                 {t('courseBar.title', 'Předměty')}
             </Typography>
             <Stack direction="column" spacing={1} sx={{ p: 1, borderBottom: 1, borderColor: 'divider', mb: 1, flexShrink: 0 }}>
@@ -130,8 +130,7 @@ function CourseBar({
                                 {deptCourses.map((course) => {
                                     const courseItemId = getItemId('course', course.id);
                                     const isCourseExpanded = expandedItems.includes(courseItemId);
-                                    const enrolledCounts = course.getEnrolledCounts(enrolledEventIds);
-                                    const neededEnrollmentsDisplay = course.getDisplayableNeededEnrollments(enrolledEventIds);
+                                    const enrolledHours = course.getEnrolledHours(enrolledEventIds);
                                     const areAllReqsMet = course.areAllEnrollmentRequirementsMet(enrolledEventIds);
 
                                     return (
@@ -141,8 +140,7 @@ function CourseBar({
                                             label={
                                                 <CourseNodeHeader
                                                     course={course}
-                                                    enrolledCounts={enrolledCounts}
-                                                    neededEnrollmentsDisplay={neededEnrollmentsDisplay}
+                                                    enrolledHours={enrolledHours}
                                                     areAllRequirementsMet={areAllReqsMet}
                                                     onRemoveCourse={onRemoveCourse}
                                                     isExpanded={isCourseExpanded}

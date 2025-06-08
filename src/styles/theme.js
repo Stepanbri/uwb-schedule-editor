@@ -1,5 +1,7 @@
 // src/styles/theme.js
-import { createTheme, alpha } from '@mui/material/styles';
+import { createTheme, responsiveFontSizes } from '@mui/material/styles';
+import { csCZ } from '@mui/material/locale';
+import { alpha } from '@mui/material/styles';
 
 // Základní barvy z vašich komentářů a původního souboru
 const primaryLight = '#25696a';
@@ -179,13 +181,14 @@ const getDesignTokens = (mode) => ({
         },
         MuiTooltip: {
             styleOverrides: {
-                tooltip: ({ theme }) => ({
-                    backgroundColor: alpha(theme.palette.common.black, 0.85),
+                tooltip: {
+                    backgroundColor: mode === 'light' ? alpha('#000000', 0.87) : alpha('#ffffff', 0.87),
+                    color: mode === 'light' ? '#ffffff' : '#000000',
                     fontSize: '0.8rem',
-                }),
-                arrow: ({ theme }) => ({
-                    color: alpha(theme.palette.common.black, 0.85),
-                }),
+                },
+                arrow: {
+                    color: mode === 'light' ? alpha('#000000', 0.87) : alpha('#ffffff', 0.87),
+                }
             }
         },
         MuiDialog: {
@@ -202,8 +205,33 @@ const getDesignTokens = (mode) => ({
                     borderLeft: `1px solid ${theme.palette.divider}`,
                 })
             }
-        }
+        },
+        MuiPopover: {
+            styleOverrides: {
+                paper: {
+                    border: `1px solid ${mode === 'light' ? 'rgba(0, 0, 0, 0.12)' : 'rgba(255, 255, 255, 0.12)'}`,
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                }
+            }
+        },
     }
 });
 
-export const createAppTheme = (mode) => createTheme(getDesignTokens(mode));
+// Funkce pro vytvoření tématu
+export const createAppTheme = (mode) => {
+    let theme = createTheme(getDesignTokens(mode), csCZ);
+
+    // Přepsání getContrastText, aby vždy vracel barvu s dobrým kontrastem
+    theme.palette.getContrastText = (background) => {
+        // Jednoduchá heuristika - pro světlé pozadí tmavý text, pro tmavé světlý.
+        // MUI používá složitější výpočet, ale pro naše světlé alfa barvy je lepší toto.
+        if (theme.palette.mode === 'light') {
+            return theme.palette.text.primary; // Vždy tmavý text ve světlém módu
+        }
+        // V tmavém módu jsou pozadí událostí také tmavá, takže potřebujeme světlý text.
+        return theme.palette.text.primary;
+    };
+
+    theme = responsiveFontSizes(theme);
+    return theme;
+};

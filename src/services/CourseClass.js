@@ -1,18 +1,21 @@
 // src/services/CourseClass.js
 import CourseEventClass from './CourseEventClass';
+import { getColorForCourse } from '../utils/colorUtils';
 
-const EVENT_TYPE_TO_KEY_MAP = {
+export const EVENT_TYPE_TO_KEY_MAP = {
     'přednáška': 'lecture',
     'lecture': 'lecture',
     'př': 'lecture',
-    'cv': 'practical',
     'cvičení': 'practical',
     'practical': 'practical',
+    'cv': 'practical',
     'seminář': 'seminar',
     'seminar': 'seminar',
+    'se': 'seminar',
+    // ... další možné mapování
 };
 
-const ENROLLMENT_KEYS_ORDER = ['lecture', 'practical', 'seminar'];
+export const ENROLLMENT_KEYS_ORDER = ['lecture', 'practical', 'seminar'];
 
 class CourseClass {
     constructor({
@@ -21,74 +24,68 @@ class CourseClass {
                     departmentCode,
                     courseCode,
                     credits,
-                    neededEnrollments = {},
+                    neededHours = {},
                     events = [],
                     semester = '', // např. ZS, LS
                     year = '',     // např. 2023/2024
                     source = 'prod',
                     color = null
                 }) {
-        // ID je nyní jen KATEDRA/KOD_PREDMETU
-        this.id = `${departmentCode}/${courseCode}`;
-        this.stagId = stagId; // Může se měnit při přepisu, pokud STAG má jiné ID pro jiný rok/semestr
+        this.stagId = stagId;
         this.name = name;
         this.departmentCode = departmentCode;
         this.courseCode = courseCode;
         this.credits = credits;
-        this.neededEnrollments = {
-            lecture: parseInt(neededEnrollments.lecture || 0, 10),
-            practical: parseInt(neededEnrollments.practical || 0, 10),
-            seminar: parseInt(neededEnrollments.seminar || 0, 10),
-        };
-        // Atributy roku a semestru jsou důležité pro data předmětu
-        this.year = year;
+        this.neededHours = { lecture: 0, practical: 0, seminar: 0, ...neededHours };
+        this.events = [];
+        this.id = `${departmentCode}/${courseCode}`; // Unikátní identifikátor předmětu
         this.semester = semester;
+        this.year = year;
         this.source = source;
-        this.color = color;
-        // Události jsou vždy vázány na aktuální rok a semestr předmětu
-        this.events = events.map(eventData => eventData instanceof CourseEventClass ? eventData : new CourseEventClass({...eventData, courseId: this.id, courseCode: this.getShortCode(), departmentCode: this.departmentCode, year: this.year, semester: this.semester }));
+        this.color = color || getColorForCourse(0); // Výchozí barva
+
+        if (events && Array.isArray(events)) {
+            this.addCourseEvents(events);
+        }
     }
 
     serialize() {
         return {
-            id: this.id,
             stagId: this.stagId,
             name: this.name,
             departmentCode: this.departmentCode,
             courseCode: this.courseCode,
             credits: this.credits,
-            neededEnrollments: this.neededEnrollments, // Je to již prostý objekt
-            // Zajistíme, že každá událost je také serializována, pokud má metodu serialize
-            // Jinak uložíme událost tak, jak je (měla by být prostý objekt, pokud není instance CourseEventClass)
-            events: this.events.map(event => {
-                if (event && typeof event.serialize === 'function') {
-                    return event.serialize();
-                }
-                // Pokud event není instance s metodou serialize, ale je to objekt (např. po importu ze starého JSON),
-                // je potřeba ho převést na instanci CourseEventClass, aby se správně serializoval
-                // nebo zajistit, že CourseEventClass.constructor správně zachází s těmito daty.
-                // Prozatím, pokud nemá serialize, vrátíme ho tak, jak je, ale toto může být zdroj problémů při deserializaci,
-                // pokud se nespoléháme na to, že this.events jsou VŽDY instance CourseEventClass.
-                // Bezpečnější by bylo zajistit, že this.events jsou vždy instance CourseEventClass, což konstruktor dělá.
-                return event; // Předpokládáme, že konstruktor zajistil, že this.events jsou instance CourseEventClass
-            }),
+            neededHours: this.neededHours,
+            events: this.events.map(event => event.serialize()),
             semester: this.semester,
             year: this.year,
+            id: this.id,
             source: this.source,
-            color: this.color,
+            color: this.color
         };
     }
 
+    // Pomocná metoda pro zjištění, zda předmět vůbec má nějaké akce daného typu
     _hasEventsOfType(typeKeyToCheck) {
-        if (!this.events || this.events.length === 0) return false;
+        if (!typeKeyToCheck) return false;
         return this.events.some(event => {
-            const key = EVENT_TYPE_TO_KEY_MAP[event.type?.toLowerCase()];
-            return key === typeKeyToCheck;
+            const eventTypeKey = EVENT_TYPE_TO_KEY_MAP[event.type?.toLowerCase()];
+            return eventTypeKey === typeKeyToCheck;
         });
     }
 
+    // Speciální případ pro předměty, kde je např. potřeba 1 přednáška, ale nabízí se 2 (např. v ČJ a AJ)
+    // a student si má vybrat jen jednu. V tomto případě se požadavek na P bere jako splněný, pokud je zapsána *jakákoliv* P.
     isSpecialLectureSubstitutionCase() {
-        return (this.neededEnrollments.lecture > 0 && !this._hasEventsOfType('lecture') && this._hasEventsOfType('practical'));
+        // Příklad: pokud jsou potřeba 2 hodiny přednášek, a existují právě dvě přednášky, každá s délkou 2 hodiny,
+        // pak se jedná o substituční případ. Student si má vybrat jen jednu.
+        if (this.neededHours.lecture > 0) {
+            const lectureEvents = this.events.filter(e => EVENT_TYPE_TO_KEY_MAP[e.type.toLowerCase()] === 'lecture');
+            const allLecturesHaveRequiredHours = lectureEvents.every(e => e.durationHours >= this.neededHours.lecture);
+            return lectureEvents.length > 1 && allLecturesHaveRequiredHours;
+        }
+        return false;
     }
 
     getShortCode() {
@@ -96,97 +93,84 @@ class CourseClass {
     }
 
     addCourseEvent(eventData) {
-        const newEvent = eventData instanceof CourseEventClass
-            ? eventData
-            : new CourseEventClass({
-                ...eventData,
-                courseId: this.id,
-                courseCode: this.getShortCode(),
-                departmentCode: this.departmentCode,
-                year: this.year, // Události by měly mít stejný rok/semestr jako předmět
-                semester: this.semester
-            });
+        if (!eventData) return;
 
-        if (!this.events.find(e => e.id === newEvent.id)) {
-            this.events.push(newEvent);
+        // Zajistíme, aby eventData byla instance CourseEventClass
+        const event = (eventData instanceof CourseEventClass) ? eventData : new CourseEventClass({
+            ...eventData,
+            courseId: this.id, // Předáme ID předmětu
+            departmentCode: this.departmentCode,
+            courseCode: this.courseCode,
+            year: this.year,
+            semester: this.semester
+        });
+
+        if (!this.events.some(e => e.id === event.id)) {
+            this.events.push(event);
         }
     }
 
     addCourseEvents(eventsData) {
+        if (!eventsData || !Array.isArray(eventsData)) return;
         eventsData.forEach(eventData => this.addCourseEvent(eventData));
     }
 
     getCourseEvents(filters = {}) {
-        let filteredEvents = this.events;
-        if (filters.instructor) {
-            filteredEvents = filteredEvents.filter(event => event.instructor === filters.instructor || (typeof event.instructor === 'object' && event.instructor.name === filters.instructor));
-        }
-        if (filters.hasCapacity === true) {
-            filteredEvents = filteredEvents.filter(event => event.currentCapacity < event.maxCapacity);
-        }
-        if (filters.hasCapacity === false) {
-            filteredEvents = filteredEvents.filter(event => event.currentCapacity >= event.maxCapacity);
-        }
-        if (filters.room) {
-            filteredEvents = filteredEvents.filter(event => event.room === filters.room);
-        }
+        let filteredEvents = [...this.events];
         if (filters.type) {
-            const filterTypeKey = EVENT_TYPE_TO_KEY_MAP[filters.type.toLowerCase()] || filters.type.toLowerCase();
-            filteredEvents = filteredEvents.filter(event => {
-                const eventTypeKey = EVENT_TYPE_TO_KEY_MAP[event.type.toLowerCase()];
-                return eventTypeKey === filterTypeKey;
-            });
+            filteredEvents = filteredEvents.filter(event => event.type === filters.type);
         }
+        // ... další filtry
         return filteredEvents;
     }
 
-    getEnrolledCounts(allEnrolledEventIdsInSchedule) {
-        const counts = { lecture: 0, practical: 0, seminar: 0, total: 0 };
-        if (!allEnrolledEventIdsInSchedule || allEnrolledEventIdsInSchedule.size === 0) {
-            return counts;
+    // Změněno z getEnrolledCounts na getEnrolledHours
+    getEnrolledHours(allEnrolledEventIdsInSchedule) {
+        const enrolledHours = { lecture: 0, practical: 0, seminar: 0, total: 0 };
+        if (!allEnrolledEventIdsInSchedule) {
+            return enrolledHours;
         }
-        const useSubstitution = this.isSpecialLectureSubstitutionCase();
+
         this.events.forEach(event => {
             if (allEnrolledEventIdsInSchedule.has(event.id)) {
-                let countAsKey = EVENT_TYPE_TO_KEY_MAP[event.type?.toLowerCase()];
-                if (useSubstitution && countAsKey === 'practical') {
-                    countAsKey = 'lecture';
+                const typeKey = EVENT_TYPE_TO_KEY_MAP[event.type?.toLowerCase()];
+                if (typeKey && enrolledHours.hasOwnProperty(typeKey)) {
+                    enrolledHours[typeKey] += event.durationHours || 0;
                 }
-                if (countAsKey && Object.prototype.hasOwnProperty.call(counts, countAsKey)) {
-                    counts[countAsKey]++;
-                }
-                counts.total++;
             }
         });
-        return counts;
-    }
-
-    getDisplayableNeededEnrollments(allEnrolledEventIdsInSchedule) {
-        const enrolledCounts = this.getEnrolledCounts(allEnrolledEventIdsInSchedule);
-        const needed = { lecture: 0, practical: 0, seminar: 0, totalNeeded: 0 };
-        let currentTotalNeeded = 0;
-        ENROLLMENT_KEYS_ORDER.forEach(key => {
-            const required = this.neededEnrollments[key] || 0;
-            const currentlyEnrolled = enrolledCounts[key] || 0;
-            needed[key] = Math.max(0, required - currentlyEnrolled);
-            currentTotalNeeded += needed[key];
-        });
-        needed.totalNeeded = currentTotalNeeded;
-        return needed;
+        
+        enrolledHours.total = enrolledHours.lecture + enrolledHours.practical + enrolledHours.seminar;
+        return enrolledHours;
     }
 
     isEnrollmentTypeRequirementMet(enrollmentKey, allEnrolledEventIdsInSchedule) {
-        const enrolledCounts = this.getEnrolledCounts(allEnrolledEventIdsInSchedule);
-        return enrolledCounts[enrollmentKey] >= (this.neededEnrollments[enrollmentKey] || 0);
+        const needed = this.neededHours[enrollmentKey] || 0;
+        if (needed === 0) {
+            // Pokud pro daný typ není nic potřeba, ale PŘESTO existují volitelné akce tohoto typu,
+            // požadavek není "splněn" v tom smyslu, aby se blokoval zápis.
+            // Ale pokud pro daný typ nejsou potřeba hodiny a ani neexistují akce, je splněn.
+            return !this._hasEventsOfType(enrollmentKey);
+        }
+
+        // Speciální případ pro volitelné přednášky
+        if (enrollmentKey === 'lecture' && this.isSpecialLectureSubstitutionCase()) {
+            const enrolledEvents = this.events.filter(e => allEnrolledEventIdsInSchedule.has(e.id));
+            const hasAnyLectureEnrolled = enrolledEvents.some(e => EVENT_TYPE_TO_KEY_MAP[e.type.toLowerCase()] === 'lecture');
+            return hasAnyLectureEnrolled;
+        }
+
+        const enrolled = this.getEnrolledHours(allEnrolledEventIdsInSchedule);
+        return enrolled[enrollmentKey] >= needed;
     }
 
     areAllEnrollmentRequirementsMet(allEnrolledEventIdsInSchedule) {
-        const needed = this.getDisplayableNeededEnrollments(allEnrolledEventIdsInSchedule);
-        return ENROLLMENT_KEYS_ORDER.every(key => needed[key] === 0);
+        return ENROLLMENT_KEYS_ORDER.every(key =>
+            this.isEnrollmentTypeRequirementMet(key, allEnrolledEventIdsInSchedule)
+        );
     }
 
     generateDummyCourseEvents(count = 2) {
-        // ... (implementace jako dříve, ale zajistit, že courseId a context roku/semestru jsou správně předány do CourseEventClass)
         const types = ['PŘEDNÁŠKA', 'CVIČENÍ', 'SEMINÁŘ'];
         const days = [0, 1, 2, 3, 4];
         const startTimes = ['08:00', '09:00', '10:00', '11:00', '13:00', '14:00', '15:00'];
@@ -222,4 +206,3 @@ class CourseClass {
 }
 
 export default CourseClass;
-export { ENROLLMENT_KEYS_ORDER, EVENT_TYPE_TO_KEY_MAP };

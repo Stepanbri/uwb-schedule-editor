@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 import { ENROLLMENT_KEYS_ORDER } from '../../../services/CourseClass';
 import GenericConfirmationDialog from '../Dialogs/GenericConfirmationDialog'; // Import dialogu
 
-const CourseNodeHeader = ({ course, enrolledCounts, neededEnrollmentsDisplay, areAllRequirementsMet, onRemoveCourse, isExpanded }) => {
+const CourseNodeHeader = ({ course, enrolledHours, areAllRequirementsMet, onRemoveCourse, isExpanded }) => {
     const { t } = useTranslation();
     const [isConfirmDeleteDialogOpen, setIsConfirmDeleteDialogOpen] = useState(false);
 
@@ -26,14 +26,27 @@ const CourseNodeHeader = ({ course, enrolledCounts, neededEnrollmentsDisplay, ar
         onRemoveCourse(course.id); // Použijeme unikátní ID předmětu
         handleCloseConfirmDialog();
     };
+    
+    const { neededHours } = course;
 
+    // Řetězec pro zobrazení zbývajících požadavků v Chipu
     const neededStr = ENROLLMENT_KEYS_ORDER
-        .filter(key => course.neededEnrollments[key] > 0)
-        .map(key => `${neededEnrollmentsDisplay[key]}${t(`enrollmentShort.${key}`, key.substring(0,1).toUpperCase())}`)
-        .join('/');
+        .map(key => {
+            const needed = neededHours[key] || 0;
+            const enrolled = enrolledHours[key] || 0;
+            const remaining = Math.max(0, needed - enrolled);
+            if (needed > 0 && remaining > 0) {
+                return `${remaining}h ${t(`enrollmentShort.${key}`, key.substring(0, 1).toUpperCase())}`;
+            }
+            return null;
+        })
+        .filter(Boolean)
+        .join(' / ');
 
+    // Řetězec pro zobrazení celkového stavu v Tooltipu
     const enrolledReqStr = ENROLLMENT_KEYS_ORDER
-        .map(key => `${enrolledCounts[key]}/${course.neededEnrollments[key]}${t(`enrollmentShort.${key}`, key.substring(0,1).toUpperCase())}`)
+        .filter(key => neededHours[key] > 0)
+        .map(key => `${enrolledHours[key] || 0}/${neededHours[key] || 0}h ${t(`enrollmentShort.${key}`, key.substring(0, 1).toUpperCase())}`)
         .join(' | ');
 
     // Sestavení textu pro sjednocený tooltip
@@ -71,8 +84,8 @@ const CourseNodeHeader = ({ course, enrolledCounts, neededEnrollmentsDisplay, ar
                                 <Chip
                                     icon={areAllRequirementsMet ? <CheckCircleOutlineIcon fontSize="small" /> : <HourglassEmptyIcon fontSize="small" />}
                                     label={areAllRequirementsMet
-                                        ? t('labels.requirementsMet', { count: enrolledCounts.total })
-                                        : t('labels.remaining', { needed: neededStr || '0', enrolledCount: enrolledCounts.total })
+                                        ? `${t('labels.requirementsMetSimple', 'Požadavky splněny')} (${enrolledHours.total}h)`
+                                        : `${t('labels.remainingSimple', 'Zbývá')}: ${neededStr || '0h'}`
                                     }
                                     size="small"
                                     color={areAllRequirementsMet ? "success" : "warning"}

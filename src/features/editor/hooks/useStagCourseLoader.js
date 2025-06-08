@@ -4,6 +4,7 @@ import { useStagApi } from '../../../contexts/StagApiContext';
 import { useWorkspace } from '../../../contexts/WorkspaceContext';
 import { useSnackbar } from '../../../contexts/SnackbarContext';
 import { useTranslation } from 'react-i18next';
+import { timeToMinutes } from '../../../utils/timeUtils';
 
 const getStagApiYear = (academicYearString) => {
     if (typeof academicYearString === 'string' && academicYearString.includes('/')) {
@@ -65,6 +66,25 @@ export const useStagCourseLoader = () => {
             const typeMapping = { "P": "PŘEDNÁŠKA", "C": "CVIČENÍ", "S": "SEMINÁŘ", "Z": "ZKOUŠKA", "A": "ZÁPOČET", "BL": "BLOK", "PŘ": "PŘEDNÁŠKA", "CV": "CVIČENÍ", "SE": "SEMINÁŘ", "LECTURE": "PŘEDNÁŠKA", "PRACTICAL": "CVIČENÍ", "SEMINAR": "SEMINÁŘ" };
 
             const transformedEvents = (Array.isArray(scheduleEventsData) ? scheduleEventsData : []).map(stagEvent => {
+                const startTime = stagEvent.hodinaSkutOd?.value || stagEvent.casOd;
+                const endTime = stagEvent.hodinaSkutDo?.value || stagEvent.casDo;
+
+                // Vyfiltrování virtuálních akcí
+                if (startTime === '00:00' && endTime === '00:00') {
+                    return null;
+                }
+
+                const hodinaOd = stagEvent.hodinaOd;
+                const hodinaDo = stagEvent.hodinaDo;
+
+                // Výpočet délky akce pokud chybí (hod/tydně)
+                let durationHours = parseFloat(stagEvent.pocetVyucHodin) || 0;
+                if (durationHours <= 0 && hodinaOd && hodinaDo) {
+                    if (hodinaDo >= hodinaOd) {
+                        durationHours = (hodinaDo - hodinaOd) + 1;
+                    }
+                }
+
                 const eventId = stagEvent.roakIdno || stagEvent.akceIdno || `${subjectInfo.katedra}-${subjectInfo.zkratka}-${stagEvent.typAkceZkr || 'T'}-${stagEvent.denZkr || 'D'}-${stagEvent.hodinaSkutOd?.value || '0000'}-${Math.random().toString(16).slice(2,7)}`;
                 
                 let instructorName = stagEvent.vsichniUciteleJmenaTituly || '';
@@ -84,8 +104,8 @@ export const useStagCourseLoader = () => {
 
                 return {
                     id: eventId, stagId: stagEvent.roakIdno || stagEvent.akceIdno,
-                    startTime: stagEvent.hodinaSkutOd?.value || stagEvent.casOd,
-                    endTime: stagEvent.hodinaSkutDo?.value || stagEvent.casDo,
+                    startTime: startTime,
+                    endTime: endTime,
                     day: dayMapping[dayKey] ?? (Number.isInteger(parseInt(stagEvent.den)) ? (parseInt(stagEvent.den) - 1) : 0),
                     recurrence: recurrenceMapping[stagEvent.tydenZkr?.toUpperCase()] || recurrenceMapping[stagEvent.tyden?.toUpperCase()] || stagEvent.tyden || "KAŽDÝ TÝDEN",
                     room: formattedRoom,
@@ -98,8 +118,9 @@ export const useStagCourseLoader = () => {
                     semester: formData.semester,
                     departmentCode: subjectInfo.katedra,
                     courseCode: subjectInfo.zkratka,
+                    durationHours: durationHours,
                 };
-            });
+            }).filter(Boolean);
 
             const courseDataForWorkspace = {
                 stagId: subjectInfo.predmetId,
@@ -107,10 +128,10 @@ export const useStagCourseLoader = () => {
                 departmentCode: subjectInfo.katedra,
                 courseCode: subjectInfo.zkratka,
                 credits: parseInt(subjectInfo.kreditu) || 0,
-                neededEnrollments: {
-                    lecture: parseInt(subjectInfo.prednaskyRozsah) || (parseInt(subjectInfo.jednotekPrednasek) > 0 ? 1 : 0),
-                    practical: parseInt(subjectInfo.cviceniRozsah) || (parseInt(subjectInfo.jednotekCviceni) > 0 ? 1 : 0),
-                    seminar: parseInt(subjectInfo.seminareRozsah) || (parseInt(subjectInfo.jednotekSeminare) > 0 ? 1 : 0)
+                neededHours: {
+                    lecture: parseInt(subjectInfo.jednotekPrednasek) || 0,
+                    practical: parseInt(subjectInfo.jednotekCviceni) || 0,
+                    seminar: parseInt(subjectInfo.jednotekSeminare) || 0
                 },
                 semester: formData.semester,
                 year: formData.year,

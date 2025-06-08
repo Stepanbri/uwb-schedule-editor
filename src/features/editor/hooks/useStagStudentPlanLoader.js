@@ -4,6 +4,7 @@ import { useStagApi } from '../../../contexts/StagApiContext';
 import { useWorkspace } from '../../../contexts/WorkspaceContext';
 import { useSnackbar } from '../../../contexts/SnackbarContext';
 import { useTranslation } from 'react-i18next';
+import { timeToMinutes } from '../../../utils/timeUtils';
 
 const getStagApiYear = (academicYearString) => {
     if (typeof academicYearString === 'string' && academicYearString.includes('/')) {
@@ -184,6 +185,25 @@ export const useStagStudentPlanLoader = () => {
                     const typeMapping = { "P": "PŘEDNÁŠKA", "C": "CVIČENÍ", "S": "SEMINÁŘ", "Z": "ZKOUŠKA", "A": "ZÁPOČET", "BL": "BLOK", "PŘ": "PŘEDNÁŠKA", "CV": "CVIČENÍ", "SE": "SEMINÁŘ", "LECTURE": "PŘEDNÁŠKA", "PRACTICAL": "CVIČENÍ", "SEMINAR": "SEMINÁŘ" };
 
                     const transformedEvents = (Array.isArray(scheduleEventsData) ? scheduleEventsData : []).map(stagEvent => {
+                        const startTime = stagEvent.hodinaSkutOd?.value || stagEvent.casOd;
+                        const endTime = stagEvent.hodinaSkutDo?.value || stagEvent.casDo;
+
+                        // Vyfiltrovaání virtuálních akcí
+                        if (startTime === '00:00' && endTime === '00:00') {
+                            return null;
+                        }
+
+                        const hodinaOd = stagEvent.hodinaOd;
+                        const hodinaDo = stagEvent.hodinaDo;
+
+                        // Výpočet délky akce pokud chybí (hod/tydně)
+                        let durationHours = parseFloat(stagEvent.pocetVyucHodin) || 0;
+                        if (durationHours <= 0 && hodinaOd && hodinaDo) {
+                            if (hodinaDo >= hodinaOd) {
+                                durationHours = (hodinaDo - hodinaOd) + 1;
+                            }
+                        }
+
                         const eventId = stagEvent.roakIdno || stagEvent.akceIdno || `${subjectData.rawSubject.katedra}-${subjectData.rawSubject.zkratka}-${stagEvent.typAkceZkr || 'T'}-${stagEvent.denZkr || 'D'}-${stagEvent.hodinaSkutOd?.value || '0000'}-${Math.random().toString(16).slice(2,7)}`;
                         let instructorName = '';
                         if (stagEvent.ucitel) {
@@ -207,8 +227,8 @@ export const useStagStudentPlanLoader = () => {
 
                         return {
                             id: eventId, stagId: stagEvent.roakIdno || stagEvent.akceIdno,
-                            startTime: stagEvent.hodinaSkutOd?.value || stagEvent.casOd,
-                            endTime: stagEvent.hodinaSkutDo?.value || stagEvent.casDo,
+                            startTime: startTime,
+                            endTime: endTime,
                             day: dayMapping[dayKey] ?? (Number.isInteger(parseInt(stagEvent.den)) ? (parseInt(stagEvent.den) - 1) : 0),
                             recurrence: recurrenceMapping[stagEvent.tydenZkr?.toUpperCase()] || recurrenceMapping[stagEvent.tyden?.toUpperCase()] || stagEvent.tyden || "KAŽDÝ TÝDEN",
                             room: formattedRoom,
@@ -221,14 +241,15 @@ export const useStagStudentPlanLoader = () => {
                             semester: eventSemesterEffective,
                             departmentCode: subjectData.rawSubject.katedra,
                             courseCode: subjectData.rawSubject.zkratka,
+                            durationHours: durationHours,
                         };
                     }).filter(event => event !== null);
 
-                    const rozsahParts = subjectData.rawSubject.rozsah?.split('+').map(s => parseInt(s.trim()) || 0) || [];
+                    const rozsahParts = subjectData.rawSubject.rozsah?.split('+').map(s => parseInt(s.trim()) || 0) || [0, 0, 0];
                     const needed = {
-                        lecture: parseInt(subjectData.rawSubject.jednotekPrednasek) || (rozsahParts[0] > 0 ? 1 : 0) || 0,
-                        practical: parseInt(subjectData.rawSubject.jednotekCviceni) || (rozsahParts.length > 1 && rozsahParts[1] > 0 ? 1 : 0) || 0,
-                        seminar: parseInt(subjectData.rawSubject.jednotekSeminare) || (rozsahParts.length > 2 && rozsahParts[2] > 0 ? 1 : 0) || 0,
+                        lecture: rozsahParts[0] || 0,
+                        practical: rozsahParts.length > 1 ? rozsahParts[1] : 0,
+                        seminar: rozsahParts.length > 2 ? rozsahParts[2] : 0,
                     };
 
                     let courseEffectiveSemester = planParams.semester.toUpperCase();
@@ -244,7 +265,7 @@ export const useStagStudentPlanLoader = () => {
                         departmentCode: subjectData.rawSubject.katedra,
                         courseCode: subjectData.rawSubject.zkratka,
                         credits: parseInt(subjectData.rawSubject.kreditu) || 0,
-                        neededEnrollments: needed,
+                        neededHours: needed,
                         semester: courseEffectiveSemester,
                         year: planParams.scheduleAcademicYear,
                         events: transformedEvents,
