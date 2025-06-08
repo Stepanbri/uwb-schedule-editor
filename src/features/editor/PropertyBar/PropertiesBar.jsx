@@ -334,8 +334,7 @@ function PropertiesBar() {
                                     type="time"
                                     value={currentPreferenceParams[param.name] || param.defaultValue || ''}
                                     onChange={(e) => handleParamChange(param.name, e.target.value)}
-                                    InputLabelProps={{ shrink: true }}
-                                    inputProps={{ step: 300 }}
+                                    slotProps={{ input: { step: 300 } }}
                                     variant="filled"
                                 />
                             )}
