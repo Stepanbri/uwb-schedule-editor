@@ -21,6 +21,12 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import SchoolIcon from '@mui/icons-material/School';
 
+// Importy SVG log
+import ReactLogo from '../../assets/react-logo.svg';
+import MuiLogo from '../../assets/mui-logo.svg';
+import ViteLogo from '../../assets/vite-logo.svg';
+import I18nextLogo from '../../assets/i18next-logo.svg';
+
 function LandingPage() {
     const { t } = useTranslation();
     const theme = useTheme();
@@ -28,10 +34,10 @@ function LandingPage() {
     const PROJECT_GITHUB_URL = "https://github.com/stepanbri/uwb-scheduler";
 
     const technologies = [
-        { name: 'React', logoSrc: '/src/assets/react-logo.svg', descriptionKey: 'landingPage.tech.reactDesc', version: "18.2.0" },
-        { name: 'MUI', logoSrc: '/src/assets/mui-logo.svg', descriptionKey: 'landingPage.tech.muiDesc', version: "5.15.0" },
-        { name: 'Vite', logoSrc: '/src/assets/vite-logo.svg', descriptionKey: 'landingPage.tech.viteDesc', version: "5.0.0" },
-        { name: 'i18next', logoSrc: '/src/assets/i18next-logo.svg', descriptionKey: 'landingPage.tech.i18nextDesc', version: "23.7.0" },
+        { name: 'React', logoSrc: ReactLogo, descriptionKey: 'landingPage.tech.reactDesc', version: "18.2.0" },
+        { name: 'MUI', logoSrc: MuiLogo, descriptionKey: 'landingPage.tech.muiDesc', version: "5.15.0" },
+        { name: 'Vite', logoSrc: ViteLogo, descriptionKey: 'landingPage.tech.viteDesc', version: "5.0.0" },
+        { name: 'i18next', logoSrc: I18nextLogo, descriptionKey: 'landingPage.tech.i18nextDesc', version: "23.7.0" },
     ];
 
     const appFunctionKeys = [

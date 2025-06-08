@@ -400,24 +400,33 @@ class WorkspaceService {
             return false;
         }
         try {
-            // Zjistit aktuální rozměry elementu včetně skrytých částí
-            const scrollHeight = scheduleWrapperElement.scrollHeight;
-            const scrollWidth = scheduleWrapperElement.scrollWidth;
+            // Najít přímý container tabulky rozvrhu
+            const tableContainer = scheduleWrapperElement.querySelector('.MuiTableContainer-root');
+            if (!tableContainer) {
+                console.error("Nelze najít container tabulky rozvrhu");
+                return false;
+            }
+
+            // Zapamatovat si původní hodnoty
+            const originalStyle = {
+                overflow: tableContainer.style.overflow,
+                height: tableContainer.style.height,
+                width: tableContainer.style.width,
+                position: tableContainer.style.position
+            };
             
-            // Zapamatovat si původní hodnoty scrollu a stylu
-            const originalScrollTop = scheduleWrapperElement.scrollTop;
-            const originalScrollLeft = scheduleWrapperElement.scrollLeft;
-            const originalPosition = window.getComputedStyle(scheduleWrapperElement).position;
-            const originalOverflow = window.getComputedStyle(scheduleWrapperElement).overflow;
+            // Zjistit skutečné rozměry včetně přetečení
+            const scrollHeight = tableContainer.scrollHeight;
+            const scrollWidth = tableContainer.scrollWidth;
             
             // Dočasně upravit styly pro zachycení
-            scheduleWrapperElement.style.position = 'relative';
-            scheduleWrapperElement.style.overflow = 'visible';
-            scheduleWrapperElement.style.height = `${scrollHeight}px`;
-            scheduleWrapperElement.style.width = `${scrollWidth}px`;
+            tableContainer.style.overflow = 'visible';
+            tableContainer.style.height = `${scrollHeight}px`;
+            tableContainer.style.width = `${scrollWidth}px`;
+            tableContainer.style.position = 'relative';
             
-            // Vytvořit canvas
-            const canvas = await html2canvas(scheduleWrapperElement, {
+            // Vytvořit canvas, použijeme samotnou tabulku místo celého wrapperu
+            const canvas = await html2canvas(tableContainer, {
                 scale: 2, // Zvýšení rozlišení pro lepší kvalitu
                 useCORS: true, // Povolení CORS pro případné obrázky na pozadí
                 logging: false, // Vypnutí logování z html2canvas
@@ -425,19 +434,20 @@ class WorkspaceService {
                 width: scrollWidth,
                 windowHeight: scrollHeight,
                 windowWidth: scrollWidth,
-                x: 0,
-                y: 0,
-                scrollX: 0,
-                scrollY: 0
+                ignoreElements: (element) => {
+                    // Ignorovat elementy, které by mohly způsobovat problémy
+                    return element.classList && (
+                        element.classList.contains('MuiCircularProgress-root') ||
+                        element.classList.contains('MuiBackdrop-root')
+                    );
+                }
             });
             
             // Vrátit původní stav elementu
-            scheduleWrapperElement.style.position = originalPosition;
-            scheduleWrapperElement.style.overflow = originalOverflow;
-            scheduleWrapperElement.style.height = '';
-            scheduleWrapperElement.style.width = '';
-            scheduleWrapperElement.scrollTop = originalScrollTop;
-            scheduleWrapperElement.scrollLeft = originalScrollLeft;
+            tableContainer.style.overflow = originalStyle.overflow;
+            tableContainer.style.height = originalStyle.height;
+            tableContainer.style.width = originalStyle.width;
+            tableContainer.style.position = originalStyle.position;
             
             // Uložit obrázek
             const image = canvas.toDataURL('image/png', 1.0);

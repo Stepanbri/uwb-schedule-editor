@@ -83,6 +83,34 @@ class ScheduleClass {
     clear() {
         this.enrolledEvents = [];
     }
+    
+    /**
+     * Vytvoří a vrátí hlubokou kopii rozvrhu.
+     * @returns {ScheduleClass} Nová instance ScheduleClass se zkopírovanými událostmi.
+     */
+    clone() {
+        const clonedSchedule = new ScheduleClass();
+        // Reference na objekty událostí jsou dostačující, 
+        // protože CourseEventClass instance se nemění, jen se přidávají/odebírají
+        clonedSchedule.addEvents(this.enrolledEvents);
+        return clonedSchedule;
+    }
+    
+    /**
+     * Kontroluje, zda by přidání nové události způsobilo konflikt s již zapsanými událostmi.
+     * @param {CourseEventClass} newEvent - Nová událost ke kontrole.
+     * @param {Function} conflictFunc - Funkce pro kontrolu konfliktu mezi dvěma událostmi.
+     * @returns {boolean} True, pokud existuje konflikt.
+     */
+    conflictsWith(newEvent, conflictFunc) {
+        if (!newEvent || !conflictFunc || typeof conflictFunc !== 'function') {
+            return false;
+        }
+        
+        return this.enrolledEvents.some(existingEvent => 
+            conflictFunc(existingEvent, newEvent)
+        );
+    }
 
     // Metody pro kontrolu překryvů, získání akcí pro den atd. mohou být přidány zde.
     // Například pro grafické zobrazení dle

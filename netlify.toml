@@ -19,3 +19,31 @@
   #  publish = "dist" # Folder with the static content for _redirect file
 
   ## more info on configuring this file: https://ntl.fyi/file-based-build-config
+
+# API proxy pro production STAG systém
+[[redirects]]
+  from = "/api/stag-production/*"
+  to = "https://stag-ws.zcu.cz/:splat"
+  status = 200
+  force = true
+  headers = {X-Forwarded-Host = "true"}
+
+# API proxy pro demo STAG systém
+[[redirects]]
+  from = "/api/stag-demo/*"
+  to = "https://stag-demo.zcu.cz/:splat"
+  status = 200
+  force = true
+  headers = {X-Forwarded-Host = "true"}
+
+# Cache SVG souborů pro lepší výkon
+[[headers]]
+  for = "*.svg"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Cache pro ostatní statické soubory
+[[headers]]
+  for = "/*.(js|css|woff|woff2|ttf|png|jpg|jpeg)"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
