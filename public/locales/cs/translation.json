@@ -241,7 +241,7 @@
   "Dialogs": {
     "deletePreference": {
       "title": "Odstranit preferenci",
-      "message": "Opravdu si přejete odstranit preferenci {{displayLabel}}?"
+      "message": "Opravdu si přejete odstranit preferenci {{preferenceLabel}}?"
     },
     "selectStudyParams": {
       "title": "Parametry pro načtení předmětů oboru",
@@ -387,7 +387,7 @@
     "author": {
       "sectionTitle": "O Projektu",
       "namePlaceholder": "Štěpán Bříza",
-      "summary": "Tento Plánovač Rozvrhu vznikl jako součást bakalářské práce na Fakultě aplikovaných věd Západočeské univerzity v Plzni. Cílem bylo vytvořit moderní a uživatelsky přívětivý nástroj pro studenty.",
+      "summary": "Tento Plánovač rozvrhu vznikl jako součást semestrální práce v rámci předmětu KIV/UUR na Fakultě aplikovaných věd Západočeské univerzity v Plzni. KIV/UUR se zaměřuje na základní principy návrhu uživatelských rozhraní. Cílem práce bylo vytvořit moderní a uživatelsky přívětivý nástroj pro studenty k sestavení rozvrhu ještě před oficiálním termínem předezápisu. Ačkoliv projekt vznikl jako semestrální práce, nadále pokračuje jeho vývoj, přidávají se nové funkce a opravují chyby. Rád bych poděkoval panu Ing. Richardu Lipkovi, Ph.D., a panu Ing. Michalu Nyklovi, Ph.D., za kvalitně vedený předmět.",
       "githubButton": "Zdrojový Kód na GitHubu"
     }
   },

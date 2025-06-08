@@ -9,9 +9,9 @@ import SchoolIcon from '@mui/icons-material/School';
 import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
 import { useTranslation } from 'react-i18next';
 
-import CourseNodeHeader from './CourseBar/CourseNodeHeader';
-import EventNode from './CourseBar/EventNode';
-import { EVENT_TYPE_TO_KEY_MAP } from '../../services/CourseClass';
+import CourseNodeHeader from './CourseNodeHeader';
+import EventNode from './EventNode';
+import { EVENT_TYPE_TO_KEY_MAP } from '../../../services/CourseClass';
 
 function CourseBar({
                        courses,

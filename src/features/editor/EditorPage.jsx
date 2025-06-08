@@ -17,7 +17,7 @@ import { useCourseManagement } from './hooks/useCourseManagement';
 import { useStagCourseLoader } from './hooks/useStagCourseLoader';
 import { useStagStudentPlanLoader } from './hooks/useStagStudentPlanLoader';
 
-import CourseBar from './CourseBar';
+import CourseBar from './CourseBar/CourseBar';
 import ScheduleBox from './ScheduleBox/ScheduleBox.jsx';
 import PropertiesBar from './PropertyBar/PropertiesBar';
 import ScheduleToolbar from './ScheduleBox/ScheduleToolbar';

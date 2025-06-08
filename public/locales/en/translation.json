@@ -384,7 +384,7 @@
     "author": {
       "sectionTitle": "About the Project",
       "namePlaceholder": "Štěpán Bříza",
-      "summary": "This Schedule Planner was created as part of a bachelor's thesis at the Faculty of Applied Sciences, University of West Bohemia in Pilsen. The goal was to create a modern and user-friendly tool for students.",
+      "summary": "This Schedule Planner was created as part of a semester project for the KIV/UUR course at the Faculty of Applied Sciences, University of West Bohemia in Pilsen. KIV/UUR introduces the fundamental principles of user interface design. The goal of the project was to build a modern and user-friendly tool for students to plan their schedules before the official course registration opens. Although the project originated as a semester assignment, it is currently under active development, with new features and bug fixes being added. I would like to thank Ing. Richard Lipka, Ph.D., and Ing. Michal Nykl, Ph.D., for their excellent instruction.",
       "githubButton": "Source Code on GitHub"
     }
   },
