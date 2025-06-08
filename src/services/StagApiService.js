@@ -1,11 +1,12 @@
-// const IS_DEV = import.meta.env.DEV;
-// const PROXY_PATH = '/api-stag';
+// Služba pro komunikaci se STAG API
+// Poskytuje metody pro autentizaci, získávání dat o předmětech a studijních plánech
 
 // Přímé URL pro STAG servery pro login redirect a API volání
 const DIRECT_PROD_STAG_URL = "https://stag-ws.zcu.cz";
 const DIRECT_DEMO_STAG_URL = "https://stag-demo.zcu.cz";
 
 class StagApiService {
+    // Konstruktor inicializuje cesty pro API a přihlášení
     // apiRootPath: např. '/api/stag-production/' (pro API volání přes proxy)
     // useDemoServer: boolean, indikuje, zda se má použít demo STAG pro login
     constructor(apiRootPath, useDemoServer) {
@@ -23,15 +24,19 @@ class StagApiService {
         
         console.log(`StagApiService initialized with wsBaseUrl: ${this.wsBaseUrl}, direct loginUrl: ${this.loginUrl}`);
 
+        // Inicializace stavových proměnných
         this.stagUserTicket = null;
         this.userInfo = { jmeno: '', prijmeni: '', email: '', titulPred: '', titulZa: '', roles: [] };
         this.selectedStagUserRole = null;
     }
 
+    // Nastavení přístupového tokenu pro STAG API
     setStagUserTicket(ticket) {
         this.stagUserTicket = (ticket === "anonymous" || !ticket) ? null : ticket;
     }
 
+    // Dekódování a nastavení informací o uživateli z base64 řetězce
+    // Tato data přicházejí z callback URL po přihlášení do STAGu
     setUserInfoFromBase64(base64UserInfo) {
         if (!base64UserInfo) {
             this.userInfo = { jmeno: '', prijmeni: '', email: '', titulPred: '', titulZa: '', roles: [] };
@@ -39,6 +44,7 @@ class StagApiService {
             return;
         }
         try {
+            // Dekódování base64 řetězce
             const binaryString = atob(base64UserInfo);
             const bytes = new Uint8Array(binaryString.length);
             for (let i = 0; i < binaryString.length; i++) {

@@ -1,11 +1,14 @@
-// src/features/editor/hooks/usePreferenceManagement.js
+// Hook pro správu uživatelských preferencí při generování rozvrhu
+// Obsahuje definici typů preferencí, jejich parametrů a funkcí pro práci s nimi
 import { useCallback } from 'react';
 import { useWorkspace } from '../../../contexts/WorkspaceContext';
 import { useSnackbar } from '../../../contexts/SnackbarContext';
 import { useTranslation } from 'react-i18next';
 import { EVENT_TYPE_TO_KEY_MAP } from '../../../services/CourseClass';
 
+// Konfigurace typů preferencí - definuje parametry, popisky a formátování pro každý typ preference
 export const PREFERENCE_CONFIG = {
+    // Preference pro volný den v týdnu
     FREE_DAY: {
         labelKey: 'preferences.types.FREE_DAY.label',
         shortLabelKey: 'preferences.types.FREE_DAY.shortLabel',
@@ -15,6 +18,7 @@ export const PREFERENCE_CONFIG = {
         ],
         displayFormatter: (params, t) => t('preferences.displayLabels.freeDay', { day: t(`preferences.dayOptions.${EVENT_TYPE_TO_KEY_MAP[params.day.toLowerCase()] || 'other'}`, params.day) })
     },
+    // Preference pro vyhnutí se určitým časům v daný den
     AVOID_TIMES: {
         labelKey: 'preferences.types.AVOID_TIMES.label',
         shortLabelKey: 'preferences.types.AVOID_TIMES.shortLabel',
@@ -26,7 +30,8 @@ export const PREFERENCE_CONFIG = {
         ],
         displayFormatter: (params, t) => t('preferences.displayLabels.avoidTimes', { day: t(`preferences.dayOptions.${EVENT_TYPE_TO_KEY_MAP[params.day.toLowerCase()] || 'other'}`, params.day), startTime: params.startTime, endTime: params.endTime })
     },
-    PREFER_INSTRUCTOR: { // Přidání konfigurace pro PREFER_INSTRUCTOR
+    // Preference pro preferování konkrétního vyučujícího u daného předmětu a typu výuky
+    PREFER_INSTRUCTOR: {
         labelKey: 'preferences.types.PREFER_INSTRUCTOR.label',
         shortLabelKey: 'preferences.types.PREFER_INSTRUCTOR.shortLabel',
         defaultLabel: 'Preferovat vyučujícího',
@@ -46,6 +51,7 @@ export const PREFERENCE_CONFIG = {
     }
 };
 
+// Dostupné hodnoty pro výběrové parametry preferencí
 export const PREFERENCE_OPTIONS = {
     dayOptions: ['PO', 'UT', 'ST', 'CT', 'PA', 'SO', 'NE']
 };

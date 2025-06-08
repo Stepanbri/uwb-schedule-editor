@@ -1,5 +1,5 @@
-// src/services/ScheduleClass.js
-// import CourseEventClass from './CourseEventClass'; // Není přímo potřeba zde, akce přicházejí zvenku
+// Třída reprezentující rozvrh (schedule) uživatele
+// Spravuje seznam zapsaných rozvrhových akcí a operace s nimi
 
 /**
  * Reprezentuje sestavený rozvrh studenta.

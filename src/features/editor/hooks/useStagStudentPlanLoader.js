@@ -9,7 +9,8 @@
  * Hook spravuje stav všech dialogových oken a komunikaci se STAG API a Workspace.
  */
 
-// src/features/editor/hooks/useStagStudentPlanLoader.js
+// Hook pro načítání studijního plánu studenta ze STAGu
+// Řídí celý proces od přihlášení uživatele až po přidání předmětů do workspace
 import { useState, useCallback } from 'react';
 import { useStagApi } from '../../../contexts/StagApiContext';
 import { useWorkspace } from '../../../contexts/WorkspaceContext';

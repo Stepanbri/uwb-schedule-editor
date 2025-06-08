@@ -15,6 +15,7 @@ const MAX_GENERATED_SCHEDULES = 10;
 
 /**
  * Převádí časový řetězec ve formátu "HH:MM" na celkový počet minut od půlnoci.
+ * Usnadňuje porovnávání časů a výpočet překryvů.
  * @param {string} timeStr - Časový řetězec (např. "14:30").
  * @returns {number} Počet minut od půlnoci.
  */
@@ -31,19 +32,24 @@ const timeToMinutes = (timeStr) => {
  * @returns {boolean} Vrací `true`, pokud události kolidují.
  */
 const eventsConflict = (event1, event2) => {
+    // Pokud jsou události v jiné dny, nemohou kolidovat
     if (event1.day !== event2.day) return false;
 
+    // Převod časů na minuty pro snadnější porovnání
     const start1 = timeToMinutes(event1.startTime);
     const end1 = timeToMinutes(event1.endTime);
     const start2 = timeToMinutes(event2.startTime);
     const end2 = timeToMinutes(event2.endTime);
 
+    // Kontrola překryvu časů - standardní algoritmus pro detekci překryvu intervalů
     const overlap = start1 < end2 && start2 < end1;
     if (!overlap) return false;
 
+    // Zohlednění frekvence opakování (každý týden, lichý, sudý)
     const freq1 = event1.recurrence;
     const freq2 = event2.recurrence;
 
+    // Jednorázové události vždy kolidují, pokud se překrývají v čase
     if (freq1 === "jednorázově" || freq2 === "jednorázově") {
         return true;
     }

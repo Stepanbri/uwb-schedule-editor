@@ -1,4 +1,5 @@
-// src/features/editor/hooks/useCourseManagement.js
+// Hook pro správu kurzů v editoru rozvrhu
+// Poskytuje funkce pro přidávání, odebírání a manipulaci s kurzy a jejich událostmi
 import { useCallback } from 'react';
 import { useWorkspace } from '../../../contexts/WorkspaceContext';
 import { useSnackbar } from '../../../contexts/SnackbarContext';
@@ -9,19 +10,17 @@ export const useCourseManagement = () => {
     const {
         courses,
         activeSchedule,
-        addCourse: addCourseToWorkspaceContext, // Nyní řešeno v kontextu
-        removeCourse: removeCourseFromWorkspaceContext, // Nyní řešeno v kontextu
-        handleRemoveAllCourses: handleRemoveAllCoursesFromContext, // Nová funkce z kontextu
+        addCourse: addCourseToWorkspaceContext, // Funkce z kontextu pro přidání kurzu
+        removeCourse: removeCourseFromWorkspaceContext, // Funkce z kontextu pro odebrání kurzu
+        handleRemoveAllCourses: handleRemoveAllCoursesFromContext, // Funkce pro odebrání všech kurzů
         toggleEventInSchedule: toggleEventInScheduleContext,
         syncStateFromService
     } = useWorkspace();
     const { showSnackbar } = useSnackbar();
     const { t } = useTranslation();
 
-    // addCourse a removeCourse jsou nyní primárně řešeny v WorkspaceContext,
-    // který zobrazuje vlastní snackbary.
-    // Zde ponecháme jen toggleEventInSchedule, pokud chceme specifickou logiku/notifikace pro něj.
-
+    // Funkce pro přepínání zápisu/odhlášení události v rozvrhu
+    // Kontroluje splnění podmínek pro zápis/odhlášení a zobrazuje odpovídající notifikace
     const toggleEventInSchedule = useCallback((eventToToggle, isCurrentlyEnrolled, courseContext) => {
         if (isCurrentlyEnrolled) {
             toggleEventInScheduleContext(eventToToggle, true);
@@ -35,6 +34,7 @@ export const useCourseManagement = () => {
                 const eventTypeKey = EVENT_TYPE_TO_KEY_MAP[normalizedEventType] || normalizedEventType;
                 const enrolledEventIds = new Set(activeSchedule.getAllEnrolledEvents().map(e => e.id));
 
+                // Kontrola, zda je splněn požadavek na počet událostí daného typu
                 if (eventTypeKey && courseContext.isEnrollmentTypeRequirementMet(eventTypeKey, enrolledEventIds)) {
                     alertMsg = t('alerts.typeRequirementMet', {
                         eventType: t(`courseEvent.${eventTypeKey}`, eventToToggle.type),

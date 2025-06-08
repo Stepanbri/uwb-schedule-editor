@@ -4,7 +4,8 @@
  * Je implementována jako Singleton, aby byl zajištěn jediný zdroj pravdy v celé aplikaci.
  */
 
-// src/services/WorkspaceService.js
+// Hlavní služba pro správu dat aplikace
+// Spravuje předměty, rozvrhy, preference a poskytuje rozhraní pro operace s nimi
 import CourseClass from './CourseClass';
 import ScheduleClass from './ScheduleClass';
 import CourseEventClass from './CourseEventClass';

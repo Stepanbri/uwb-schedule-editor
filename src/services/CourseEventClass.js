@@ -1,28 +1,29 @@
-// src/services/CourseEventClass.js
+// Třída reprezentující rozvrhovou akci (událost) předmětu
+// Obsahuje všechny potřebné informace o konkrétní výukové jednotce
 class CourseEventClass {
     constructor({
-                    id, // Mělo by být stagId, pokud je dostupné
+                    id, // Identifikátor události, může být ze STAGu nebo generovaný
                     stagId = null,
-                    startTime,
-                    endTime,
-                    day,
-                    recurrence,
-                    validityStart = null,
-                    validityEnd = null,
-                    courseId, // Unikátní ID předmětu (department/code_year_semester)
-                    courseCode,
-                    room = '',
-                    type,
-                    instructor = '',
-                    currentCapacity = 0,
-                    maxCapacity = 0,
-                    note = '',
-                    isVirtual = false,
-                    year = '',
-                    semester = '',
-                    groupId = null,
-                    departmentCode = '',
-                    durationHours = 0
+                    startTime,         // Čas začátku (např. "14:00")
+                    endTime,           // Čas konce (např. "15:30")
+                    day,               // Den v týdnu (index nebo textový identifikátor)
+                    recurrence,        // Opakování (každý týden, sudý, lichý)
+                    validityStart = null, // Datum začátku platnosti
+                    validityEnd = null,   // Datum konce platnosti
+                    courseId,          // ID kurzu, ke kterému událost patří
+                    courseCode,        // Kód předmětu (např. PPA1)
+                    room = '',         // Místnost (např. UU303)
+                    type,              // Typ výuky (přednáška, cvičení, seminář)
+                    instructor = '',   // Vyučující
+                    currentCapacity = 0, // Aktuální počet zapsaných studentů
+                    maxCapacity = 0,     // Maximální kapacita
+                    note = '',         // Poznámka k události
+                    isVirtual = false, // Příznak pro virtuální výuku
+                    year = '',         // Akademický rok
+                    semester = '',     // Semestr (ZS, LS)
+                    groupId = null,    // ID skupiny událostí
+                    departmentCode = '',// Kód katedry (např. KIV)
+                    durationHours = 0  // Délka v hodinách
                 }) {
         // Použijeme stagId jako primární id, pokud je dostupné, jinak dodané id, jinak generujeme
         this.id = id || stagId || `${departmentCode}-${courseCode}-${type}-${day}-${startTime}-${Math.random().toString(36).substring(2, 9)}`;
@@ -41,7 +42,7 @@ class CourseEventClass {
         this.currentCapacity = currentCapacity;
         this.maxCapacity = maxCapacity;
         this.note = note;
-        this.isVirtual = isVirtual || !room;
+        this.isVirtual = isVirtual || !room; // Pokud není zadaná místnost, předpokládáme virtuální výuku
         this.year = year;
         this.semester = semester;
         this.groupId = groupId;

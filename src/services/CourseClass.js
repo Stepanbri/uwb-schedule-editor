@@ -1,7 +1,10 @@
-// src/services/CourseClass.js
+// Třída reprezentující kurz (předmět) v rozvrhu
+// Obsahuje metadata předmětu a seznam jeho rozvrhových akcí
 import CourseEventClass from './CourseEventClass';
 import { getColorForCourse } from '../utils/colorUtils';
 
+// Mapování různých formátů zápisu typů událostí na jednotné interní klíče
+// Slouží k normalizaci dat z různých zdrojů (STAG, uživatelský vstup)
 export const EVENT_TYPE_TO_KEY_MAP = {
     'přednáška': 'lecture',
     'lecture': 'lecture',
@@ -15,21 +18,24 @@ export const EVENT_TYPE_TO_KEY_MAP = {
     // ... další možné mapování
 };
 
+// Pořadí typů událostí pro konzistentní zobrazení v UI
 export const ENROLLMENT_KEYS_ORDER = ['lecture', 'practical', 'seminar'];
 
+// Hlavní třída reprezentující předmět v rozvrhu
+// Uchovává metadata předmětu a spravuje seznam jeho rozvrhových akcí
 class CourseClass {
     constructor({
-                    stagId = null,
-                    name,
-                    departmentCode,
-                    courseCode,
-                    credits,
-                    neededHours = {},
-                    events = [],
-                    semester = '', // např. ZS, LS
-                    year = '',     // např. 2023/2024
-                    source = 'prod',
-                    color = null
+                    stagId = null,           // ID předmětu ve STAGu
+                    name,                    // Název předmětu
+                    departmentCode,          // Kód katedry (např. KIV)
+                    courseCode,              // Kód předmětu (např. PPA1)
+                    credits,                 // Počet kreditů
+                    neededHours = {},        // Požadované hodiny podle typu výuky
+                    events = [],             // Seznam rozvrhových akcí
+                    semester = '',           // Semestr (ZS, LS)
+                    year = '',               // Akademický rok
+                    source = 'prod',         // Zdroj dat (prod, demo)
+                    color = null             // Barva předmětu v UI
                 }) {
         this.stagId = stagId;
         this.name = name;

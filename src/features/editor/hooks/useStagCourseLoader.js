@@ -1,4 +1,5 @@
-// src/features/editor/hooks/useStagCourseLoader.js
+// Hook pro načítání informací o předmětech ze STAG API
+// Poskytuje funkce pro otevření dialogu, zpracování formuláře a přidání předmětu do workspace
 import { useState, useCallback } from 'react';
 import { useStagApi } from '../../../contexts/StagApiContext';
 import { useWorkspace } from '../../../contexts/WorkspaceContext';
@@ -6,6 +7,8 @@ import { useSnackbar } from '../../../contexts/SnackbarContext';
 import { useTranslation } from 'react-i18next';
 import { timeToMinutes } from '../../../utils/timeUtils';
 
+// Pomocná funkce pro extrakci roku ze stringu akademického roku
+// Např. z "2023/2024" vrátí "2023" pro API
 const getStagApiYear = (academicYearString) => {
     if (typeof academicYearString === 'string' && academicYearString.includes('/')) {
         return academicYearString.split('/')[0];
@@ -19,9 +22,11 @@ export const useStagCourseLoader = () => {
     const { showSnackbar } = useSnackbar();
     const { t, i18n } = useTranslation();
 
+    // Stav pro správu dialogů a procesu načítání
     const [isLoadCourseDialogOpen, setIsLoadCourseDialogOpen] = useState(false);
     const [isProcessingCourse, setIsProcessingCourse] = useState(false);
 
+    // Stav pro dialog přepsání existujícího předmětu
     const [overwriteSingleCourseDialog, setOverwriteSingleCourseDialog] = useState({
         open: false,
         title: '',
@@ -30,14 +35,18 @@ export const useStagCourseLoader = () => {
         onConfirm: () => {},
     });
 
+    // Funkce pro otevření a zavření dialogu načítání předmětu
     const openLoadCourseDialog = useCallback(() => setIsLoadCourseDialogOpen(true), []);
     const closeLoadCourseDialog = useCallback(() => setIsLoadCourseDialogOpen(false), []);
 
+    // Funkce pro zavření dialogu přepsání kurzu
     const closeOverwriteSingleCourseDialog = () => {
         setOverwriteSingleCourseDialog(prev => ({ ...prev, open: false }));
-        setIsProcessingCourse(false); // Ukončíme processing, pokud byl dialog jen zavřen
+        setIsProcessingCourse(false); // Ukončení stavu zpracování při zavření dialogu
     };
 
+    // Funkce pro zpracování formuláře načtení předmětu ze STAGu
+    // Načte informace o předmětu a jeho rozvrhových akcích, a připraví je pro přidání do workspace
     const handleSubmitLoadCourse = useCallback(async (formData) => {
         setIsProcessingCourse(true);
         closeLoadCourseDialog();
@@ -45,6 +54,7 @@ export const useStagCourseLoader = () => {
         const stagApiYearValue = getStagApiYear(formData.year);
 
         try {
+            // Načtení základních informací o předmětu ze STAGu
             const subjectInfoArray = await stagApiService.getSubjectInfo(formData.departmentCode, formData.subjectCode, stagApiYearValue, lang);
             const subjectInfo = Array.isArray(subjectInfoArray) && subjectInfoArray.length > 0 ? subjectInfoArray[0] : subjectInfoArray;
 
