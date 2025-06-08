@@ -1,5 +1,5 @@
 {
-  "appTitle": "UWB Schedule Planner",
+  "appTitle": "ZCU Schedule Planner",
   "appTitleShort": "Schedule Planner",
   "nav": {
     "editor": "Schedule Editor",
@@ -336,7 +336,10 @@
     }
   },
   "schedule": {
-    "dayTime": "Day/Time"
+    "dayTime": "Day/Time",
+    "switcherTitle": "Schedule Variants",
+    "primarySchedule": "Primary Schedule",
+    "generatedSchedule": "Generated Schedule #{{number}}"
   },
   "landingPage": {
     "hero": {

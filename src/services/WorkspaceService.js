@@ -11,7 +11,7 @@ import ScheduleClass from './ScheduleClass';
 import CourseEventClass from './CourseEventClass';
 import { getColorForCourse } from '../utils/colorUtils';
 import html2canvas from 'html2canvas'; // Import pro ukládání obrázku
-import { generateSchedule as generateScheduleAlgorithm } from './scheduleGenerator';
+import { generateScheduleAlgorithm } from './scheduleGenerator';
 
 /**
  * Klíč pro ukládání dat workspace do localStorage.
@@ -551,13 +551,23 @@ class WorkspaceService {
      * @param {CourseClass[]} [coursesToSchedule=this.courses] - Pole předmětů k naplánování.
      */
     generateSchedule(coursesToSchedule = this.courses) {
+        console.log("WorkspaceService.generateSchedule called with:", {
+            coursesCount: coursesToSchedule.length,
+            preferencesCount: Object.keys(this.preferences).length
+        });
+        
         // Použijeme externí, optimalizovaný algoritmus pro generování
-        this.generatedSchedules = generateScheduleAlgorithm(coursesToSchedule);
+        // Předáme algoritmu i uživatelské preference
+        this.generatedSchedules = generateScheduleAlgorithm(coursesToSchedule, this.preferences);
+        
+        console.log("Generated schedules:", this.generatedSchedules.length);
 
         // Resetujeme aktivní rozvrh, primární rozvrh zůstává nedotčen
         this.activeScheduleIndex = -1; 
+        
+        return this.generatedSchedules.length > 0;
     }
-                }
+}
 
 /**
  * Jediná instance služby WorkspaceService (Singleton pattern).

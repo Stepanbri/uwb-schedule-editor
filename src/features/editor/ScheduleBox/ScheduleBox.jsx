@@ -1,6 +1,6 @@
 // src/features/editor/ScheduleBox/ScheduleBox.jsx
 import React, { useMemo } from 'react';
-import { Paper, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, styled, Box } from '@mui/material';
+import { Paper, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, styled, Box, Tabs, Tab, Tooltip, Pagination, Stack } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useWorkspace } from '../../../contexts/WorkspaceContext';
 import { timeToMinutes } from '../../../utils/timeUtils';
@@ -45,6 +45,7 @@ const StickyTableCell = styled(TableCell)(({ theme, stickytype }) => ({
     backgroundColor: theme.palette.background.paper,
     zIndex: stickytype === 'day' ? theme.zIndex.appBar + 1 : theme.zIndex.appBar,
     borderBottom: `1px solid ${theme.palette.divider}`,
+    borderTop: `1px solid ${theme.palette.divider}`,
     ...(stickytype === 'day' && {
         left: 0,
         minWidth: DAY_CELL_WIDTH,
@@ -74,6 +75,16 @@ const DayRowCell = styled(TableCell)(({ theme }) => ({
     height: MIN_EVENT_HEIGHT,
     padding: 0,
     borderBottom: `1px solid ${theme.palette.divider}`,
+    backgroundColor: theme.palette.background.default,
+}));
+
+const ScheduleSwitcherWrapper = styled(Box)(({ theme }) => ({
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: theme.spacing(1),
+    borderTop: `1px solid ${theme.palette.divider}`,
+    backgroundColor: theme.palette.background.default,
 }));
 
 export const layoutEvents = (eventsForDay) => {
@@ -118,7 +129,14 @@ export const layoutEvents = (eventsForDay) => {
 
 function ScheduleBox() {
     const { t } = useTranslation();
-    const { activeSchedule, courses, scheduleColorMode } = useWorkspace();
+    const { 
+        activeSchedule, 
+        courses, 
+        scheduleColorMode, 
+        generatedSchedules, 
+        activeScheduleIndex, 
+        setActiveGeneratedSchedule 
+    } = useWorkspace();
 
     const scheduledEvents = activeSchedule ? activeSchedule.getAllEnrolledEvents() : [];
 
@@ -188,8 +206,12 @@ function ScheduleBox() {
         );
     };
 
+    const handleScheduleChange = (event, newIndex) => {
+        setActiveGeneratedSchedule(newIndex);
+    };
+
     return (
-        <Paper elevation={1} sx={{ height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column'}}>
+        <Box elevation={1} sx={{ height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column'}}>
             <StyledTableContainer component={Paper}>
                 <Table stickyHeader size="small">
                     <TableHead>
@@ -264,7 +286,40 @@ function ScheduleBox() {
                     </TableBody>
                 </Table>
             </StyledTableContainer>
-        </Paper>
+            
+            {generatedSchedules.length > 0 && (
+                <ScheduleSwitcherWrapper>
+                    <Stack spacing={1} direction="column" alignItems="center">
+                        <Typography variant="body2" color="text.secondary">
+                            {t('schedule.switcherTitle', 'Varianty rozvrhu')}
+                        </Typography>
+                        <Pagination 
+                            count={generatedSchedules.length + 1} 
+                            page={activeScheduleIndex + 2} // +2 protože -1 je primární a indexy začínají od 1
+                            onChange={(event, value) => setActiveGeneratedSchedule(value - 2)} // -2 pro konverzi zpět na indexy
+                            color="primary"
+                            size="medium"
+                            showFirstButton
+                            showLastButton
+                            siblingCount={1}
+                            boundaryCount={1}
+                            sx={{ 
+                                '& .MuiPaginationItem-root.Mui-selected': {
+                                    fontWeight: 'bold',
+                                    backgroundColor: theme => theme.palette.primary.main,
+                                    color: theme => theme.palette.primary.contrastText,
+                                }
+                            }}
+                        />
+                        <Typography variant="caption" color="text.secondary">
+                            {activeScheduleIndex === -1 
+                                ? t('schedule.primarySchedule', 'Primární rozvrh') 
+                                : t('schedule.generatedSchedule', 'Vygenerovaný rozvrh č. {{number}}', { number: activeScheduleIndex + 1 })}
+                        </Typography>
+                    </Stack>
+                </ScheduleSwitcherWrapper>
+            )}
+        </Box>
     );
 }
 

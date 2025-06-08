@@ -339,7 +339,10 @@
     }
   },
   "schedule": {
-    "dayTime": "Den/Čas"
+    "dayTime": "Den/Čas",
+    "switcherTitle": "Varianty rozvrhu",
+    "primarySchedule": "Primární rozvrh",
+    "generatedSchedule": "Vygenerovaný rozvrh č. {{number}}"
   },
   "landingPage": {
     "hero": {

@@ -1,7 +1,7 @@
 /**
  * @file Tento soubor obsahuje hlavní algoritmus pro generování rozvrhů.
- * Funkce `generateSchedule` využívá rekurzivní backtracking k nalezení všech platných,
- * bezkolizních kombinací rozvrhových akcí pro zadané předměty.
+ * Funkce `generateScheduleAlgorithm` využívá rekurzivní backtracking k nalezení všech platných,
+ * bezkolizních kombinací rozvrhových akcí pro zadané předměty s ohledem na preference.
  */
 import ScheduleClass from './ScheduleClass';
 import { EVENT_TYPE_TO_KEY_MAP } from './CourseClass';
@@ -61,20 +61,179 @@ const eventsConflict = (event1, event2) => {
 };
 
 /**
- * Hlavní funkce pro generování možných rozvrhů na základě zadaných předmětů.
- * Používá rekurzivní backtracking algoritmus k nalezení všech platných kombinací,
- * které splňují požadavky na počet hodin pro každý typ akce (přednáška, cvičení, ...).
- * @param {import('./CourseClass').default[]} [coursesToSchedule=[]] - Pole předmětů, pro které se má generovat rozvrh.
- * @returns {ScheduleClass[]} Pole vygenerovaných platných rozvrhů (`ScheduleClass` instancí).
+ * Vypočítá "cenu" okna (prázdného času) mezi rozvrhovými akcemi v rámci jednoho dne.
+ * Čím větší hodnota, tím méně efektivní je rozvrh.
+ * @param {ScheduleClass} schedule - Rozvrh pro výpočet ceny oken.
+ * @returns {number} Cena oken v rozvrhu.
  */
-export const generateSchedule = (coursesToSchedule = []) => {
-    let generatedSchedules = [];
-    const relevantCourses = coursesToSchedule.filter(course => course.events && course.events.length > 0);
+const calculateGapsCost = (schedule) => {
+    const events = schedule.getAllEnrolledEvents();
+    let totalGapsCost = 0;
 
+    // Rozdělení událostí podle dnů
+    const eventsByDay = {};
+    events.forEach(event => {
+        if (!eventsByDay[event.day]) {
+            eventsByDay[event.day] = [];
+        }
+        eventsByDay[event.day].push(event);
+    });
+
+    // Pro každý den s událostmi spočítáme mezery
+    Object.values(eventsByDay).forEach(dayEvents => {
+        if (dayEvents.length <= 1) return; // V daném dni je nejvýše jedna událost, žádná mezera
+
+        // Seřazení událostí podle času začátku
+        dayEvents.sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
+
+        // Výpočet mezer mezi událostmi
+        for (let i = 0; i < dayEvents.length - 1; i++) {
+            const currentEnd = timeToMinutes(dayEvents[i].endTime);
+            const nextStart = timeToMinutes(dayEvents[i + 1].startTime);
+            const gap = nextStart - currentEnd;
+            
+            if (gap > 0) {
+                // Cena mezery je kvadratická, abychom více penalizovali velké mezery
+                totalGapsCost += gap * gap;
+            }
+        }
+    });
+
+    return totalGapsCost;
+};
+
+/**
+ * Kontroluje, zda rozvrh splňuje preferenci typu FREE_DAY.
+ * @param {object} preference - Preference, která má být ověřena.
+ * @param {ScheduleClass} schedule - Rozvrh k ověření.
+ * @returns {boolean} Vrací `true`, pokud rozvrh splňuje preferenci.
+ */
+const checkFreeDayPreference = (preference, schedule) => {
+    const params = preference.params || {};
+    const dayToCheck = ['PO', 'UT', 'ST', 'CT', 'PA', 'SO', 'NE'].indexOf(params.day);
+    
+    if (dayToCheck === -1) return true; // Neplatný den, ignorujeme preferenci
+    
+    // Kontrola, zda v daném dni nejsou žádné události
+    return !schedule.getAllEnrolledEvents().some(event => event.day === dayToCheck);
+};
+
+/**
+ * Kontroluje, zda rozvrh splňuje preferenci typu AVOID_TIMES.
+ * @param {object} preference - Preference, která má být ověřena.
+ * @param {ScheduleClass} schedule - Rozvrh k ověření.
+ * @returns {boolean} Vrací `true`, pokud rozvrh splňuje preferenci.
+ */
+const checkAvoidTimesPreference = (preference, schedule) => {
+    const params = preference.params || {};
+    const dayToCheck = ['PO', 'UT', 'ST', 'CT', 'PA', 'SO', 'NE'].indexOf(params.day);
+    
+    if (dayToCheck === -1) return true; // Neplatný den, ignorujeme preferenci
+    if (!params.startTime || !params.endTime) return true; // Chybějící parametry, ignorujeme preferenci
+    
+    const startToAvoid = timeToMinutes(params.startTime);
+    const endToAvoid = timeToMinutes(params.endTime);
+    
+    // Kontrola, zda v daném dni a čase nejsou žádné události
+    return !schedule.getAllEnrolledEvents().some(event => {
+        if (event.day !== dayToCheck) return false;
+        
+        const eventStart = timeToMinutes(event.startTime);
+        const eventEnd = timeToMinutes(event.endTime);
+        
+        // Kontrola překryvu časových intervalů
+        return (eventStart < endToAvoid && startToAvoid < eventEnd);
+    });
+};
+
+/**
+ * Kontroluje, zda rozvrh splňuje preferenci typu PREFER_INSTRUCTOR.
+ * @param {object} preference - Preference, která má být ověřena.
+ * @param {ScheduleClass} schedule - Rozvrh k ověření.
+ * @param {import('./CourseClass').default[]} courses - Pole všech dostupných předmětů.
+ * @returns {boolean} Vrací `true`, pokud rozvrh splňuje preferenci.
+ */
+const checkPreferInstructorPreference = (preference, schedule, courses) => {
+    const params = preference.params || {};
+    
+    if (!params.courseCode || !params.eventType || !params.instructorName) return true; // Chybějící parametry, ignorujeme preferenci
+    
+    const course = courses.find(c => c.courseCode === params.courseCode);
+    if (!course) return true; // Předmět neexistuje, ignorujeme preferenci
+    
+    const eventType = EVENT_TYPE_TO_KEY_MAP[params.eventType.toLowerCase()];
+    if (!eventType) return true; // Neplatný typ události, ignorujeme preferenci
+    
+    // Zjistíme všechny zapsané události daného předmětu a typu
+    const enrolledEvents = schedule.getAllEnrolledEvents().filter(event => 
+        event.courseId === course.id && 
+        EVENT_TYPE_TO_KEY_MAP[event.type.toLowerCase()] === eventType
+    );
+    
+    // Pokud nemá zapsanou žádnou událost tohoto typu, preference není splněna
+    if (enrolledEvents.length === 0) return false;
+    
+    // Kontrola, zda alespoň jedna zapsaná událost má požadovaného vyučujícího
+    return enrolledEvents.some(event => event.instructor === params.instructorName);
+};
+
+/**
+ * Zkontroluje, zda rozvrh splňuje danou preferenci.
+ * @param {object} preference - Preference, která má být ověřena.
+ * @param {ScheduleClass} schedule - Rozvrh k ověření.
+ * @param {import('./CourseClass').default[]} courses - Pole všech dostupných předmětů.
+ * @returns {boolean} Vrací `true`, pokud rozvrh splňuje preferenci.
+ */
+const checkPreference = (preference, schedule, courses) => {
+    if (!preference || !preference.isActive) return true; // Neaktivní preference je vždy splněna
+    
+    switch (preference.type) {
+        case 'FREE_DAY':
+            return checkFreeDayPreference(preference, schedule);
+        case 'AVOID_TIMES':
+            return checkAvoidTimesPreference(preference, schedule);
+        case 'PREFER_INSTRUCTOR':
+            return checkPreferInstructorPreference(preference, schedule, courses);
+        default:
+            return true; // Neznámý typ preference, ignorujeme
+    }
+};
+
+/**
+ * Hlavní funkce pro generování rozvrhů.
+ * Implementuje algoritmus s backtrackingem a zohledňuje uživatelské preference.
+ * @param {import('./CourseClass').default[]} coursesToSchedule - Předměty pro generování rozvrhu.
+ * @param {object} preferences - Objekt s uživatelskými preferencemi.
+ * @returns {ScheduleClass[]} Pole vygenerovaných validních rozvrhů.
+ */
+export const generateScheduleAlgorithm = (coursesToSchedule = [], preferences = {}) => {
+    console.log("generateScheduleAlgorithm called with:", { 
+        coursesCount: coursesToSchedule.length, 
+        preferencesCount: Object.keys(preferences).length 
+    });
+    
+    // Seřadíme preference podle priority (od nejvyšší po nejnižší)
+    const orderedPreferences = Object.values(preferences || {})
+        .sort((a, b) => a.priority - b.priority);
+    
+    console.log("Ordered preferences:", orderedPreferences);
+    
+    // Filtrujeme pouze předměty, které mají nějaké rozvrhové akce
+    const relevantCourses = coursesToSchedule.filter(course => course.events && course.events.length > 0);
+    
+    console.log("Relevant courses:", { 
+        count: relevantCourses.length, 
+        courses: relevantCourses.map(c => c.id) 
+    });
+    
     if (relevantCourses.length === 0) {
+        console.log("No relevant courses, returning empty array");
         return [];
     }
-
+    
+    let generatedSchedules = [];
+    let solutionsFound = 0;
+    
     // Krok 1: Seskupit všechny události podle předmětu a typu (přednáška, cvičení...).
     const allEventGroups = {};
     relevantCourses.forEach(course => {
@@ -89,9 +248,7 @@ export const generateSchedule = (coursesToSchedule = []) => {
             }
         });
     });
-
-    let solutionsFound = 0;
-
+    
     /**
      * Rekurzivní funkce, která prochází předměty a zkouší pro ně najít platné kombinace událostí.
      * @param {number} courseIdx - Index aktuálně zpracovávaného předmětu v poli `relevantCourses`.
@@ -103,8 +260,19 @@ export const generateSchedule = (coursesToSchedule = []) => {
         }
 
         if (courseIdx === relevantCourses.length) {
-            generatedSchedules.push(currentScheduleInProgress.clone());
-            solutionsFound++;
+            // Kontrola aktivních preferencí
+            let allPreferencesMet = true;
+            for (const pref of orderedPreferences) {
+                if (pref.isActive && !checkPreference(pref, currentScheduleInProgress, relevantCourses)) {
+                    allPreferencesMet = false;
+                    break;
+                }
+            }
+            
+            if (allPreferencesMet) {
+                generatedSchedules.push(currentScheduleInProgress.clone());
+                solutionsFound++;
+            }
             return;
         }
 
@@ -201,7 +369,22 @@ export const generateSchedule = (coursesToSchedule = []) => {
         };
         generateEventCombinationsForCourse(0, []);
     };
+    
     findSchedulesRecursive(0, new ScheduleClass());
-
+    
+    // Seřazení rozvrhů podle ceny oken (od nejmenší po největší)
+    generatedSchedules.sort((a, b) => calculateGapsCost(a) - calculateGapsCost(b));
+    
     return generatedSchedules;
+};
+
+/**
+ * Hlavní exportovaná funkce pro generování rozvrhů.
+ * Nastaví generovaný rozvrh podle zadaných předmětů a preferencí.
+ * @param {import('./CourseClass').default[]} coursesToSchedule - Předměty pro generování rozvrhu.
+ * @param {object} preferences - Objekt s uživatelskými preferencemi.
+ * @returns {ScheduleClass[]} Pole vygenerovaných platných rozvrhů.
+ */
+export const generateSchedule = (coursesToSchedule = [], preferences = {}) => {
+    return generateScheduleAlgorithm(coursesToSchedule, preferences);
 }; 
