@@ -10,12 +10,12 @@
   to = "https://stag-ws.zcu.cz/:splat"
   status = 200
   force = true
-  headers = {
-    X-Forwarded-Host = "true", 
-    Access-Control-Allow-Origin = "*", 
-    Access-Control-Allow-Methods = "GET, POST, OPTIONS", 
-    Access-Control-Allow-Headers = "Origin, X-Requested-With, Content-Type, Accept"
-  }
+
+  [redirects.headers]
+    "X-Forwarded-Host" = "true"
+    "Access-Control-Allow-Origin" = "*"
+    "Access-Control-Allow-Methods" = "GET, POST, OPTIONS"
+    "Access-Control-Allow-Headers" = "Origin, X-Requested-With, Content-Type, Accept"
 
 # API proxy pro demo STAG systém
 [[redirects]]
@@ -23,12 +23,12 @@
   to = "https://stag-demo.zcu.cz/:splat"
   status = 200
   force = true
-  headers = {
-    X-Forwarded-Host = "true", 
-    Access-Control-Allow-Origin = "*", 
-    Access-Control-Allow-Methods = "GET, POST, OPTIONS", 
-    Access-Control-Allow-Headers = "Origin, X-Requested-With, Content-Type, Accept"
-  }
+
+  [redirects.headers]
+    "X-Forwarded-Host" = "true"
+    "Access-Control-Allow-Origin" = "*"
+    "Access-Control-Allow-Methods" = "GET, POST, OPTIONS"
+    "Access-Control-Allow-Headers" = "Origin, X-Requested-With, Content-Type, Accept"
 
 # Cache SVG souborů pro lepší výkon
 [[headers]]
