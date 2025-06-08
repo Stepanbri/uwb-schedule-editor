@@ -44,7 +44,7 @@ function PreferenceItem({
             >
                 {/* Left part: Priority controls */}
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', alignSelf: 'stretch' }}>
-                    <Tooltip title={t('tooltips.increasePriority')}>
+                    <Tooltip title={t('propertiesBar.preferenceItem.increasePriority')}>
                         <span>
                             <IconButton size="small" onClick={handleIncreasePriority} disabled={isFirst}>
                                 <ArrowUpwardIcon sx={{ fontSize: '1rem' }} />
@@ -54,7 +54,7 @@ function PreferenceItem({
                     <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
                         {preference.priority}
                     </Typography>
-                    <Tooltip title={t('tooltips.decreasePriority')}>
+                    <Tooltip title={t('propertiesBar.preferenceItem.decreasePriority')}>
                          <span>
                             <IconButton size="small" onClick={handleDecreasePriority} disabled={isLast}>
                                 <ArrowDownwardIcon sx={{ fontSize: '1rem' }} />
@@ -80,14 +80,14 @@ function PreferenceItem({
 
                 {/* Right part: Actions */}
                 <Stack direction="row" alignItems="center">
-                    <Tooltip title={preference.isActive ? t('tooltips.deactivatePreference') : t('tooltips.activatePreference')}>
+                    <Tooltip title={preference.isActive ? t('propertiesBar.preferenceItem.deactivatePreference') : t('propertiesBar.preferenceItem.activatePreference')}>
                         <Switch
                             checked={preference.isActive}
                             onChange={() => onToggleActive(preference.id)}
                             size="small"
                         />
                     </Tooltip>
-                    <Tooltip title={t('tooltips.deletePreference')}>
+                    <Tooltip title={t('propertiesBar.preferenceItem.deletePreference')}>
                         <IconButton size="small" onClick={handleOpenConfirmDialog}>
                             <DeleteIcon fontSize="small" />
                         </IconButton>

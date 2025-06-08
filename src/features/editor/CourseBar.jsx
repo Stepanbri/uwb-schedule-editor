@@ -110,11 +110,13 @@ function CourseBar({
             ) : (
                 <Box sx={{ flexGrow: 1, overflowY: 'auto', scrollbarGutter: 'stable' }}>
                     <SimpleTreeView
-                        defaultCollapseIcon={<ExpandMoreIcon />}
-                        defaultExpandIcon={<ChevronRightIcon />}
                         expandedItems={expandedItems}
                         onExpandedItemsChange={handleExpandedItemsChange}
                         sx={{ flexGrow: 1 }}
+                        slots={{
+                            collapseIcon: ExpandMoreIcon,
+                            expandIcon: ChevronRightIcon,
+                        }}
                     >
                         {Object.entries(coursesByDepartment).map(([departmentCode, deptCourses]) => (
                             <TreeItem

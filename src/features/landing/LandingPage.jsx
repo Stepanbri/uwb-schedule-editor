@@ -94,7 +94,17 @@ function LandingPage() {
             >
                 <Container maxWidth="lg">
                     <Grid container alignItems="center" spacing={{ xs: 4, md: 6 }} justifyContent="center">
-                        <Grid item xs={12} md={6} sx={{ textAlign: { xs: 'center', md: 'left' } }}>
+                        <Grid 
+                            sm={12} 
+                            lg={6} 
+                            sx={{ 
+                                textAlign: { xs: 'center', md: 'left' },
+                                gridColumn: {
+                                    xs: 'span 12',
+                                    md: 'span 6'
+                                }
+                            }}
+                        >
                             <Typography variant="h1" component="h1" sx={{ fontWeight: 'bold', mb: 3, fontSize: {xs: '2.8rem', sm: '3.5rem', md: '4rem'}, lineHeight: 1.15 }}>
                                 {t('landingPage.hero.title')}
                             </Typography>

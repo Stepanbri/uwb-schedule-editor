@@ -21,7 +21,8 @@ class CourseEventClass {
                     year = '',
                     semester = '',
                     groupId = null,
-                    departmentCode = ''
+                    departmentCode = '',
+                    durationHours = 0
                 }) {
         // Použijeme stagId jako primární id, pokud je dostupné, jinak dodané id, jinak generujeme
         this.id = id || stagId || `${departmentCode}-${courseCode}-${type}-${day}-${startTime}-${Math.random().toString(36).substring(2, 9)}`;
@@ -45,7 +46,9 @@ class CourseEventClass {
         this.semester = semester;
         this.groupId = groupId;
         this.departmentCode = departmentCode;
+        this.durationHours = durationHours
     }
+
 
     serialize() {
         // Vrátí prostý objekt se všemi vlastnostmi pro JSON serializaci
@@ -71,6 +74,7 @@ class CourseEventClass {
             semester: this.semester,
             groupId: this.groupId,
             departmentCode: this.departmentCode,
+            durationHours: this.durationHours
         };
     }
 

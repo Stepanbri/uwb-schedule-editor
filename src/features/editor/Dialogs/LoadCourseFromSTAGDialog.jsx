@@ -62,7 +62,9 @@ const LoadCourseFromSTAGDialog = ({ open, onClose, onSubmit }) => {
             <DialogTitle>{t('Dialogs.loadCourseFromSTAG.title', 'Načíst předmět ze STAGu')}</DialogTitle>
             <DialogContent dividers>
                 <Grid container spacing={2} sx={{pt: 1}}>
-                    <Grid item xs={12}>
+                    <Grid 
+                        sx={{ gridColumn: 'span 12' }}
+                    >
                         <TextField
                             label={t('Dialogs.loadCourseFromSTAG.courseCodeLabel', 'Kód předmětu (např. KIV/PPA1)')}
                             value={courseCodeFull}
@@ -74,7 +76,12 @@ const LoadCourseFromSTAGDialog = ({ open, onClose, onSubmit }) => {
                             autoFocus
                         />
                     </Grid>
-                    <Grid item xs={12} sm={8} sx={{width: '7.5rem'}}>
+                    <Grid 
+                        sx={{ 
+                            gridColumn: { xs: 'span 12', sm: 'span 8' },
+                            width: '7.5rem'
+                        }}
+                    >
                         <Autocomplete
                             disableClearable
                             options={academicYearsOptions}
@@ -95,7 +102,11 @@ const LoadCourseFromSTAGDialog = ({ open, onClose, onSubmit }) => {
                             )}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={4}>
+                    <Grid 
+                        sx={{ 
+                            gridColumn: { xs: 'span 12', sm: 'span 4' } 
+                        }}
+                    >
                         <TextField
                             select
                             label={t('Dialogs.loadCourseFromSTAG.semesterLabel', 'Semestr')}

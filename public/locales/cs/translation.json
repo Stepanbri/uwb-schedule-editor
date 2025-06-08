@@ -95,21 +95,25 @@
     "lecture": "Přednáška",
     "practical": "Cvičení",
     "seminar": "Seminář",
-    "exam": "Zkouška",
+    "přednáška": "Přednáška",
+    "cvičení ": "Cvičení",
+    "seminář": "Seminář",
     "credit": "Zápočet",
     "block": "Bloková výuka",
     "unknown": "Neznámý typ",
     "recurrence": "Opakování",
     "recurrenceShort": {
-      "každýtýden": "KT",
-      "sudýtýden": "ST",
-      "lichýtýden": "LT",
-      "jednorázově": "Jedn."
+      "každýtýden": "",
+      "sudýtýden": "Sudý",
+      "lichýtýden": "Lichý",
+      "jednorázově": "Jednorázový",
+      "jiný": "Jiný"
     },
     "každýtýden": "Každý týden",
     "sudýtýden": "Sudý týden",
     "lichýtýden": "Lichý týden",
-    "jednorázově": "Jednorázově"
+    "jednorázově": "Jednorázový",
+    "jiný": "Jiný"
   },
   "enrollmentShort": {
     "lecture": "P",
@@ -120,7 +124,9 @@
     "credits": "{{count}} kredit",
     "credits_plural": "{{count}} kredity",
     "requirementsMet": "Požadavky splněny ({{count}})",
+    "requirementsMetSimple": "Požadavky splněny",
     "remaining": "Zbývá: {{needed}} (Zaps: {{enrolledCount}})",
+    "remainingSimple": "Zbývá",
     "eventType": "Typ akce",
     "enrolled": "Zapsáno",
     "enroll": "Zapsat",
@@ -135,7 +141,8 @@
     "loadingCourses": "Načítání předmětů...",
     "unknownDepartment": "Neznámá katedra",
     "noCoursesToDisplay": "Žádné předměty k zobrazení. Přidejte předmět nebo načtěte uložený stav.",
-    "noEventsForCourse": "Tento předmět nemá žádné rozvrhové akce."
+    "noEventsForCourse": "Tento předmět nemá žádné rozvrhové akce.",
+    "time": "Čas"
   },
   "tooltips": {
     "removeCourse": "Odstranit předmět {{courseName}} z pracovní plochy",
@@ -164,6 +171,8 @@
       "increasePriority": "Zvýšit prioritu",
       "decreasePriority": "Snížit prioritu",
       "toggleActive": "Aktivovat/deaktivovat preferenci",
+      "deactivatePreference": "Deaktivovat preferenci",
+      "activatePreference": "Aktivovat preferenci",
       "deletePreference": "Smazat preferenci"
     },
     "removeAllPreferences": "Odstranit všechny preference",
@@ -204,7 +213,21 @@
       "CT": "Čtvrtek",
       "PA": "Pátek",
       "SO": "Sobota",
-      "NE": "Neděle"
+      "NE": "Neděle",
+      "pondělí": "Pondělí",
+      "úterý": "Úterý",
+      "středa": "Středa",
+      "čtvrtek": "Čtvrtek",
+      "pátek": "Pátek",
+      "sobota": "Sobota",
+      "neděle": "Neděle",
+      "monday": "Pondělí",
+      "tuesday": "Úterý",
+      "wednesday": "Středa",
+      "thursday": "Čtvrtek",
+      "friday": "Pátek",
+      "saturday": "Sobota",
+      "sunday": "Neděle"
     },
     "alerts": {
       "added": "Preference úspěšně přidána.",
@@ -212,12 +235,14 @@
       "allDeleted": "Všechny preference byly odstraněny.",
       "updated": "Preference byla aktualizována.",
       "priorityChanged": "Priorita preference byla upravena.",
-      "activityChanged": "Aktivita preference byla změněna.",
-      "confirmDeleteTitle": "Odstranit preferenci?",
-      "confirmDeleteMessage": "Opravdu si přejete odstranit preferenci {{displayLabel}}?"
+      "activityChanged": "Aktivita preference byla změněna."
     }
   },
   "Dialogs": {
+    "deletePreference": {
+      "title": "Odstranit preferenci",
+      "message": "Opravdu si přejete odstranit preferenci {{displayLabel}}?"
+    },
     "selectStudyParams": {
       "title": "Parametry pro načtení předmětů oboru",
       "studentInfo": "Načítání pro:",
@@ -400,6 +425,7 @@
     "switchToDemoStagTooltip": "Přepnout na demo STAG API",
     "activateDemoStagTooltip": "Aktivovat DEMO režim STAG API",
     "deactivateDemoStagTooltip": "Deaktivovat DEMO režim (použít produkční STAG API)",
-    "faqButtonTooltip": "Nápověda a FAQ"
+    "faqButtonTooltip": "Nápověda a FAQ",
+    "colorModeTooltip": "Přepnout barvy rozvrhu (dle předmětu / typu akce)"
   }
 }

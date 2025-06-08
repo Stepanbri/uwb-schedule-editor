@@ -1,11 +1,7 @@
-// PROJEKT/NEW/src/services/StagApiService.js
+// const IS_DEV = import.meta.env.DEV;
+// const PROXY_PATH = '/api-stag';
 
-// Použijeme proxy cestu pro vývoj, pokud je vite.config.js nastaven
-// V produkci byste zde měli plnou URL.
-// const IS_DEV = import.meta.env.DEV; // Již nepotřebujeme přímo zde
-// const PROXY_PATH = '/api-stag'; // Již nepotřebujeme přímo zde
-
-// Přímé URL pro STAG servery (použijeme pro login redirect)
+// Přímé URL pro STAG servery pro login redirect a API volání
 const DIRECT_PROD_STAG_URL = "https://stag-ws.zcu.cz";
 const DIRECT_DEMO_STAG_URL = "https://stag-demo.zcu.cz";
 
@@ -130,9 +126,7 @@ class StagApiService {
 
         if (requiresAuth) {
             if (!this.stagUserTicket) {
-                console.warn(`API volání na ${endpoint} vyžaduje autentizaci, ale není dostupný ticket.`);
-                // Můžeme zde vyhodit chybu, nebo nechat STAG API, aby ji vrátilo
-                // throw new Error("Chybí autentizační ticket pro požadavek.");
+                console.warn(`API volání na ${endpoint} možná vyžaduje autentizaci, ale není dostupný ticket.`);
             } else {
                 options.headers['Authorization'] = 'Basic ' + btoa(`${this.stagUserTicket}:`);
             }
@@ -192,11 +186,13 @@ class StagApiService {
         }
     }
 
-    async getSubjectInfo(departmentCode, subjectShortCode, year, lang = 'cs') {
+    async getSubjectInfo(departmentCode, subjectShortCode, year, lang = 'en') {
+        lang = 'en';
         return this._doRequest("predmety/getPredmetInfo", { katedra: departmentCode, zkratka: subjectShortCode, lang, rok:year }, 'GET', false);
     }
 
-    async getScheduleEvents(criteria, lang = 'cs') {
+    async getScheduleEvents(criteria, lang = 'en') {
+        lang = en;
         if (!criteria.rok || !criteria.semestr) throw new Error("Rok a semestr jsou povinné pro getRozvrhoveAkce.");
         const response = await this._doRequest("rozvrhy/getRozvrhoveAkce", { ...criteria, lang }, 'GET', true, true); // requiresAuth=true, useSelectedRole=true (pro případ, že by některé akce byly vázané na roli)
         return Array.isArray(response?.rozvrhovaAkce) ? response.rozvrhovaAkce : (response?.rozvrhovaAkce ? [response.rozvrhovaAkce] : []);
@@ -212,6 +208,7 @@ class StagApiService {
      * @returns {Promise<object>}
      */
     async getStudentInfo(osCislo, rok, zobrazovatSimsUdaje = false, lang = 'en') {
+        lang = 'en';
         if (!osCislo) throw new Error("osCislo je povinné pro getStudentInfo.");
         // 'rok' je volitelný dle dokumentace, ale pro kontext studia může být užitečný
         const params = { osCislo, zobrazovatSimsUdaje: zobrazovatSimsUdaje ? 'A' : 'N', lang };
@@ -229,6 +226,7 @@ class StagApiService {
      * @returns {Promise<Array<object>>} Pole předmětů oboru.
      */
     async getPredmetyByObor(oborIdno, rok, vyznamPredmetu = '%', lang = 'en') { // STAG často používá '%' jako wildcard
+        lang = 'en';
         if (!oborIdno) throw new Error("oborIdno je povinné pro getPredmetyByObor.");
         if (!rok) throw new Error("rok je povinný pro getPredmetyByObor.");
         const params = { oborIdno, rok, lang };
@@ -256,9 +254,9 @@ class StagApiService {
         if (!criteria.katedra || !criteria.zkratka || !criteria.rok || !criteria.semestr) {
             throw new Error("Katedra, zkratka, rok a semestr jsou povinné pro getRozvrhByPredmet.");
         }
+        lang = 'en';
         const params = { ...criteria, jenRozvrhoveAkce: true ,lang };
-        const response = await this._doRequest("rozvrhy/getRozvrhByPredmet", params, 'GET', true); // Může vyžadovat auth
-        // Dokumentace ukazuje, že odpověď je { "rozvrhovaAkce": [...] }
+        const response = await this._doRequest("rozvrhy/getRozvrhByPredmet", params, 'GET', true); // auth?
         return Array.isArray(response?.rozvrhovaAkce) ? response.rozvrhovaAkce : [];
     }
 }

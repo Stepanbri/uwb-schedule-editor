@@ -21,7 +21,7 @@ const SelectStudyParametersDialog = ({ open, onClose, onSubmitParameters, studen
     const [error, setError] = useState('');
 
     // Rok pro načítání rozvrhových akcí, může být jiný než ročník studia předmětů
-    const [scheduleAcademicYear, setScheduleAcademicYear] = useState(defaultAcademicYear || getCurrentAcademicYear());
+    const [scheduleAcademicYear, setScheduleAcademicYear] = useState(getCurrentAcademicYear());
 
     const academicYearsOptions = useMemo(() => generateAcademicYears(), []);
 
@@ -30,7 +30,7 @@ const SelectStudyParametersDialog = ({ open, onClose, onSubmitParameters, studen
             setStudyYearNum('1'); // Reset na první ročník
             setSemester('%'); // Změna resetované hodnoty na "Oba semestry"
             setStatuses({ A: true, B: true, C: false });
-            setScheduleAcademicYear(defaultAcademicYear || getCurrentAcademicYear());
+            setScheduleAcademicYear(getCurrentAcademicYear());
             setError('');
         }
     }, [open, defaultAcademicYear]);

@@ -145,63 +145,53 @@ class CourseClass {
     }
 
     isEnrollmentTypeRequirementMet(enrollmentKey, allEnrolledEventIdsInSchedule) {
+        if (!enrollmentKey || !allEnrolledEventIdsInSchedule) {
+            return false;
+        }
+        
         const needed = this.neededHours[enrollmentKey] || 0;
+        
+        // Pokud pro daný typ není nic potřeba...
         if (needed === 0) {
-            // Pokud pro daný typ není nic potřeba, ale PŘESTO existují volitelné akce tohoto typu,
-            // požadavek není "splněn" v tom smyslu, aby se blokoval zápis.
-            // Ale pokud pro daný typ nejsou potřeba hodiny a ani neexistují akce, je splněn.
+            // ...ale akce tohoto typu existují, umožníme uživateli je zapsat
+            // (jsou volitelné, takže neblokujeme zápis)
             return !this._hasEventsOfType(enrollmentKey);
         }
 
         // Speciální případ pro volitelné přednášky
         if (enrollmentKey === 'lecture' && this.isSpecialLectureSubstitutionCase()) {
-            const enrolledEvents = this.events.filter(e => allEnrolledEventIdsInSchedule.has(e.id));
-            const hasAnyLectureEnrolled = enrolledEvents.some(e => EVENT_TYPE_TO_KEY_MAP[e.type.toLowerCase()] === 'lecture');
-            return hasAnyLectureEnrolled;
+            // Zjistíme, zda už má zapsanou alespoň jednu přednášku
+            const enrolledEvents = this.events.filter(e => 
+                allEnrolledEventIdsInSchedule.has(e.id) && 
+                EVENT_TYPE_TO_KEY_MAP[e.type.toLowerCase()] === 'lecture'
+            );
+            return enrolledEvents.length > 0;
         }
 
-        const enrolled = this.getEnrolledHours(allEnrolledEventIdsInSchedule);
-        return enrolled[enrollmentKey] >= needed;
+        // Standardní případ - kontrola počtu hodin
+        let enrolledHoursOfThisType = 0;
+        
+        for (const event of this.events) {
+            // Kontrola, zda je událost zapsaná
+            if (allEnrolledEventIdsInSchedule.has(event.id)) {
+                // Kontrola typu události
+                const eventTypeKey = EVENT_TYPE_TO_KEY_MAP[event.type.toLowerCase()];
+                
+                // Pokud jde o hledaný typ, přičteme jeho hodiny
+                if (eventTypeKey === enrollmentKey) {
+                    enrolledHoursOfThisType += (event.durationHours || 0);
+                }
+            }
+        }
+        
+        // Vrátíme true, pokud je počet zapsaných hodin >= potřebnému počtu
+        return enrolledHoursOfThisType >= needed;
     }
 
     areAllEnrollmentRequirementsMet(allEnrolledEventIdsInSchedule) {
         return ENROLLMENT_KEYS_ORDER.every(key =>
             this.isEnrollmentTypeRequirementMet(key, allEnrolledEventIdsInSchedule)
         );
-    }
-
-    generateDummyCourseEvents(count = 2) {
-        const types = ['PŘEDNÁŠKA', 'CVIČENÍ', 'SEMINÁŘ'];
-        const days = [0, 1, 2, 3, 4];
-        const startTimes = ['08:00', '09:00', '10:00', '11:00', '13:00', '14:00', '15:00'];
-        const instructors = ['Dr. Novák', 'Ing. Svoboda', 'Doc. Procházka'];
-        const rooms = ['UC101', 'UC102', 'UP105', 'UI30'];
-        this.events = [];
-        types.forEach(type => {
-            for (let i = 0; i < count; i++) {
-                const day = days[Math.floor(Math.random() * days.length)];
-                const startTimeIndex = Math.floor(Math.random() * startTimes.length);
-                const startTime = startTimes[startTimeIndex];
-                const hour = parseInt(startTime.split(':')[0]);
-                const endTime = `${String(hour + 1 + Math.floor(Math.random() * 2)).padStart(2, '0')}:00`;
-                this.addCourseEvent(new CourseEventClass({
-                    stagId: `dummyStagEv${this.courseCode}${type.substring(0,1)}${i}`,
-                    startTime, endTime, day,
-                    recurrence: 'KAŽDÝ TÝDEN',
-                    courseId: this.id, // ID předmětu (KATEDRA/KOD)
-                    courseCode: this.getShortCode(),
-                    departmentCode: this.departmentCode,
-                    room: rooms[Math.floor(Math.random() * rooms.length)],
-                    type: type,
-                    instructor: instructors[Math.floor(Math.random() * instructors.length)],
-                    currentCapacity: Math.floor(Math.random() * 20),
-                    maxCapacity: 20 + Math.floor(Math.random() * 30),
-                    year: this.year, // Rok a semestr z instance CourseClass
-                    semester: this.semester,
-                    note: `Dummy ${type} ${i+1}`
-                }));
-            }
-        });
     }
 }
 

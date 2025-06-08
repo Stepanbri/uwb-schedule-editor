@@ -91,21 +91,26 @@
     "lecture": "Lecture",
     "practical": "Practical",
     "seminar": "Seminar",
+    "přednáška": "Přednáška",
+    "cvičení ": "Cvičení",
+    "seminář": "Seminář",
     "exam": "Exam",
     "credit": "Credit",
     "block": "Block teaching",
     "unknown": "Unknown type",
     "recurrence": "Recurrence",
     "recurrenceShort": {
-      "každýtýden": "EW",
-      "sudýtýden": "EvenW",
-      "lichýtýden": "OddW",
-      "jednorázově": "Once"
+      "každýtýden": "",
+      "sudýtýden": "Even",
+      "lichýtýden": "Odd",
+      "jednorázově": "Once",
+      "jiný": "Other"
     },
     "každýtýden": "Every week",
     "sudýtýden": "Even week",
     "lichýtýden": "Odd week",
-    "jednorázově": "One-time"
+    "jednorázově": "One-time",
+    "jiný": "Other"
   },
   "enrollmentShort": {
     "lecture": "L",
@@ -116,7 +121,9 @@
     "credits_one": "{{count}} credit",
     "credits_other": "{{count}} credits",
     "requirementsMet": "Requirements met ({{count}})",
+    "requirementsMetSimple": "Requirements met",
     "remaining": "Rem: {{needed}} (Enr: {{enrolledCount}})",
+    "remainingSimple": "Remaining",
     "eventType": "Event Type",
     "enrolled": "Enrolled",
     "enroll": "Enroll",
@@ -131,7 +138,8 @@
     "loadingCourses": "Loading courses...",
     "unknownDepartment": "Unknown Department",
     "noCoursesToDisplay": "No courses to display. Add a course or load a saved state.",
-    "noEventsForCourse": "This course has no schedule events."
+    "noEventsForCourse": "This course has no schedule events.",
+    "time": "Time"
   },
   "tooltips": {
     "removeCourse": "Remove course {{courseName}} from workspace",
@@ -160,6 +168,8 @@
       "increasePriority": "Increase priority",
       "decreasePriority": "Decrease priority",
       "toggleActive": "Activate/deactivate preference",
+      "deactivatePreference": "Deactivate preference",
+      "activatePreference": "Activate preference",
       "deletePreference": "Delete preference"
     },
     "removeAllPreferences": "Remove All Preferences",
@@ -200,7 +210,21 @@
       "CT": "Thursday",
       "PA": "Friday",
       "SO": "Saturday",
-      "NE": "Sunday"
+      "NE": "Sunday",
+      "pondělí": "Monday",
+      "úterý": "Tuesday",
+      "středa": "Wednesday",
+      "čtvrtek": "Thursday",
+      "pátek": "Friday",
+      "sobota": "Saturday",
+      "neděle": "Sunday",
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday",
+      "sunday": "Sunday"
     },
     "alerts": {
       "added": "Preference successfully added.",
@@ -208,12 +232,14 @@
       "allDeleted": "All preferences have been removed.",
       "updated": "Preference has been updated.",
       "priorityChanged": "Preference priority has been adjusted.",
-      "activityChanged": "Preference activity has been changed.",
-      "confirmDeleteTitle": "Delete preference?",
-      "confirmDeleteMessage": "Are you sure you want to delete the preference \"{{displayLabel}}\"?"
+      "activityChanged": "Preference activity has been changed."
     }
   },
   "Dialogs": {
+    "deletePreference": {
+      "title": "Delete preference",
+      "message": "Are you sure you want to delete the preference {{preferenceLabel}}?"
+    },
     "selectStudyParams": {
       "title": "Parameters for Loading Field of Study Courses",
       "studentInfo": "Loading for:",
@@ -406,6 +432,7 @@
     "switchToDemoStagTooltip": "Switch to demo STAG API",
     "activateDemoStagTooltip": "Activate STAG API DEMO mode",
     "deactivateDemoStagTooltip": "Deactivate DEMO mode (use production STAG API)",
-    "faqButtonTooltip": "Help and FAQ"
+    "faqButtonTooltip": "Help and FAQ",
+    "colorModeTooltip": "Switch schedule color mode (by course / by event type)"
   }
 }

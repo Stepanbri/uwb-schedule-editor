@@ -8,7 +8,7 @@ export const getCurrentAcademicYear = () => {
     const year = today.getFullYear();
     const month = today.getMonth(); // 0 (leden) - 11 (prosinec)
     // Akademický rok obvykle začíná na podzim. Jako hranici použijeme srpen (index 7).
-    return month >= 7 ? `${year}/${year + 1}` : `${year - 1}/${year}`;
+    return month >= 8 ? `${year}/${year + 1}` : `${year - 1}/${year}`;
 };
 
 /**

@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import PreferenceList from './PreferenceList';
 import { usePreferenceManagement, PREFERENCE_CONFIG, PREFERENCE_OPTIONS } from '../hooks/usePreferenceManagement';
 import { useWorkspace } from '../../../contexts/WorkspaceContext';
+import { EVENT_TYPE_TO_KEY_MAP } from '../../../services/CourseClass';
 
 const getUniqueValues = (array, keyAccessor) => {
     const values = array.map(item => keyAccessor(item));
@@ -303,7 +304,7 @@ function PropertiesBar() {
                                     >
                                         {availableEventTypes.map(eventType => (
                                             <MenuItem key={eventType} value={eventType}>
-                                                {t(`courseEvent.${eventType.toLowerCase()}`, eventType)}
+                                                {t(`courseEvent.${EVENT_TYPE_TO_KEY_MAP[eventType.toLowerCase()] || 'other'}`, eventType)}
                                             </MenuItem>
                                         ))}
                                     </Select>

@@ -2,6 +2,7 @@
 import React from 'react';
 import { Card, CardContent, Typography, ToggleButton, Box, Tooltip, alpha } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { EVENT_TYPE_TO_KEY_MAP } from '../../../services/CourseClass';
 
 const EventNode = ({ event, isEnrolled, onToggleEvent, canEnroll, disabledTooltipText }) => {
     const { t } = useTranslation();
@@ -10,6 +11,8 @@ const EventNode = ({ event, isEnrolled, onToggleEvent, canEnroll, disabledToolti
 
     const dayStr = event.getDayAsString(t); // Uses method from CourseEventClass [cite: 149]
     const recurrenceStr = event.recurrence ? t(`courseEvent.${event.recurrence.toLowerCase().replace(/\s+/g, '')}`, event.recurrence) : t('common.notSpecified', 'Nespecifikováno');
+    const eventTypeKey = EVENT_TYPE_TO_KEY_MAP[event.type.toLowerCase()] || 'other';
+
 
     let currentDisabledTooltipText = disabledTooltipText;
     if (isEnrolled) {
@@ -37,11 +40,9 @@ const EventNode = ({ event, isEnrolled, onToggleEvent, canEnroll, disabledToolti
         >
             <CardContent sx={{ padding: '10px !important' }}>
                 <Box display="flex" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 0.5 }}>
-                    <Tooltip title={event.type || t('labels.eventType', 'Typ akce')}>
-                        <Typography variant="subtitle2" component="div" sx={{ fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.3 }}>
-                            {t(`courseEvent.${event.type.toLowerCase()}`, event.type)}
-                        </Typography>
-                    </Tooltip>
+                    <Typography variant="subtitle2" component="div" sx={{ fontWeight: 'bold', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', lineHeight: 1.3 }}>
+                        {t(`courseEvent.${eventTypeKey}`, event.type)}
+                    </Typography>
                     <Tooltip title={currentDisabledTooltipText}>
                         <span> {/* Wrapper for Tooltip on disabled button */}
                             <ToggleButton

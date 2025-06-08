@@ -13,13 +13,13 @@ const getEventTypeThemeColor = (eventType, theme, variant = 'background') => {
     return theme.palette.eventTypes[colorKey] || theme.palette.eventTypes.other;
 };
 
-const EventWrapper = styled(Box)(({ theme, eventColor, notchColor, patternImage }) => ({
-    backgroundColor: eventColor,
-    backgroundImage: patternImage,
+const EventWrapper = styled(Box)(({ theme, eventcolor, notchcolor, patternimage }) => ({
+    backgroundColor: eventcolor,
+    backgroundImage: patternimage,
     backgroundBlendMode: 'overlay',
     border: `1px solid ${alpha(theme.palette.text.primary, 0.15)}`,
     borderRadius: '4px',
-    padding: '2px 4px 2px 8px', // Více místa vlevo pro patku
+    padding: '2px 4px 2px 8px',
     overflow: 'hidden',
     cursor: 'pointer',
     boxSizing: 'border-box',
@@ -27,7 +27,7 @@ const EventWrapper = styled(Box)(({ theme, eventColor, notchColor, patternImage 
     flexDirection: 'column',
     justifyContent: 'space-between',
     position: 'relative',
-    color: theme.palette.getContrastText(eventColor),
+    color: theme.palette.getContrastText(eventcolor),
     transition: 'transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out',
     '&:hover': {
         borderColor: theme.palette.primary.main,
@@ -42,7 +42,7 @@ const EventWrapper = styled(Box)(({ theme, eventColor, notchColor, patternImage 
         top: 0,
         bottom: 0,
         width: '5px',
-        backgroundColor: notchColor,
+        backgroundColor: notchcolor,
         borderTopLeftRadius: '3px',
         borderBottomLeftRadius: '3px',
     }
@@ -107,9 +107,9 @@ function ScheduleEventItem({ eventData, course, style, scheduleColorMode }) {
                     aria-describedby={popoverId}
                     onClick={handleClick}
                     sx={style}
-                    eventColor={backgroundColor}
-                    notchColor={notchColor}
-                    patternImage={patternImage}
+                    eventcolor={backgroundColor}
+                    notchcolor={notchColor}
+                    patternimage={patternImage}
                 >
                     <Typography variant="caption" fontWeight="bold" noWrap sx={{ lineHeight: 1.2 }}>
                         {courseShortCode}
@@ -142,7 +142,7 @@ function ScheduleEventItem({ eventData, course, style, scheduleColorMode }) {
                     <Typography variant="body2">{t('labels.room', 'Místnost')}: {roomText || '-'}</Typography>
                     <Typography variant="body2">{t('labels.instructor', 'Vyučující')}: {fullInstructorNameForPopover}</Typography>
                     <Typography variant="body2">{t('labels.capacity', 'Kapacita')}: {capacityText}</Typography>
-                    <Typography variant="body2">{t('labels.recurrence', 'Opakování')}: {t(`courseEvent.recurrence.${eventData.recurrence.toLowerCase().replace(/\s+/g, '')}`, eventData.recurrence)}</Typography>
+                    <Typography variant="body2">{t('labels.recurrence', 'Opakování')}: {t(`courseEvent.${eventData.recurrence.toLowerCase().replace(/\s+/g, '')}`, eventData.recurrence)}</Typography>
                     {eventData.note && <Typography variant="body2" sx={{mt: 1, fontStyle: 'italic'}}>{t('labels.notes', 'Poznámka')}: {eventData.note}</Typography>}
                 </Paper>
             </Popover>

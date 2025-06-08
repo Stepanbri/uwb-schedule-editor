@@ -136,7 +136,7 @@ export const useStagCourseLoader = () => {
                 semester: formData.semester,
                 year: formData.year,
                 events: transformedEvents,
-                source: useDemoApi ? 'demo' : 'prod',
+                source: useDemoApi ? 'demo' : 'prod'
             };
 
             const courseIdentifier = `${subjectInfo.katedra}/${subjectInfo.zkratka}`;

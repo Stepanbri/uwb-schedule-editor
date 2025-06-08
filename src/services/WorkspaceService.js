@@ -1,21 +1,45 @@
+/**
+ * @file Tento soubor definuje WorkspaceService, hlavní službu pro správu stavu aplikace pro plánování rozvrhu.
+ * Zodpovídá za správu předmětů, generování rozvrhů, uživatelských preferencí a perzistenci dat.
+ * Je implementována jako Singleton, aby byl zajištěn jediný zdroj pravdy v celé aplikaci.
+ */
+
 // src/services/WorkspaceService.js
 import CourseClass from './CourseClass';
 import ScheduleClass from './ScheduleClass';
 import CourseEventClass from './CourseEventClass';
-import { EVENT_TYPE_TO_KEY_MAP } from './CourseClass'; // Obnovený import
 import { getColorForCourse } from '../utils/colorUtils';
 import html2canvas from 'html2canvas'; // Import pro ukládání obrázku
+import { generateSchedule as generateScheduleAlgorithm } from './scheduleGenerator';
 
-const MAX_GENERATED_SCHEDULES = 10;
+/**
+ * Klíč pro ukládání dat workspace do localStorage.
+ * @type {string}
+ */
 export const LOCAL_STORAGE_KEY = 'schedulePlannerWorkspace_v2';
 
+/**
+ * Generuje unikátní ID pro preference.
+ * @returns {string} Unikátní identifikátor.
+ */
 const generatePreferenceId = () => `pref_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
 
+/**
+ * @class WorkspaceService
+ * @classdesc Singleton třída spravující veškerý stav a logiku plánovače rozvrhů.
+ * Zahrnuje manipulaci s předměty, rozvrhy, preferencemi a ukládání/načítání dat.
+ */
 class WorkspaceService {
+    /**
+     * @constructor
+     */
     constructor() {
         this.resetToEmptyState(); // Inicializace na prázdný stav
     }
 
+    /**
+     * Resetuje celý workspace do výchozího prázdného stavu.
+     */
     resetToEmptyState() {
         this.semester = '';
         this.year = '';
@@ -25,9 +49,13 @@ class WorkspaceService {
         this.generatedSchedules = [];
         this.activeScheduleIndex = -1;
         this.scheduleColorMode = 'type'; // Výchozí režim barev
-        console.log("WorkspaceService: State reset to empty.");
     }
 
+    /**
+     * Vrací aktuálně aktivní rozvrh.
+     * Může to být buď primární ručně sestavený rozvrh, nebo jeden z vygenerovaných.
+     * @returns {ScheduleClass} Aktivní instance ScheduleClass.
+     */
     getActiveSchedule() {
         if (this.activeScheduleIndex >= 0 && this.activeScheduleIndex < this.generatedSchedules.length) {
             return this.generatedSchedules[this.activeScheduleIndex];
@@ -35,21 +63,29 @@ class WorkspaceService {
         return this.primarySchedule;
     }
 
+    /**
+     * Nastaví index aktivního rozvrhu z pole vygenerovaných rozvrhů.
+     * @param {number} index - Index v poli `generatedSchedules`. Hodnota -1 označuje primární rozvrh.
+     */
     setActiveScheduleIndex(index) {
         if (index >= -1 && index < this.generatedSchedules.length) {
             this.activeScheduleIndex = index;
         } else {
-            console.error("Neplatný index pro aktivní rozvrh:", index);
             this.activeScheduleIndex = -1;
         }
     }
 
+    /**
+     * Přidá nový předmět do workspace nebo aktualizuje existující.
+     * Pokud předmět se stejným ID již existuje, jeho data jsou přepsána.
+     * @param {object} courseData - Data nového předmětu.
+     * @returns {CourseClass} Přidaná nebo aktualizovaná instance předmětu.
+     */
     addCourse(courseData) {
         const courseIdentifier = `${courseData.departmentCode}/${courseData.courseCode}`;
         const existingCourse = this.courses.find(c => c.id === courseIdentifier);
 
         if (existingCourse) {
-            console.warn(`Předmět ${courseIdentifier} již existuje ve workspace. Přepisuji daty pro rok ${courseData.year}, semestr ${courseData.semester}.`);
             const oldEventIds = existingCourse.events.map(e => e.id);
             oldEventIds.forEach(eventId => {
                 this.primarySchedule.removeEventById(eventId);
@@ -87,6 +123,11 @@ class WorkspaceService {
         return course;
     }
 
+    /**
+     * Odstraní předmět z workspace na základě jeho identifikátoru.
+     * Zároveň odstraní všechny související události z primárního i generovaných rozvrhů.
+     * @param {string} courseIdentifier - ID předmětu (např. "KIV/PPA1").
+     */
     removeCourse(courseIdentifier) {
         const courseToRemove = this.courses.find(c => c.id === courseIdentifier || c.stagId === courseIdentifier);
         if (courseToRemove) {
@@ -99,6 +140,9 @@ class WorkspaceService {
         }
     }
 
+    /**
+     * Odstraní všechny předměty z workspace a vyčistí všechny rozvrhy.
+     */
     removeAllCourses() {
         this.courses = [];
         this.primarySchedule.clear();
@@ -106,14 +150,28 @@ class WorkspaceService {
         this.activeScheduleIndex = -1;
     }
 
+    /**
+     * Vrací pole všech předmětů ve workspace.
+     * @returns {CourseClass[]} Kopie pole s předměty.
+     */
     getAllCourses() {
         return [...this.courses];
     }
 
+    /**
+     * Najde a vrátí předmět podle jeho ID.
+     * @param {string} courseId - ID předmětu.
+     * @returns {CourseClass|undefined} Nalezený předmět nebo undefined.
+     */
     findCourseById(courseId) {
         return this.courses.find(c => c.id === courseId);
     }
 
+    /**
+     * Najde a vrátí událost (přednášku, cvičení) napříč všemi předměty podle jejího ID.
+     * @param {string} eventId - ID události.
+     * @returns {CourseEventClass|null} Nalezená událost nebo null.
+     */
     findEventByIdGlobal(eventId) {
         for (const course of this.courses) {
             const event = course.events.find(e => e.id === eventId);
@@ -122,6 +180,10 @@ class WorkspaceService {
         return null;
     }
 
+    /**
+     * Normalizuje priority všech preferencí tak, aby tvořily souvislou číselnou řadu.
+     * @private
+     */
     _normalizePriorities() {
         const sortedPreferences = Object.values(this.preferences)
             .sort((a, b) => a.priority - b.priority);
@@ -132,6 +194,10 @@ class WorkspaceService {
         this.preferences = normalizedPreferences;
     }
 
+    /**
+     * Přidá novou uživatelskou preferenci.
+     * @param {object} preferenceData - Data nové preference.
+     */
     addPreference(preferenceData) {
         const newId = preferenceData.id || generatePreferenceId();
         const newPreference = {
@@ -144,6 +210,10 @@ class WorkspaceService {
         this._normalizePriorities();
     }
 
+    /**
+     * Odstraní uživatelskou preferenci podle jejího ID.
+     * @param {string} preferenceId - ID preference k odstranění.
+     */
     deletePreference(preferenceId) {
         if (this.preferences[preferenceId]) {
             delete this.preferences[preferenceId];
@@ -151,10 +221,18 @@ class WorkspaceService {
         }
     }
 
+    /**
+     * Odstraní všechny uživatelské preference.
+     */
     removeAllPreferences() {
         this.preferences = {};
     }
 
+    /**
+     * Aktualizuje data existující preference.
+     * @param {string} preferenceId - ID preference k aktualizaci.
+     * @param {object} updatedData - Objekt s novými daty pro preferenci.
+     */
     updatePreference(preferenceId, updatedData) {
         if (this.preferences[preferenceId]) {
             this.preferences[preferenceId] = {
@@ -167,6 +245,11 @@ class WorkspaceService {
         }
     }
 
+    /**
+     * Změní prioritu preference (posune ji nahoru nebo dolů v seznamu).
+     * @param {string} preferenceId - ID preference.
+     * @param {'up'|'down'} direction - Směr posunu.
+     */
     updatePreferencePriority(preferenceId, direction) {
         const prefsArray = Object.values(this.preferences).sort((a, b) => a.priority - b.priority);
         const index = prefsArray.findIndex(p => p.id === preferenceId);
@@ -183,12 +266,21 @@ class WorkspaceService {
         this._normalizePriorities();
     }
 
+    /**
+     * Přepíná stav aktivace/deaktivace pro danou preferenci.
+     * @param {string} preferenceId - ID preference.
+     */
     togglePreferenceActive(preferenceId) {
         if (this.preferences[preferenceId]) {
             this.preferences[preferenceId].isActive = !this.preferences[preferenceId].isActive;
         }
     }
 
+    /**
+     * Připraví data celého workspace pro serializaci (ukládání, export).
+     * @returns {object} Objekt reprezentující stav workspace.
+     * @private
+     */
     _getWorkspaceData() {
         return {
             semester: this.semester,
@@ -204,15 +296,23 @@ class WorkspaceService {
         };
     }
 
+    /**
+     * Uloží aktuální stav workspace do localStorage.
+     */
     saveWorkspace() {
         try {
             const workspaceData = this._getWorkspaceData();
             localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(workspaceData));
         } catch (error) {
-            console.error("Chyba při ukládání workspace do localStorage:", error);
+            // Chyby při ukládání se tiše ignorují, aby nepadala aplikace.
         }
     }
 
+    /**
+     * Exportuje aktuální stav workspace jako soubor JSON.
+     * @param {string} [filename='muj_rozvrh_workspace.json'] - Název souboru pro stažení.
+     * @returns {boolean} Vrací true při úspěchu, jinak false.
+     */
     exportWorkspaceAsJson(filename = 'muj_rozvrh_workspace.json') {
         try {
             const workspaceData = this._getWorkspaceData();
@@ -228,16 +328,19 @@ class WorkspaceService {
             URL.revokeObjectURL(url);
             return true;
         } catch (error) {
-            console.error("Chyba při exportu workspace:", error);
             return false;
         }
     }
 
+    /**
+     * Importuje stav workspace z JSON řetězce.
+     * @param {string} jsonDataString - Data workspace ve formátu JSON.
+     * @returns {boolean} Vrací true při úspěchu, jinak false.
+     */
     importWorkspaceFromJson(jsonDataString) {
         try {
             const data = JSON.parse(jsonDataString);
             if (!data || typeof data !== 'object') {
-                console.error("ImportWorkspace: Neplatný formát JSON dat.");
                 return false;
             }
 
@@ -271,7 +374,7 @@ class WorkspaceService {
                 });
             }
             
-            this.activeScheduleIndex = (typeof data.activeScheduleIndex === 'number' && data.activeScheduleIndex >= -1) ? data.activeScheduleIndex : -1;
+            this.activeScheduleIndex = data.activeScheduleIndex !== undefined ? data.activeScheduleIndex : -1;
             
             if (typeof data.preferences === 'object' && data.preferences !== null) {
                 this.preferences = data.preferences;
@@ -280,84 +383,63 @@ class WorkspaceService {
 
             this.scheduleColorMode = data.scheduleColorMode === 'course' ? 'course' : 'type';
 
-            console.log("Workspace importován z JSON.");
             return true;
         } catch (error) {
-            console.error("Chyba při importu workspace z JSON:", error);
-            this.resetToEmptyState(); // V případě chyby vrátíme do prázdného stavu
+            this.resetToEmptyState(); // V případě chyby se vrátíme do bezpečného stavu
             return false;
         }
     }
 
+    /**
+     * Uloží snímek HTML elementu rozvrhu jako obrázek PNG.
+     * @param {HTMLElement} scheduleWrapperElement - HTML element, který obsahuje rozvrh.
+     * @param {string} [filename='rozvrh.png'] - Název souboru pro uložení.
+     */
     async saveScheduleImage(scheduleWrapperElement, filename = 'rozvrh.png') {
         if (!scheduleWrapperElement) {
-            console.error('Chyba: Element pro vyfocení rozvrhu nebyl poskytnut.');
-            return;
+            return false;
         }
-
-        const scheduleBoxPaperElement = scheduleWrapperElement.querySelector('.MuiPaper-root'); // Najdeme Paper uvnitř
-        if (!scheduleBoxPaperElement) {
-            console.error('Chyba: Vnitřní Paper element ScheduleBox nebyl nalezen.');
-            return;
-        }
-        
-        const scheduleContentElement = scheduleBoxPaperElement.children[0]; // Předpokládáme, že první dítě je StyledTableContainer
-        if (!scheduleContentElement || !scheduleContentElement.children[0]) {
-             console.error('Chyba: Vnitřní prvek obsahu ScheduleBox (StyledTableContainer nebo Table) nebyl nalezen.');
-             return;
-        }
-        const tableElement = scheduleContentElement.children[0]; // Předpokládáme, že tabulka je první dítě StyledTableContainer
-
-        // Uložení původních stylů
-        const originalWrapperStyles = {
-            overflow: scheduleWrapperElement.style.overflow,
-            height: scheduleWrapperElement.style.height,
-            width: scheduleWrapperElement.style.width,
-            maxHeight: scheduleWrapperElement.style.maxHeight,
-        };
-        const originalPaperStyles = {
-            overflow: scheduleBoxPaperElement.style.overflow,
-            height: scheduleBoxPaperElement.style.height,
-            width: scheduleBoxPaperElement.style.width,
-            maxHeight: scheduleBoxPaperElement.style.maxHeight,
-        };
-        const originalContentStyles = {
-            overflow: scheduleContentElement.style.overflow,
-            height: scheduleContentElement.style.height,
-            width: scheduleContentElement.style.width,
-            maxHeight: scheduleContentElement.style.maxHeight,
-        };
-
         try {
-            // Dočasná úprava stylů pro plný obsah
-            scheduleWrapperElement.style.overflow = 'visible';
-            scheduleWrapperElement.style.height = 'auto'; // Nebo scheduleWrapperElement.scrollHeight + 'px'
-            scheduleWrapperElement.style.width = 'auto';  // Nebo scheduleWrapperElement.scrollWidth + 'px'
-            scheduleWrapperElement.style.maxHeight = 'none';
-
-            scheduleBoxPaperElement.style.overflow = 'visible';
-            scheduleBoxPaperElement.style.height = 'auto';
-            scheduleBoxPaperElement.style.width = 'auto';
-            scheduleBoxPaperElement.style.maxHeight = 'none';
+            // Zjistit aktuální rozměry elementu včetně skrytých částí
+            const scrollHeight = scheduleWrapperElement.scrollHeight;
+            const scrollWidth = scheduleWrapperElement.scrollWidth;
             
-            scheduleContentElement.style.overflow = 'visible';
-            scheduleContentElement.style.height = tableElement.scrollHeight + 'px';
-            scheduleContentElement.style.width = tableElement.scrollWidth + 'px';
-            scheduleContentElement.style.maxHeight = 'none';
-
-            const canvas = await html2canvas(tableElement, { // Snímat přímo tabulku
-                allowTaint: true,
-                useCORS: true,
-                logging: true,
-                scrollX: 0, // Dříve -window.scrollX
-                scrollY: 0, // Dříve -window.scrollY
-                x: 0, // Pozice X výřezu
-                y: 0, // Pozice Y výřezu
-                width: tableElement.scrollWidth, // Šířka celého obsahu elementu
-                height: tableElement.scrollHeight, // Výška celého obsahu elementu
-                backgroundColor: window.getComputedStyle(scheduleBoxPaperElement).backgroundColor || '#ffffff', // Barva pozadí
-                scale: 2, // Zvýšení kvality obrázku
+            // Zapamatovat si původní hodnoty scrollu a stylu
+            const originalScrollTop = scheduleWrapperElement.scrollTop;
+            const originalScrollLeft = scheduleWrapperElement.scrollLeft;
+            const originalPosition = window.getComputedStyle(scheduleWrapperElement).position;
+            const originalOverflow = window.getComputedStyle(scheduleWrapperElement).overflow;
+            
+            // Dočasně upravit styly pro zachycení
+            scheduleWrapperElement.style.position = 'relative';
+            scheduleWrapperElement.style.overflow = 'visible';
+            scheduleWrapperElement.style.height = `${scrollHeight}px`;
+            scheduleWrapperElement.style.width = `${scrollWidth}px`;
+            
+            // Vytvořit canvas
+            const canvas = await html2canvas(scheduleWrapperElement, {
+                scale: 2, // Zvýšení rozlišení pro lepší kvalitu
+                useCORS: true, // Povolení CORS pro případné obrázky na pozadí
+                logging: false, // Vypnutí logování z html2canvas
+                height: scrollHeight,
+                width: scrollWidth,
+                windowHeight: scrollHeight,
+                windowWidth: scrollWidth,
+                x: 0,
+                y: 0,
+                scrollX: 0,
+                scrollY: 0
             });
+            
+            // Vrátit původní stav elementu
+            scheduleWrapperElement.style.position = originalPosition;
+            scheduleWrapperElement.style.overflow = originalOverflow;
+            scheduleWrapperElement.style.height = '';
+            scheduleWrapperElement.style.width = '';
+            scheduleWrapperElement.scrollTop = originalScrollTop;
+            scheduleWrapperElement.scrollLeft = originalScrollLeft;
+            
+            // Uložit obrázek
             const image = canvas.toDataURL('image/png', 1.0);
             const link = document.createElement('a');
             link.href = image;
@@ -365,272 +447,110 @@ class WorkspaceService {
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-        } catch (error) {
-            console.error('Chyba při vytváření obrázku rozvrhu:', error);
-        } finally {
-            // Obnovení původních stylů
-            scheduleWrapperElement.style.overflow = originalWrapperStyles.overflow;
-            scheduleWrapperElement.style.height = originalWrapperStyles.height;
-            scheduleWrapperElement.style.width = originalWrapperStyles.width;
-            scheduleWrapperElement.style.maxHeight = originalWrapperStyles.maxHeight;
-
-            scheduleBoxPaperElement.style.overflow = originalPaperStyles.overflow;
-            scheduleBoxPaperElement.style.height = originalPaperStyles.height;
-            scheduleBoxPaperElement.style.width = originalPaperStyles.width;
-            scheduleBoxPaperElement.style.maxHeight = originalPaperStyles.maxHeight;
-            
-            scheduleContentElement.style.overflow = originalContentStyles.overflow;
-            scheduleContentElement.style.height = originalContentStyles.height;
-            scheduleContentElement.style.width = originalContentStyles.width;
-            scheduleContentElement.style.maxHeight = originalContentStyles.maxHeight;
-        }
-    }
-
-    loadWorkspace() {
-            const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
-            if (savedData) {
-            try {
-                const data = JSON.parse(savedData);
-                // Validace základní struktury dat
-                if (typeof data === 'object' && data !== null && Array.isArray(data.courses)) {
-                    this.year = data.year || '';
-                    this.semester = data.semester || '';
-                    this.courses = data.courses.map(courseData => new CourseClass(courseData));
-
-                this.primarySchedule = new ScheduleClass();
-                    if (data.primaryScheduleEvents && Array.isArray(data.primaryScheduleEvents)) {
-                        const eventsToEnroll = data.primaryScheduleEvents
-                        .map(eventRef => this.findEventByIdGlobal(eventRef.id))
-                            .filter(event => event !== null);
-                        eventsToEnroll.forEach(event => this.primarySchedule.addEvent(event));
-                    }
-                    
-                    this.generatedSchedules = Array.isArray(data.generatedSchedules) ? data.generatedSchedules.map(scheduleData => {
-                        const newSchedule = new ScheduleClass();
-                        if (scheduleData.enrolledEventIds && Array.isArray(scheduleData.enrolledEventIds)) {
-                             const eventsForGenerated = scheduleData.enrolledEventIds
-                            .map(eventId => this.findEventByIdGlobal(eventId))
-                                .filter(event => event !== null);
-                            eventsForGenerated.forEach(event => newSchedule.addEvent(event));
-                        }
-                        return newSchedule;
-                    }) : [];
-                    
-                    this.activeScheduleIndex = (typeof data.activeScheduleIndex === 'number' && data.activeScheduleIndex >= -1) ? data.activeScheduleIndex : -1;
-                    
-                    this.preferences = (typeof data.preferences === 'object' && data.preferences !== null) ? data.preferences : {};
-                    if (Object.keys(this.preferences).length > 0) {
-                        this._normalizePriorities();
-                    }
-
-                    this.scheduleColorMode = data.scheduleColorMode === 'course' ? 'course' : 'type';
-
-                console.log("WorkspaceService: Workspace loaded from localStorage.");
-                    return true; // Data byla úspěšně načtena z localStorage
-            } else {
-                    console.warn("WorkspaceService: Data v localStorage nejsou ve validním formátu. Inicializuji prázdný workspace.");
-                    this.resetToEmptyState();
-                    return false; // Data nebyla validní
-                }
-            } catch (error) {
-                console.error("WorkspaceService: Chyba při parsování dat z localStorage. Inicializuji prázdný workspace.", error);
-                this.resetToEmptyState();
-                return false; // Chyba při parsování
-            }
-        } else {
-            console.log("WorkspaceService: Žádná data v localStorage. Inicializuji prázdný workspace.");
-            this.resetToEmptyState(); // Toto je důležité - zajistí prázdný stav
-            return false; // Nic nebylo načteno z localStorage
-        }
-    }
-
-    clearWorkspace(removeFromStorage = true) {
-        this.resetToEmptyState(); // Nastaví všechny vlastnosti na prázdné/výchozí
-        if (removeFromStorage) {
-            localStorage.removeItem(LOCAL_STORAGE_KEY);
-            console.log("WorkspaceService: Workspace data removed from localStorage.");
-        }
-    }
-
-    _eventsConflict(event1, event2) {
-        if (event1.day !== event2.day) return false;
-
-        const start1 = this._timeToMinutes(event1.startTime);
-        const end1 = this._timeToMinutes(event1.endTime);
-        const start2 = this._timeToMinutes(event2.startTime);
-        const end2 = this._timeToMinutes(event2.endTime);
-
-        // Kontrola překryvu časů
-        const overlap = start1 < end2 && start2 < end1;
-        if (!overlap) return false;
-
-        // Kontrola týdenní frekvence
-        const freq1 = event1.recurrence; // např. "každýtýden", "sudýtýden", "lichýtýden", "jednorázově"
-        const freq2 = event2.recurrence;
-
-        if (freq1 === "jednorázově" || freq2 === "jednorázově") {
-            // Pokud je alespoň jedna akce jednorázová, musíme zkontrolovat datum (pokud máme)
-            // Prozatím, pokud je jedna jednorázová a druhá týdenní/periodická, považujeme za konflikt, pokud se časově kryjí v den
-            // Toto by vyžadovalo přesnější logiku pro jednorázové události (např. porovnání konkrétních dat)
-            // Pro zjednodušení: pokud se časy a dny kryjí, a jedna je jednorázová, považujeme za konflikt.
             return true;
-        }
-
-        if (freq1 === "každýtýden" || freq2 === "každýtýden") return true; // Každý týden koliduje s čímkoliv periodickým
-        if (freq1 === freq2) return true; // Sudý se sudým, lichý s lichým
-
-        return false; // Sudý s lichým nekoliduje
-    }
-
-    _timeToMinutes(timeStr) { // Pomocná funkce pro převod času "HH:MM" na minuty od půlnoci
-        const [hours, minutes] = timeStr.split(':').map(Number);
-        return hours * 60 + minutes;
-    }
-
-    generateSchedule(coursesToSchedule = this.courses) {
-        this.generatedSchedules = [];
-        this.activeScheduleIndex = -1;
-
-        const activePreferences = Object.values(this.preferences)
-            .filter(p => p.isActive)
-            .sort((a, b) => a.priority - b.priority);
-
-        const relevantCourses = coursesToSchedule.filter(course => course.events && course.events.length > 0);
-        if (relevantCourses.length === 0) {
-            console.log("Nebyly nalezeny žádné předměty s událostmi pro generování rozvrhu.");
+        } catch (error) {
+            console.error("Error capturing schedule image:", error);
             return false;
         }
-
-        // Předpočítání všech událostí seskupených podle typu pro každý předmět
-        const allEventGroups = {};
-        relevantCourses.forEach(course => {
-            allEventGroups[course.id] = {};
-            course.events.forEach(event => {
-                const typeKey = EVENT_TYPE_TO_KEY_MAP[event.type.toLowerCase()];
-                if (typeKey) {
-                    if (!allEventGroups[course.id][typeKey]) {
-                        allEventGroups[course.id][typeKey] = [];
-                    }
-                    allEventGroups[course.id][typeKey].push(event);
-                }
-            });
-        });
-        
-        let solutionsFound = 0;
-
-        const findSchedulesRecursive = (courseIdx, currentScheduleInProgress) => {
-            if (solutionsFound >= MAX_GENERATED_SCHEDULES) {
-                return;
-            }
-
-            if (courseIdx === relevantCourses.length) {
-                // Úspěšně nalezen kompletní rozvrh
-                this.generatedSchedules.push(currentScheduleInProgress.clone());
-                solutionsFound++;
-                return;
-            }
-
-            const course = relevantCourses[courseIdx];
-            const eventGroupsForCourse = allEventGroups[course.id];
-            const groupKeys = Object.keys(eventGroupsForCourse);
-
-            // Rekurzivní funkce pro generování kombinací událostí pro jeden předmět
-            const generateEventCombinationsForCourse = (groupKeyIndex, tempEventsForCourse) => {
-                if (solutionsFound >= MAX_GENERATED_SCHEDULES) return;
-
-                if (groupKeyIndex === groupKeys.length) {
-                    // Máme platnou sadu událostí pro tento předmět, zkusíme je přidat do hlavního rozvrhu
-                    const nextScheduleCandidate = currentScheduleInProgress.clone();
-                    let possibleToAddAll = true;
-                    for (const eventToAdd of tempEventsForCourse) {
-                        if (nextScheduleCandidate.conflictsWith(eventToAdd, this._eventsConflict.bind(this))) {
-                            possibleToAddAll = false;
-                            break;
-                        }
-                        nextScheduleCandidate.addEvent(eventToAdd);
-                    }
-
-                    if (possibleToAddAll) {
-                        // Pokud je kombinace bezkonfliktní, pokračujeme s dalším předmětem
-                        findSchedulesRecursive(courseIdx + 1, nextScheduleCandidate);
-                    }
-                    return;
-                }
-
-                const currentGroupKey = groupKeys[groupKeyIndex];
-                const eventsOfThisGroup = eventGroupsForCourse[currentGroupKey];
-                const neededHours = course.neededHours[currentGroupKey] || 0;
-
-                if (neededHours === 0) {
-                    // Pro tento typ události nejsou potřeba žádné hodiny, pokračujeme dál
-                    generateEventCombinationsForCourse(groupKeyIndex + 1, tempEventsForCourse);
-                    return;
-                }
-
-                // Funkce pro nalezení všech podmnožin událostí, které splňují hodinový požadavek
-                function getCombinationsThatMeetHours(events, targetHours) {
-                    const result = [];
-                    
-                    function findSubsets(startIndex, currentSum, currentSubset) {
-                        if (currentSum >= targetHours) {
-                            // Našli jsme platnou kombinaci
-                            result.push([...currentSubset]);
-                            // V této větvi můžeme skončit, pokud hledáme minimální sady,
-                            // ale pro úplnost je lepší projít všechny možnosti.
-                        }
-                        
-                        // Pokud jsme již přesáhli součet a máme další prvky, můžeme skončit dříve,
-                        // pokud víme, že hodiny jsou vždy kladné.
-                        if (currentSum >= targetHours) return;
-
-                        if (startIndex === events.length) {
-                            return;
-                        }
-
-                        for (let i = startIndex; i < events.length; i++) {
-                            const newSum = currentSum + (events[i].durationHours || 0);
-                            currentSubset.push(events[i]);
-                            findSubsets(i + 1, newSum, currentSubset);
-                            currentSubset.pop(); // backtrack
-                        }
-                    }
-
-                    findSubsets(0, 0, []);
-
-                    // Odstranění duplicitních sad (pokud by k nim mohlo dojít) a nadbytečných supersetů
-                    // Pro jednoduchost teď vezmeme všechny, co splňují podmínku
-                    const uniqueCombinations = [];
-                    const seenCombinations = new Set();
-                    result.forEach(comb => {
-                        const combId = comb.map(e => e.id).sort().join(',');
-                        if(!seenCombinations.has(combId)) {
-                            uniqueCombinations.push(comb);
-                            seenCombinations.add(combId);
-                        }
-                    });
-
-                    return uniqueCombinations;
-                }
-                
-                // Získáme všechny platné kombinace (podmnožiny) událostí pro daný typ
-                const combinations = getCombinationsThatMeetHours(eventsOfThisGroup, neededHours);
-
-                for (const combination of combinations) {
-                    if (solutionsFound >= MAX_GENERATED_SCHEDULES) return;
-                    // Pro každou platnou kombinaci pokračujeme v rekurzi pro další typ události
-                    generateEventCombinationsForCourse(groupKeyIndex + 1, [...tempEventsForCourse, ...combination]);
-                }
-            }
-            
-            // Spustíme generování kombinací pro první typ události daného předmětu
-            generateEventCombinationsForCourse(0, []);
-        }
-        
-        findSchedulesRecursive(0, new ScheduleClass());
-
-        console.log(`Generování dokončeno. Nalezeno ${this.generatedSchedules.length} rozvrhů.`);
-        return this.generatedSchedules.length > 0;
     }
-}
 
-export default WorkspaceService;
+    /**
+     * Načte pracovní prostor z localStorage.
+     * Pokud v localStorage nic není nebo jsou data poškozená, inicializuje prázdný stav.
+     */
+    loadWorkspace() {
+        try {
+            const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+            if (!savedData) {
+                this.resetToEmptyState();
+                return;
+            }
+
+                const data = JSON.parse(savedData);
+
+                    this.year = data.year || '';
+                    this.semester = data.semester || '';
+
+            // Deserializace předmětů a jejich událostí
+            this.courses = Array.isArray(data.courses)
+                ? data.courses.map(courseData => {
+                    const course = new CourseClass(courseData);
+                    // Přiřazení barev, pokud nejsou uloženy
+                    if (!course.color) {
+                        course.color = getColorForCourse(this.courses.length);
+                    }
+                    return course;
+                })
+                : [];
+
+            // Obnovení primárního rozvrhu
+                this.primarySchedule = new ScheduleClass();
+                    if (data.primaryScheduleEvents && Array.isArray(data.primaryScheduleEvents)) {
+                data.primaryScheduleEvents.forEach(eventRef => {
+                    const event = this.findEventByIdGlobal(eventRef.id);
+                    if (event) {
+                        this.primarySchedule.addEvent(event);
+                    }
+                });
+                    }
+                    
+            // Obnovení vygenerovaných rozvrhů
+            this.generatedSchedules = Array.isArray(data.generatedSchedules)
+                ? data.generatedSchedules.map(scheduleData => {
+                    const schedule = new ScheduleClass();
+                        if (scheduleData.enrolledEventIds && Array.isArray(scheduleData.enrolledEventIds)) {
+                        scheduleData.enrolledEventIds.forEach(eventId => {
+                            const event = this.findEventByIdGlobal(eventId);
+                            if (event) {
+                                schedule.addEvent(event);
+                            }
+                        });
+                        }
+                    return schedule;
+                })
+                : [];
+                    
+            this.activeScheduleIndex = data.activeScheduleIndex !== undefined ? data.activeScheduleIndex : -1;
+            this.preferences = data.preferences || {};
+            this.scheduleColorMode = data.scheduleColorMode || 'type';
+
+            } catch (error) {
+            this.resetToEmptyState(); // V případě chyby se vrátíme do bezpečného stavu
+            }
+    }
+
+    /**
+     * Vymaže celý pracovní prostor a volitelně i data z localStorage.
+     * @param {boolean} [removeFromStorage=true] - Pokud je true, smaže i data z localStorage.
+     */
+    clearWorkspace(removeFromStorage = true) {
+        this.resetToEmptyState();
+        if (removeFromStorage) {
+            try {
+            localStorage.removeItem(LOCAL_STORAGE_KEY);
+            } catch (error) {
+                // Chyba při mazání z localStorage se tiše ignoruje
+            }
+        }
+    }
+
+    /**
+     * Spustí algoritmus pro generování rozvrhů na základě aktuálně přidaných předmětů.
+     * Výsledky uloží do `this.generatedSchedules`.
+     * @param {CourseClass[]} [coursesToSchedule=this.courses] - Pole předmětů k naplánování.
+     */
+    generateSchedule(coursesToSchedule = this.courses) {
+        // Použijeme externí, optimalizovaný algoritmus pro generování
+        this.generatedSchedules = generateScheduleAlgorithm(coursesToSchedule);
+
+        // Resetujeme aktivní rozvrh, primární rozvrh zůstává nedotčen
+        this.activeScheduleIndex = -1; 
+    }
+                }
+
+/**
+ * Jediná instance služby WorkspaceService (Singleton pattern).
+ * @type {WorkspaceService}
+ */
+const workspaceService = new WorkspaceService();
+export default workspaceService;

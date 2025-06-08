@@ -3,6 +3,7 @@ import { useCallback } from 'react';
 import { useWorkspace } from '../../../contexts/WorkspaceContext';
 import { useSnackbar } from '../../../contexts/SnackbarContext';
 import { useTranslation } from 'react-i18next';
+import { EVENT_TYPE_TO_KEY_MAP } from '../../../services/CourseClass';
 
 export const PREFERENCE_CONFIG = {
     FREE_DAY: {
@@ -12,7 +13,7 @@ export const PREFERENCE_CONFIG = {
         params: [
             { name: 'day', labelKey: 'preferences.params.day', type: 'select', optionsKey: 'dayOptions', defaultValue: 'PO' },
         ],
-        displayFormatter: (params, t) => t('preferences.displayLabels.freeDay', { day: t(`preferences.dayOptions.${params.day}`, params.day) })
+        displayFormatter: (params, t) => t('preferences.displayLabels.freeDay', { day: t(`preferences.dayOptions.${EVENT_TYPE_TO_KEY_MAP[params.day.toLowerCase()] || 'other'}`, params.day) })
     },
     AVOID_TIMES: {
         labelKey: 'preferences.types.AVOID_TIMES.label',
@@ -23,7 +24,7 @@ export const PREFERENCE_CONFIG = {
             { name: 'startTime', labelKey: 'preferences.params.startTime', type: 'time', defaultValue: '10:00' },
             { name: 'endTime', labelKey: 'preferences.params.endTime', type: 'time', defaultValue: '12:00' },
         ],
-        displayFormatter: (params, t) => t('preferences.displayLabels.avoidTimes', { day: t(`preferences.dayOptions.${params.day}`, params.day), startTime: params.startTime, endTime: params.endTime })
+        displayFormatter: (params, t) => t('preferences.displayLabels.avoidTimes', { day: t(`preferences.dayOptions.${EVENT_TYPE_TO_KEY_MAP[params.day.toLowerCase()] || 'other'}`, params.day), startTime: params.startTime, endTime: params.endTime })
     },
     PREFER_INSTRUCTOR: { // Přidání konfigurace pro PREFER_INSTRUCTOR
         labelKey: 'preferences.types.PREFER_INSTRUCTOR.label',

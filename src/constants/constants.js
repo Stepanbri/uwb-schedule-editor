@@ -34,4 +34,4 @@ export const ENROLLMENT_KEY_TO_SHORT_I18N_KEY = {
 
 export const ENROLLMENT_DISPLAY_ORDER = ['lecture', 'practical', 'seminar'];
 
-export const LOCAL_STORAGE_KEY = 'schedulePlannerWorkspace_v2';
+export const LOCAL_STORAGE_KEY = 'schedulePlannerWorkspaceSave';

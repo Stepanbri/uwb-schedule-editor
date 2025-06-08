@@ -1,15 +1,13 @@
 // src/contexts/WorkspaceContext.jsx
-import React, { createContext, useContext, useState, useMemo, useCallback } from 'react';
-import WorkspaceService from '../services/WorkspaceService';
+import React, { createContext, useContext, useState, useCallback } from 'react';
+import workspaceService, { LOCAL_STORAGE_KEY } from '../services/WorkspaceService';
 import ScheduleClass from '../services/ScheduleClass';
 import { useSnackbar } from './SnackbarContext';
 import { useTranslation } from 'react-i18next';
-import { LOCAL_STORAGE_KEY } from '../services/WorkspaceService';
 
 const WorkspaceContext = createContext(null);
 
 export const WorkspaceProvider = ({ children }) => {
-    const workspaceService = useMemo(() => new WorkspaceService(), []);
     const { showSnackbar } = useSnackbar();
     const { t } = useTranslation();
 

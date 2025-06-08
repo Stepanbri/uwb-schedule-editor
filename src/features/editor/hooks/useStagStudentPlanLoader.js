@@ -1,3 +1,14 @@
+/**
+ * @file Tento soubor definuje hook `useStagStudentPlanLoader`, který zapouzdřuje komplexní logiku
+ * pro načítání studijního plánu studenta ze STAGu. Tento proces zahrnuje několik kroků:
+ * 1. Přihlášení uživatele přes STAG.
+ * 2. Výběr identity (role) studenta.
+ * 3. Zadání parametrů studia (ročník, semestr).
+ * 4. Načtení předmětů a jejich rozvrhových akcí.
+ * 5. Zpracování a přidání předmětů do `WorkspaceService`.
+ * Hook spravuje stav všech dialogových oken a komunikaci se STAG API a Workspace.
+ */
+
 // src/features/editor/hooks/useStagStudentPlanLoader.js
 import { useState, useCallback } from 'react';
 import { useStagApi } from '../../../contexts/StagApiContext';
@@ -5,7 +16,13 @@ import { useWorkspace } from '../../../contexts/WorkspaceContext';
 import { useSnackbar } from '../../../contexts/SnackbarContext';
 import { useTranslation } from 'react-i18next';
 import { timeToMinutes } from '../../../utils/timeUtils';
+import { transformStagEvent, transformStagSubject } from '../../../utils/stagDataTransform.js';
 
+/**
+ * Pomocná funkce pro získání akademického roku ve formátu, který vyžaduje STAG API (např. "2023").
+ * @param {string} academicYearString - Akademický rok ve formátu "RRRR/RRRR" (např. "2023/2024").
+ * @returns {string} První část roku.
+ */
 const getStagApiYear = (academicYearString) => {
     if (typeof academicYearString === 'string' && academicYearString.includes('/')) {
         return academicYearString.split('/')[0];
@@ -13,23 +30,51 @@ const getStagApiYear = (academicYearString) => {
     return academicYearString;
 };
 
+/**
+ * Hook pro správu kompletního workflow načítání studijního plánu studenta.
+ * @returns {{
+ *  isRedirectDialogOpen: boolean,
+ *  isIdentityDialogOpen: boolean,
+ *  isStudyParamsDialogOpen: boolean,
+ *  isStudentPlanLoadingActive: boolean,
+ *  isLoadingCourseDetails: boolean,
+ *  currentStudentContextForDialog: object | null,
+ *  overwritePlanDialogState: object,
+ *  summaryDialog: object,
+ *  openLoadCoursesFromStudentDialog: () => void,
+ *  closeRedirectDialog: () => void,
+ *  handleContinueToSTAGLogin: () => void,
+ *  processLoginSuccessAndOpenIdentityDialog: () => void,
+ *  closeIdentityDialog: (userCancelled?: boolean) => void,
+ *  handleIdentitySelected: (selectedStagUserIdentifier: string) => Promise<void>,
+ *  closeStudyParamsDialog: (userCancelled?: boolean) => void,
+ *  handleStudyParametersSubmitted: (params: object) => Promise<void>,
+ *  closeOverwritePlanDialog: (userCancelled?: boolean) => void,
+ *  closeSummaryDialog: () => void
+ * }}
+ */
 export const useStagStudentPlanLoader = () => {
     const { stagApiService, redirectToStagLogin, setRole, clearStagAuthData, userInfo, useDemoApi } = useStagApi();
     const { workspaceService, addCourse } = useWorkspace();
     const { showSnackbar } = useSnackbar();
     const { t, i18n } = useTranslation();
 
+    // Stav pro dialog, který informuje o přesměrování na STAG login.
     const [isRedirectDialogOpen, setIsRedirectDialogOpen] = useState(false);
+    // Stav pro dialog výběru identity (role) studenta po přihlášení.
     const [isIdentityDialogOpen, setIsIdentityDialogOpen] = useState(false);
+    // Stav pro dialog zadání parametrů studia (rok, semestr).
     const [isStudyParamsDialogOpen, setIsStudyParamsDialogOpen] = useState(false);
 
-    // Tento stav by měl pokrývat celý proces od výběru identity až po dokončení načítání
+    // Globální příznak, že probíhá proces načítání plánu (od prvního kroku až do konce).
     const [isStudentPlanLoadingActive, setIsStudentPlanLoadingActive] = useState(false);
-    // Tento stav je specifičtější pro fázi načítání detailů předmětů a jejich RAKcí
+    // Specifický příznak pro fázi, kdy se na pozadí stahují detaily předmětů.
     const [isLoadingCourseDetails, setIsLoadingCourseDetails] = useState(false);
 
+    // Uchovává kontext studenta (jméno, obor atd.) pro zobrazení v dialogu.
     const [currentStudentContextForDialog, setCurrentStudentContextForDialog] = useState(null);
 
+    // Stav pro dialog, který se ptá na přepsání existujících předmětů.
     const [overwritePlanDialogState, setOverwritePlanDialogState] = useState({
         open: false,
         coursesToProcess: [],
@@ -39,11 +84,16 @@ export const useStagStudentPlanLoader = () => {
         onConfirm: () => {},
     });
 
+    // Stav pro souhrnný dialog zobrazující výsledek importu.
     const [summaryDialog, setSummaryDialog] = useState({
         open: false,
         summary: { added: [], overwritten: [], failed: [] }
     });
 
+    /**
+     * Resetuje všechny stavy hooku do jejich počáteční hodnoty.
+     * Používá se pro čistý start nebo při zrušení operace.
+     */
     const resetAllPlanLoaderStates = () => {
         setIsRedirectDialogOpen(false);
         setIsIdentityDialogOpen(false);
@@ -56,17 +106,26 @@ export const useStagStudentPlanLoader = () => {
         clearStagAuthData();
     };
 
+    /**
+     * Zahájí proces načítání studijního plánu otevřením úvodního dialogu.
+     */
     const openLoadCoursesFromStudentDialog = useCallback(() => {
         resetAllPlanLoaderStates(); // Reset před začátkem nového flow
         setIsRedirectDialogOpen(true);
     }, []); // Závislost na resetAllPlanLoaderStates není nutná, protože se nemění
 
+    /**
+     * Zavře dialog o přesměrování a ukončí celý proces.
+     */
     const closeRedirectDialog = useCallback(() => {
         setIsRedirectDialogOpen(false);
         // Pokud uživatel zavře tento dialog, flow končí
         resetAllPlanLoaderStates();
     }, []);
 
+    /**
+     * Pokračuje z úvodního dialogu na přihlašovací stránku STAGu.
+     */
     const handleContinueToSTAGLogin = useCallback(() => {
         // isRedirectDialogOpen se nastaví na false v closeRedirectDialog, ale chceme, aby studentPlanLoadingActive zůstal true
         setIsStudentPlanLoadingActive(true); // Indikujeme, že proces načítání studenta začal
@@ -74,7 +133,9 @@ export const useStagStudentPlanLoader = () => {
         redirectToStagLogin('studentCourses');
     }, [redirectToStagLogin]);
 
-
+    /**
+     * Zpracuje úspěšné přihlášení, zkontroluje role a otevře dialog pro výběr identity.
+     */
     const processLoginSuccessAndOpenIdentityDialog = useCallback(() => {
         if (userInfo && userInfo.roles && userInfo.roles.length > 0) {
             showSnackbar(t('alerts.stagLoginSuccessful'), 'success');
@@ -86,6 +147,10 @@ export const useStagStudentPlanLoader = () => {
         }
     }, [userInfo, showSnackbar, t]); // Odebrána závislost na clearStagAuthData
 
+    /**
+     * Zavře dialog pro výběr identity. Pokud jej zrušil uživatel, resetuje stav.
+     * @param {boolean} [userCancelled=false] - Indikuje, zda dialog zavřel uživatel.
+     */
     const closeIdentityDialog = useCallback((userCancelled = false) => {
         setIsIdentityDialogOpen(false);
         if (userCancelled) {
@@ -95,6 +160,10 @@ export const useStagStudentPlanLoader = () => {
         // Pokud není zrušeno, isStudentPlanLoadingActive zůstává true
     }, [showSnackbar, t]);
 
+    /**
+     * Zpracuje výběr identity studenta, načte jeho detaily a otevře dialog pro zadání parametrů studia.
+     * @param {string} selectedStagUserIdentifier - Identifikátor vybrané role ze STAGu.
+     */
     const handleIdentitySelected = useCallback(async (selectedStagUserIdentifier) => {
         setIsIdentityDialogOpen(false);
         setRole(selectedStagUserIdentifier);
@@ -134,13 +203,16 @@ export const useStagStudentPlanLoader = () => {
                 } else { throw new Error(t('alerts.fetchStudentInfoErrorNoStudyDetails')); }
             } else { throw new Error(t('alerts.fetchStudentInfoErrorNoData')); }
         } catch (error) {
-            console.error("Chyba při získávání detailů studenta:", error);
             showSnackbar(error.message || t('alerts.fetchStudentInfoError'), 'error');
             resetAllPlanLoaderStates(); // Při chybě resetujeme
         }
         // setIsStudentPlanLoadingActive zůstává true, dokud se neotevře StudyParamsDialog nebo nedojde k chybě
     }, [stagApiService, setRole, showSnackbar, t, i18n.language, workspaceService.year]);
 
+    /**
+     * Zavře dialog pro zadání parametrů studia. Pokud jej zrušil uživatel, resetuje stav.
+     * @param {boolean} [userCancelled=false] - Indikuje, zda dialog zavřel uživatel.
+     */
     const closeStudyParamsDialog = useCallback((userCancelled = false) => {
         setIsStudyParamsDialogOpen(false);
         if (userCancelled) {
@@ -150,6 +222,12 @@ export const useStagStudentPlanLoader = () => {
         // Pokud není zrušeno, isStudentPlanLoadingActive zůstává true
     }, [showSnackbar, t]);
 
+    /**
+     * Finální fáze: Zpracuje pole předmětů, dotáhne pro každý z nich rozvrhové akce,
+     * transformuje data a přidá je do workspace.
+     * @param {object} planParams - Parametry studia (rok, semestr).
+     * @param {object[]} coursesToProcess - Pole předmětů k importu.
+     */
     const actuallyProcessCoursesFromPlan = async (planParams, coursesToProcess) => {
         setOverwritePlanDialogState(prev => ({ ...prev, open: false }));
         setIsLoadingCourseDetails(true); // Začínáme načítání detailů předmětů
@@ -180,97 +258,11 @@ export const useStagStudentPlanLoader = () => {
                         semestr: semesterForEventsApi
                     }, lang);
 
-                    const dayMapping = { "PO": 0, "ÚT": 1, "ST": 2, "ČT": 3, "PÁ": 4, "SO": 5, "NE": 6, "MON": 0, "TUE": 1, "WED": 2, "THU": 3, "FRI": 4, "SAT": 5, "SUN": 6 };
-                    const recurrenceMapping = { "KT": "KAŽDÝ TÝDEN", "SUDY": "SUDÝ TÝDEN", "LI": "LICHÝ TÝDEN", "KAŽDÝ": "KAŽDÝ TÝDEN", "LICHÝ": "LICHÝ TÝDEN", "SUDÝ": "SUDÝ TÝDEN", "EVERY": "KAŽDÝ TÝDEN", "ODD": "LICHÝ TÝDEN", "EVEN": "SUDÝ TÝDEN" };
-                    const typeMapping = { "P": "PŘEDNÁŠKA", "C": "CVIČENÍ", "S": "SEMINÁŘ", "Z": "ZKOUŠKA", "A": "ZÁPOČET", "BL": "BLOK", "PŘ": "PŘEDNÁŠKA", "CV": "CVIČENÍ", "SE": "SEMINÁŘ", "LECTURE": "PŘEDNÁŠKA", "PRACTICAL": "CVIČENÍ", "SEMINAR": "SEMINÁŘ" };
-
-                    const transformedEvents = (Array.isArray(scheduleEventsData) ? scheduleEventsData : []).map(stagEvent => {
-                        const startTime = stagEvent.hodinaSkutOd?.value || stagEvent.casOd;
-                        const endTime = stagEvent.hodinaSkutDo?.value || stagEvent.casDo;
-
-                        // Vyfiltrovaání virtuálních akcí
-                        if (startTime === '00:00' && endTime === '00:00') {
-                            return null;
-                        }
-
-                        const hodinaOd = stagEvent.hodinaOd;
-                        const hodinaDo = stagEvent.hodinaDo;
-
-                        // Výpočet délky akce pokud chybí (hod/tydně)
-                        let durationHours = parseFloat(stagEvent.pocetVyucHodin) || 0;
-                        if (durationHours <= 0 && hodinaOd && hodinaDo) {
-                            if (hodinaDo >= hodinaOd) {
-                                durationHours = (hodinaDo - hodinaOd) + 1;
-                            }
-                        }
-
-                        const eventId = stagEvent.roakIdno || stagEvent.akceIdno || `${subjectData.rawSubject.katedra}-${subjectData.rawSubject.zkratka}-${stagEvent.typAkceZkr || 'T'}-${stagEvent.denZkr || 'D'}-${stagEvent.hodinaSkutOd?.value || '0000'}-${Math.random().toString(16).slice(2,7)}`;
-                        let instructorName = '';
-                        if (stagEvent.ucitel) {
-                            const ucitele = Array.isArray(stagEvent.ucitel) ? stagEvent.ucitel : [stagEvent.ucitel];
-                            instructorName = ucitele.map(u => `${u.titulPred ? u.titulPred + ' ' : ''}${u.jmeno} ${u.prijmeni}${u.titulZa ? ', ' + u.titulZa : ''}`).join(', ');
-                        }
-                        const dayKey = stagEvent.denZkr?.toUpperCase() || stagEvent.den?.toUpperCase();
-                        let formattedRoom = t('common.notSpecified');
-                        if (stagEvent.budova && stagEvent.mistnost) formattedRoom = `${stagEvent.budova.toUpperCase()}${stagEvent.mistnost.replace(/\s|-/g, '')}`;
-                        else if (stagEvent.mistnost) formattedRoom = stagEvent.mistnost.replace(/\s|-/g, '');
-                        else if (stagEvent.mistnostZkr) formattedRoom = stagEvent.mistnostZkr.replace(/\s|-/g, '');
-
-                        let eventSemesterEffective = stagEvent.semestr?.toUpperCase();
-                        if (!eventSemesterEffective && planParams.semester === '%') {
-                            eventSemesterEffective = subjectData.rawSubject.semestrDoporUc?.toUpperCase() ||
-                                (subjectData.rawSubject.vyukaZS === 'A' ? 'ZS' :
-                                    (subjectData.rawSubject.vyukaLS === 'A' ? 'LS' : 'ZS'));
-                        } else if (!eventSemesterEffective) {
-                            eventSemesterEffective = planParams.semester.toUpperCase();
-                        }
-
-                        return {
-                            id: eventId, stagId: stagEvent.roakIdno || stagEvent.akceIdno,
-                            startTime: startTime,
-                            endTime: endTime,
-                            day: dayMapping[dayKey] ?? (Number.isInteger(parseInt(stagEvent.den)) ? (parseInt(stagEvent.den) - 1) : 0),
-                            recurrence: recurrenceMapping[stagEvent.tydenZkr?.toUpperCase()] || recurrenceMapping[stagEvent.tyden?.toUpperCase()] || stagEvent.tyden || "KAŽDÝ TÝDEN",
-                            room: formattedRoom,
-                            type: typeMapping[stagEvent.typAkceZkr?.toUpperCase()] || typeMapping[stagEvent.typAkce?.toUpperCase()] || stagEvent.typAkce || "NEZNÁMÝ",
-                            instructor: instructorName,
-                            currentCapacity: parseInt(stagEvent.obsazeni || stagEvent.pocetZapsanychStudentu || 0),
-                            maxCapacity: parseInt(stagEvent.kapacita || stagEvent.maxKapacita || stagEvent.kapacitaMistnosti || 0),
-                            note: stagEvent.poznamka,
-                            year: planParams.scheduleAcademicYear,
-                            semester: eventSemesterEffective,
-                            departmentCode: subjectData.rawSubject.katedra,
-                            courseCode: subjectData.rawSubject.zkratka,
-                            durationHours: durationHours,
-                        };
-                    }).filter(event => event !== null);
-
-                    const rozsahParts = subjectData.rawSubject.rozsah?.split('+').map(s => parseInt(s.trim()) || 0) || [0, 0, 0];
-                    const needed = {
-                        lecture: rozsahParts[0] || 0,
-                        practical: rozsahParts.length > 1 ? rozsahParts[1] : 0,
-                        seminar: rozsahParts.length > 2 ? rozsahParts[2] : 0,
-                    };
-
-                    let courseEffectiveSemester = planParams.semester.toUpperCase();
-                    if (planParams.semester === '%') {
-                        courseEffectiveSemester = subjectData.rawSubject.semestrDoporUc?.toUpperCase() ||
-                            (subjectData.rawSubject.vyukaZS === 'A' ? 'ZS' :
-                                (subjectData.rawSubject.vyukaLS === 'A' ? 'LS' : 'ZS'));
-                    }
-
-                    const courseDataForWorkspace = {
-                        stagId: subjectData.rawSubject.predmetId,
-                        name: subjectData.rawSubject.nazev,
-                        departmentCode: subjectData.rawSubject.katedra,
-                        courseCode: subjectData.rawSubject.zkratka,
-                        credits: parseInt(subjectData.rawSubject.kreditu) || 0,
-                        neededHours: needed,
-                        semester: courseEffectiveSemester,
-                        year: planParams.scheduleAcademicYear,
-                        events: transformedEvents,
-                        source: useDemoApi ? 'demo' : 'prod',
-                    };
+                    const transformedEvents = (Array.isArray(scheduleEventsData) ? scheduleEventsData : [])
+                        .map(stagEvent => transformStagEvent(stagEvent, subjectData, planParams, t))
+                        .filter(event => event !== null);
+                    
+                    const courseDataForWorkspace = transformStagSubject(subjectData, transformedEvents, planParams, useDemoApi);
 
                     addCourse(courseDataForWorkspace);
                     const subjectIdentifier = { name: `${subjectData.rawSubject.katedra}/${subjectData.rawSubject.zkratka} - ${subjectData.rawSubject.nazev}` };
@@ -281,7 +273,6 @@ export const useStagStudentPlanLoader = () => {
                     }
 
                 } catch (innerError) {
-                    console.error(`Chyba při zpracování předmětu ${subjectData.rawSubject.katedra}/${subjectData.rawSubject.zkratka}:`, innerError);
                     coursesFailed.push({ name: `${subjectData.rawSubject.katedra}/${subjectData.rawSubject.zkratka} - ${subjectData.rawSubject.nazev}` });
                 }
             }
@@ -297,7 +288,6 @@ export const useStagStudentPlanLoader = () => {
 
         } catch (e) {
             // Catch any unexpected error during the loop or setup
-            console.error("Neočekávaná chyba během zpracování předmětů plánu:", e);
             showSnackbar(t('alerts.studyPlanLoadError'), 'error');
         } finally {
             setIsLoadingCourseDetails(false);
@@ -307,6 +297,11 @@ export const useStagStudentPlanLoader = () => {
         }
     };
 
+    /**
+     * Zpracuje odeslané parametry studia, načte seznam předmětů pro daný obor a ročník
+     * a zobrazí dialog pro potvrzení přepisu.
+     * @param {object} params - Parametry zadané v dialogu (ročník, semestr atd.).
+     */
     const handleStudyParametersSubmitted = useCallback(async (params) => {
         setIsStudyParamsDialogOpen(false);
         setIsStudentPlanLoadingActive(true); // Proces stále běží, nyní načítáme seznam předmětů
@@ -397,13 +392,16 @@ export const useStagStudentPlanLoader = () => {
                 resetAllPlanLoaderStates();
             }
         } catch (error) {
-            console.error("Chyba při načítání předmětů studijního plánu (před dialogem):", error);
             showSnackbar(error.message || t('alerts.studyPlanLoadError'), 'error');
             resetAllPlanLoaderStates();
         }
         // Zde již není setIsStudentPlanLoadingActive(false), to se řeší v actuallyProcess nebo cancel
     }, [stagApiService, currentStudentContextForDialog, showSnackbar, t, i18n.language, workspaceService, addCourse, useDemoApi]);
 
+    /**
+     * Zavře dialog pro potvrzení přepisu. Pokud jej zrušil uživatel, resetuje stav.
+     * @param {boolean} [userCancelled=false] - Indikuje, zda dialog zavřel uživatel.
+     */
     const closeOverwritePlanDialog = (userCancelled = false) => {
         setOverwritePlanDialogState(prev => ({ ...prev, open: false, coursesToProcess: [], coursesToAdd: [], coursesToOverwrite: [] }));
         if (userCancelled) {
@@ -413,6 +411,9 @@ export const useStagStudentPlanLoader = () => {
         // Pokud nebyl dialog zrušen, tak isStudentPlanLoadingActive a isLoadingCourseDetails se řídí v actuallyProcessCoursesFromPlan
     };
 
+    /**
+     * Zavře souhrnný dialog s výsledky importu.
+     */
     const closeSummaryDialog = () => {
         setSummaryDialog({ open: false, summary: { added: [], overwritten: [], failed: [] }});
     };
