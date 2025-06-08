@@ -219,7 +219,6 @@ function PropertiesBar() {
                 startIcon={<PlayArrowIcon />}
                 onClick={handleGenerateSchedule}
                 fullWidth
-                disabled={preferences.length > 0 && activePreferencesCount === 0}
                 sx={{ mt: 2, textTransform: 'none'}}
                 size="small"
             >

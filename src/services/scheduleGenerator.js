@@ -156,13 +156,24 @@ const checkAvoidTimesPreference = (preference, schedule) => {
 const checkPreferInstructorPreference = (preference, schedule, courses) => {
     const params = preference.params || {};
     
-    if (!params.courseCode || !params.eventType || !params.instructorName) return true; // Chybějící parametry, ignorujeme preferenci
+    if (!params.courseCode || !params.eventType || !params.instructorName) {
+        console.log("PREFER_INSTRUCTOR: Chybějící parametry preference", params);
+        return true; // Chybějící parametry, ignorujeme preferenci
+    }
     
-    const course = courses.find(c => c.courseCode === params.courseCode);
-    if (!course) return true; // Předmět neexistuje, ignorujeme preferenci
+    console.log("PREFER_INSTRUCTOR: Kontroluji preferenci pro", params);
+    
+    const course = courses.find(c => c.getShortCode() === params.courseCode);
+    if (!course) {
+        console.log("PREFER_INSTRUCTOR: Předmět nenalezen", params.courseCode);
+        return true; // Předmět neexistuje, ignorujeme preferenci
+    }
     
     const eventType = EVENT_TYPE_TO_KEY_MAP[params.eventType.toLowerCase()];
-    if (!eventType) return true; // Neplatný typ události, ignorujeme preferenci
+    if (!eventType) {
+        console.log("PREFER_INSTRUCTOR: Neplatný typ události", params.eventType);
+        return true; // Neplatný typ události, ignorujeme preferenci
+    }
     
     // Zjistíme všechny zapsané události daného předmětu a typu
     const enrolledEvents = schedule.getAllEnrolledEvents().filter(event => 
@@ -170,11 +181,22 @@ const checkPreferInstructorPreference = (preference, schedule, courses) => {
         EVENT_TYPE_TO_KEY_MAP[event.type.toLowerCase()] === eventType
     );
     
+    console.log("PREFER_INSTRUCTOR: Zapsané události:", enrolledEvents.map(e => ({ 
+        id: e.id, 
+        type: e.type, 
+        instructor: e.instructor 
+    })));
+    
     // Pokud nemá zapsanou žádnou událost tohoto typu, preference není splněna
-    if (enrolledEvents.length === 0) return false;
+    if (enrolledEvents.length === 0) {
+        console.log("PREFER_INSTRUCTOR: Žádné zapsané události tohoto typu");
+        return false;
+    }
     
     // Kontrola, zda alespoň jedna zapsaná událost má požadovaného vyučujícího
-    return enrolledEvents.some(event => event.instructor === params.instructorName);
+    const result = enrolledEvents.some(event => event.instructor === params.instructorName);
+    console.log("PREFER_INSTRUCTOR: Výsledek kontroly:", result, "pro vyučujícího", params.instructorName);
+    return result;
 };
 
 /**
