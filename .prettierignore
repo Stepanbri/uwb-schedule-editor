@@ -1,0 +1,28 @@
+# Složky s generovanými soubory
+node_modules
+dist
+build
+coverage
+
+# Soubory s překlady
+public/locales
+
+# Cache soubory
+.cache
+.vscode
+
+# Výstupní logy
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Jiné soubory, které by neměly být formátovány
+*.min.js
+*.svg
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.pdf
+*.ico
+*.json
