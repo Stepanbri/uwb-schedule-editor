@@ -239,7 +239,7 @@ class StagApiService {
         if (vyznamPredmetu && vyznamPredmetu !== '%') { // Pokud chceme filtrovat dle významu (statutu)
             params.vyznamPredmetu = vyznamPredmetu; // Nebo jiný parametr, pokud STAG API používá jiný název pro statut
         }
-        const response = await this._doRequest("predmety/getPredmetyByObor", params, 'GET', true); // Předpokládáme autentizaci
+        const response = await this._doRequest("predmety/getPredmetyByObor", params, 'GET', true); // nemělo by vyžadovat autentizaci
         // Dokumentace ukazuje, že odpověď je { "predmetOboru": [...] }
         return Array.isArray(response?.predmetOboru) ? response.predmetOboru : [];
     }

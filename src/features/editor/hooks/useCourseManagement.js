@@ -1,5 +1,5 @@
 // Hook pro správu kurzů v editoru rozvrhu
-// Poskytuje funkce pro přidávání, odebírání a manipulaci s kurzy a jejich událostmi
+// Poskytuje funkce pro přidávání, odebírání a manipulaci s předměty a jejich akcemi v rozvrhu
 import { useCallback } from 'react';
 import { useWorkspace } from '../../../contexts/WorkspaceContext';
 import { useSnackbar } from '../../../contexts/SnackbarContext';
@@ -19,7 +19,7 @@ export const useCourseManagement = () => {
     const { showSnackbar } = useSnackbar();
     const { t } = useTranslation();
 
-    // Funkce pro přepínání zápisu/odhlášení události v rozvrhu
+    // Funkce pro přepínání zápisu/odhlášení rozvrhové akce v rozvrhu
     // Kontroluje splnění podmínek pro zápis/odhlášení a zobrazuje odpovídající notifikace
     const toggleEventInSchedule = useCallback((eventToToggle, isCurrentlyEnrolled, courseContext) => {
         if (isCurrentlyEnrolled) {
@@ -34,7 +34,7 @@ export const useCourseManagement = () => {
                 const eventTypeKey = EVENT_TYPE_TO_KEY_MAP[normalizedEventType] || normalizedEventType;
                 const enrolledEventIds = new Set(activeSchedule.getAllEnrolledEvents().map(e => e.id));
 
-                // Kontrola, zda je splněn požadavek na počet událostí daného typu
+                // Kontrola, zda je splněn požadavek na počet rozvrhových akcí daného typu
                 if (eventTypeKey && courseContext.isEnrollmentTypeRequirementMet(eventTypeKey, enrolledEventIds)) {
                     alertMsg = t('alerts.typeRequirementMet', {
                         eventType: t(`courseEvent.${eventTypeKey}`, eventToToggle.type),

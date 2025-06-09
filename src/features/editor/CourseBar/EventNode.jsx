@@ -1,4 +1,3 @@
-// PROJEKT/NEW/src/features/editor/CourseBar/EventNode.jsx
 import React from 'react';
 import { Card, CardContent, Typography, ToggleButton, Box, Tooltip, alpha } from '@mui/material';
 import { useTranslation } from 'react-i18next';
@@ -9,7 +8,7 @@ const EventNode = ({ event, isEnrolled, onToggleEvent, canEnroll, disabledToolti
 
     if (!event) return null;
 
-    const dayStr = event.getDayAsString(t); // Uses method from CourseEventClass [cite: 149]
+    const dayStr = event.getDayAsString(t); // Používání metody pro získání dne jako řetězce
     const recurrenceStr = event.recurrence ? t(`courseEvent.${event.recurrence.toLowerCase().replace(/\s+/g, '')}`, event.recurrence) : t('common.notSpecified', 'Nespecifikováno');
     const eventTypeKey = EVENT_TYPE_TO_KEY_MAP[event.type.toLowerCase()] || 'other';
 

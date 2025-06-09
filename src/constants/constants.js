@@ -17,8 +17,8 @@ export const PREFERENCE_TYPE_IDS = {
     PREFER_INSTRUCTOR: 2, // Preference pro konkrétního vyučujícího
 };
 
-// Mapování typů událostí na interní klíče - zajišťuje jednotné zpracování různých pojmenování
-// stejných typů událostí (např. přednáška, lecture, př -> všechny převedeny na 'lecture')
+// Mapování typů rozvrhových akcí na interní klíče - zajišťuje jednotné zpracování různých pojmenování
+// stejných typů rozvrhových akcí (např. přednáška, lecture, př -> všechny převedeny na 'lecture')
 export const EVENT_TYPE_TO_KEY_MAP = {
     'přednáška': 'lecture',
     'lecture': 'lecture',
@@ -30,16 +30,16 @@ export const EVENT_TYPE_TO_KEY_MAP = {
     'seminar': 'seminar',
 };
 
-// Mapování klíčů událostí na zkrácené i18n klíče pro překlady
-// Používá se pro zkrácené popisky typů událostí v UI
+// Mapování klíčů rozvrhových akcí na zkrácené i18n klíče pro překlady
+// Používá se pro zkrácené popisky typů rozvrhových akcí v UI
 export const ENROLLMENT_KEY_TO_SHORT_I18N_KEY = {
     lecture: 'enrollmentShort.lecture',
     practical: 'enrollmentShort.practical',
     seminar: 'enrollmentShort.seminar',
 };
 
-// Pořadí typů zápisu událostí pro zobrazení v UI
-// Určuje, v jakém pořadí se mají typy událostí zobrazovat ve filtrech a seznamech
+// Pořadí typů zápisu rozvrhových akcí pro zobrazení v UI
+// Určuje, v jakém pořadí se mají typy rozvrhových akcí zobrazovat ve filtrech a seznamech
 export const ENROLLMENT_DISPLAY_ORDER = ['lecture', 'practical', 'seminar'];
 
 // Klíč pro ukládání dat aplikace do localStorage

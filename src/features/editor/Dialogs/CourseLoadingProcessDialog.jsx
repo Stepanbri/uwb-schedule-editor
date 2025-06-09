@@ -1,4 +1,3 @@
-// PROJEKT/NEW/src/features/editor/Dialogs/CourseLoadingProcessDialog.jsx
 import React from 'react';
 import { Dialog, DialogContent, DialogContentText, CircularProgress } from '@mui/material';
 import { useTranslation } from 'react-i18next';

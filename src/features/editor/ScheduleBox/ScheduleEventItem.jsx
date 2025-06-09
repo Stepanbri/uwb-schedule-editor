@@ -1,4 +1,3 @@
-// src/features/editor/ScheduleBox/ScheduleEventItem.jsx
 import React, { useState } from 'react';
 import { Box, Typography, Popover, Paper, Tooltip, alpha, styled, Stack, Divider } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
@@ -7,12 +6,21 @@ import { EVENT_TYPE_TO_KEY_MAP } from '../../../services/CourseClass';
 import { ENROLLMENT_KEY_TO_SHORT_I18N_KEY } from '../../../constants/constants.js';
 import { getEventTypePatterns } from '../../../styles/patterns';
 
+// Funkce pro získání barvy rozvrhové akce na základě typu a tématu
+// Vrací barvu pozadí nebo plnou barvu podle varianty
+// Používá mapování typů rozvrhových akcí na klíče pro získání správné barvy z tématu
+// Pokud typ rozvrhové akce není nalezen, vrací barvu pro 'other'
+// Používá se v komponentě ScheduleEventItem pro nastavení barvy pozadí a notche rozvrhové akce
 const getEventTypeThemeColor = (eventType, theme, variant = 'background') => {
     const typeKey = EVENT_TYPE_TO_KEY_MAP[eventType?.toLowerCase()] || 'other';
     const colorKey = variant === 'solid' ? `${typeKey}Solid` : typeKey;
     return theme.palette.eventTypes[colorKey] || theme.palette.eventTypes.other;
 };
 
+// Komponenta pro zobrazení rozvrhovou akcí v rozvrhu
+// Zobrazí informace o rozvrhové akce, včetně názvu předmětu, času, místnosti a vyučujícího
+// Umožňuje interakci s rozvrhovou akcí a zobrazuje podrobnosti v popoveru
+// Používá se v komponentě ScheduleBox pro zobrazení jednotlivých rozvrhových akcí v rozvrhu
 const EventWrapper = styled(Box)(({ theme, eventcolor, notchcolor, patternimage }) => ({
     backgroundColor: eventcolor,
     backgroundImage: patternimage,
@@ -48,7 +56,9 @@ const EventWrapper = styled(Box)(({ theme, eventcolor, notchcolor, patternimage 
     }
 }));
 
-
+// Komponenta ScheduleEventItem zobrazuje jednotlivé akce v rozvrhu
+// Používá se v komponentě ScheduleBox pro zobrazení jednotlivých akcí v rozvrhu
+// Přijímá data rozvrhových akcí, předměty a další stylování jako props
 function ScheduleEventItem({ eventData, course, style, scheduleColorMode }) {
     const { t } = useTranslation();
     const theme = useTheme();
@@ -61,25 +71,20 @@ function ScheduleEventItem({ eventData, course, style, scheduleColorMode }) {
 
     if (!eventData || !course) return null;
 
-    // --- Color & Pattern Logic ---
-    const isCourseColorMode = scheduleColorMode === 'course';
+    const isCourseColorMode = scheduleColorMode === 'course'; // Určuje, jaký režim prezentace akcí v rozvrhu je aktuálně nasatven
 
-    const eventTypeKey = EVENT_TYPE_TO_KEY_MAP[eventData.type.toLowerCase()] || 'other';
-    const eventTypeBgColor = getEventTypeThemeColor(eventData.type, theme, 'background');
-    const eventTypeSolidColor = getEventTypeThemeColor(eventData.type, theme, 'solid');
-    const courseColor = course.color || theme.palette.grey[500];
+    const eventTypeKey = EVENT_TYPE_TO_KEY_MAP[eventData.type.toLowerCase()] || 'other'; // Získání klíče typu akce pro překlad a barvy
+    const eventTypeBgColor = getEventTypeThemeColor(eventData.type, theme, 'background'); // Získání barvy pozadí akce na základě typu a tématu
+    const eventTypeSolidColor = getEventTypeThemeColor(eventData.type, theme, 'solid'); // Získání plné barvy akce na základě typu a tématu
+    const courseColor = course.color || theme.palette.grey[500]; // Barva předmětu, pokud není nastavená - použije se šedá
 
     const patterns = getEventTypePatterns(theme);
     const patternImage = isCourseColorMode ? 'none' : (patterns[eventTypeKey] || 'none');
     
-    // Background color is lightened course color in course mode, or type color in type mode
-    const backgroundColor = isCourseColorMode ? alpha(courseColor, 0.25) : eventTypeBgColor;
+    const backgroundColor = isCourseColorMode ? alpha(courseColor, 0.25) : eventTypeBgColor; //
     
-    // Notch is solid type color in course mode, or course color in type mode
     const notchColor = isCourseColorMode ? eventTypeSolidColor : courseColor;
-    // --- End Color & Pattern Logic ---
-
-    // --- Text Content Logic ---
+    
     const courseShortCode = course.getShortCode();
     const capacityText = `${eventData.currentCapacity} / ${eventData.maxCapacity}`;
     const fullInstructorNameForPopover = eventData.instructor || '-';
@@ -88,13 +93,12 @@ function ScheduleEventItem({ eventData, course, style, scheduleColorMode }) {
         const nameTokens = eventData.instructor.split(',')[0].trim().split(' ').filter(Boolean);
         displayInstructorName = nameTokens[nameTokens.length - 1];
     }
-    const roomText = eventData.isVirtual ? t('labels.virtualEvent', 'Virtuální') : (eventData.room || '-');
-    let recurrenceDisplay = '';
+    const roomText = eventData.isVirtual ? t('labels.virtualEvent', 'Virtuální') : (eventData.room || '-'); // Zobrazí text místnosti, pokud se jedná o virtuální akci, zobrazí se "Virtuální", jinak se zobrazí zadaná místnost nebo '-'
+    let recurrenceDisplay = ''; // Proměnná pro zobrazení opakování akce
     if (eventData.recurrence) {
         const recurrenceKey = eventData.recurrence.toLowerCase().replace(/\s+/g, '');
         recurrenceDisplay = t(`courseEvent.recurrenceShort.${recurrenceKey}`, eventData.recurrence.substring(0,2).toUpperCase());
     }
-    // --- End Text Content Logic ---
 
     return (
         <>

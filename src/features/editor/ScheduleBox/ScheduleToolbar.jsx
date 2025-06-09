@@ -1,4 +1,3 @@
-// src/features/editor/ScheduleBox/ScheduleToolbar.jsx
 import React, { useRef } from 'react';
 import { Paper, Tooltip, Divider, IconButton, ToggleButton, Typography, Box, alpha } from '@mui/material';
 import { useTheme } from '@mui/material/styles';

@@ -126,7 +126,7 @@ class WorkspaceService {
 
     /**
      * Odstraní předmět z workspace na základě jeho identifikátoru.
-     * Zároveň odstraní všechny související události z primárního i generovaných rozvrhů.
+     * Zároveň odstraní všechny související rozvrhové akce z primárního i generovaných rozvrhů.
      * @param {string} courseIdentifier - ID předmětu (např. "KIV/PPA1").
      */
     removeCourse(courseIdentifier) {
@@ -170,7 +170,7 @@ class WorkspaceService {
 
     /**
      * Najde a vrátí událost (přednášku, cvičení) napříč všemi předměty podle jejího ID.
-     * @param {string} eventId - ID události.
+     * @param {string} eventId - ID rozvrhové akce.
      * @returns {CourseEventClass|null} Nalezená událost nebo null.
      */
     findEventByIdGlobal(eventId) {
@@ -482,7 +482,7 @@ class WorkspaceService {
                     this.year = data.year || '';
                     this.semester = data.semester || '';
 
-            // Deserializace předmětů a jejich událostí
+            // Deserializace předmětů a jejich rozvrhových akcí
             this.courses = Array.isArray(data.courses)
                 ? data.courses.map(courseData => {
                     const course = new CourseClass(courseData);

@@ -1,4 +1,3 @@
-// src/features/editor/Dialogs/ConfirmationDialog.jsx
 import React from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button, Typography, List, ListItem, ListItemText, Box } from '@mui/material';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';

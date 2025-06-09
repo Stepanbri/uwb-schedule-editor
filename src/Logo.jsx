@@ -1,4 +1,3 @@
-// src/components/common/Logo.jsx
 import React from 'react';
 import { Button, Box, Typography } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';

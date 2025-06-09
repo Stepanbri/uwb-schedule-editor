@@ -1,4 +1,3 @@
-// src/features/editor/ScheduleBox/ScheduleBox.jsx
 import React, { useMemo } from 'react';
 import { Paper, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, styled, Box, Tabs, Tab, Tooltip, Pagination, Stack } from '@mui/material';
 import { useTranslation } from 'react-i18next';

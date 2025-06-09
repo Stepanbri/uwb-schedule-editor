@@ -1,7 +1,7 @@
-// src/utils/colorUtils.js
-
-// Paleta barev pečlivě vybraná pro dobrou vizuální odlišitelnost a kontrast.
+// Paleta barev vybraná pro dobrou vizuální odlišitelnost a kontrast.
 // Byly vynechány základní odstíny červené, zelené a modré, které jsou použity pro typy akcí.
+
+// POZOR: Tyto barvy byly vygenerovány pomocí chatGPT a nějak si tento kus kódu nepřivlasňuji
 export const courseColorPalette = [
     '#E91E63', // Pink 500
     '#9C27B0', // Purple 500

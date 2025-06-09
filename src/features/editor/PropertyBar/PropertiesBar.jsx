@@ -1,4 +1,3 @@
-// src/features/editor/PropertiesBar/PropertiesBar.jsx
 import React, { useState, useEffect } from 'react';
 import {
     Box, Typography, Button, Divider, Dialog, DialogTitle,
@@ -84,7 +83,7 @@ function PropertiesBar() {
                          setAvailableInstructors([]);
                     }
                 } else {
-                    // Žádný kurz není vybrán, resetujeme vše
+                    // Žádný předmět není vybrán, resetujeme vše
                     setSelectedCourseEvents([]);
                     setAvailableEventTypes([]);
                     setAvailableInstructors([]);
@@ -105,7 +104,7 @@ function PropertiesBar() {
                 setSelectedCourseEvents([]);
                 setAvailableEventTypes([]);
             }
-            // Reset eventType a instructorName, protože se změnil kurz
+            // Reset eventType a instructorName, protože se změnil předmět
             setCurrentPreferenceParams(prev => ({ ...prev, eventType: '', instructorName: '' }));
             setAvailableInstructors([]);
         }

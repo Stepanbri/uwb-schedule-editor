@@ -11,13 +11,13 @@
 const DAY_MAPPING = { "PO": 0, "ÚT": 1, "ST": 2, "ČT": 3, "PÁ": 4, "SO": 5, "NE": 6, "MON": 0, "TUE": 1, "WED": 2, "THU": 3, "FRI": 4, "SAT": 5, "SUN": 6 };
 
 /**
- * Mapování zkratek typu opakování události ze STAGu na plný textový popis.
+ * Mapování zkratek typu opakování rozvrhových ze STAGu na plný textový popis.
  * @type {Object<string, string>}
  */
 const RECURRENCE_MAPPING = { "KT": "KAŽDÝ TÝDEN", "SUDY": "SUDÝ TÝDEN", "LI": "LICHÝ TÝDEN", "KAŽDÝ": "KAŽDÝ TÝDEN", "LICHÝ": "LICHÝ TÝDEN", "SUDÝ": "SUDÝ TÝDEN", "EVERY": "KAŽDÝ TÝDEN", "ODD": "LICHÝ TÝDEN", "EVEN": "SUDÝ TÝDEN" };
 
 /**
- * Mapování zkratek typu události (přednáška, cvičení) ze STAGu na plný textový popis.
+ * Mapování zkratek typu rozvrhových (přednáška, cvičení) ze STAGu na plný textový popis.
  * @type {Object<string, string>}
  */
 const TYPE_MAPPING = { "P": "PŘEDNÁŠKA", "C": "CVIČENÍ", "S": "SEMINÁŘ", "Z": "ZKOUŠKA", "A": "ZÁPOČET", "BL": "BLOK", "PŘ": "PŘEDNÁŠKA", "CV": "CVIČENÍ", "SE": "SEMINÁŘ", "LECTURE": "PŘEDNÁŠKA", "PRACTICAL": "CVIČENÍ", "SEMINAR": "SEMINÁŘ" };
@@ -37,7 +37,7 @@ const formatInstructorName = (instructorData) => {
 /**
  * Zformátuje informaci o místnosti z datové struktury STAGu.
  * Pokouší se sestavit název z budovy a čísla místnosti, případně použije dostupné zkratky.
- * @param {object} stagEvent - Data události ze STAGu.
+ * @param {object} stagEvent - Data rozvrhových akcí ze STAGu.
  * @param {function} t - Funkce pro překlad (i18next).
  * @returns {string} Zformátovaný název místnosti, např. "UU101".
  */
@@ -49,20 +49,20 @@ const formatRoom = (stagEvent, t) => {
 };
 
 /**
- * Transformuje jednu událost (rozvrhovou akci) ze STAG formátu na interní formát aplikace.
- * Normalizuje časy, dny, typy a další atributy. Přeskakuje neplatné události (např. s nulovým časem).
- * @param {object} stagEvent - Surová data události ze STAGu.
- * @param {object} subjectData - Data o předmětu, ke kterému událost patří (pro kontext).
+ * Transformuje jednu rozvrhovou akci ze STAG formátu na interní formát aplikace.
+ * Normalizuje časy, dny, typy a další atributy. Přeskakuje neplatné akce (např. s nulovým časem).
+ * @param {object} stagEvent - Surová data akcí ze STAGu.
+ * @param {object} subjectData - Data o předmětu, ke kterému rozvrhová patří (pro kontext).
  * @param {object} planParams - Parametry zadané uživatelem (rok, semestr).
  * @param {function} t - Funkce pro překlad (i18next).
- * @returns {object|null} Objekt události ve formátu aplikace nebo `null`, pokud má být událost přeskočena.
+ * @returns {object|null} Objekt rozvrhové akce ve formátu aplikace nebo `null`, pokud má být rozvrhová akce přeskočena.
  */
 export const transformStagEvent = (stagEvent, subjectData, planParams, t) => {
     const startTime = stagEvent.hodinaSkutOd?.value || stagEvent.casOd;
     const endTime = stagEvent.hodinaSkutDo?.value || stagEvent.casDo;
 
     if (startTime === '00:00' && endTime === '00:00') {
-        return null; // Přeskočíme virtuální/neplatné akce
+        return null; // Přeskočíme virtuální/neplatné akce - není důvod je zobrazovat
     }
 
     let durationHours = parseFloat(stagEvent.pocetVyucHodin) || 0;
@@ -83,6 +83,7 @@ export const transformStagEvent = (stagEvent, subjectData, planParams, t) => {
     
     const eventId = stagEvent.roakIdno || stagEvent.akceIdno || `${subjectData.rawSubject.katedra}-${subjectData.rawSubject.zkratka}-${stagEvent.typAkceZkr || 'T'}-${dayKey || 'D'}-${startTime || '0000'}-${Math.random().toString(16).slice(2, 7)}`;
 
+    // Vytvoříme a vrátíme objekt rozvrhové akce ve formátu aplikace
     return {
         id: eventId,
         stagId: stagEvent.roakIdno || stagEvent.akceIdno,
@@ -93,8 +94,8 @@ export const transformStagEvent = (stagEvent, subjectData, planParams, t) => {
         room: formatRoom(stagEvent, t),
         type: TYPE_MAPPING[stagEvent.typAkceZkr?.toUpperCase()] || TYPE_MAPPING[stagEvent.typAkce?.toUpperCase()] || stagEvent.typAkce || "NEZNÁMÝ",
         instructor: formatInstructorName(stagEvent.ucitel),
-        currentCapacity: parseInt(stagEvent.obsazeni || stagEvent.pocetZapsanychStudentu || 0),
-        maxCapacity: parseInt(stagEvent.kapacita || stagEvent.maxKapacita || stagEvent.kapacitaMistnosti || 0),
+        currentCapacity: parseInt(stagEvent.planObsazeni || 0),
+        maxCapacity: parseInt(stagEvent.kapacitaMistnosti || 0),
         note: stagEvent.poznamka,
         year: planParams.scheduleAcademicYear,
         semester: eventSemesterEffective,
@@ -107,7 +108,7 @@ export const transformStagEvent = (stagEvent, subjectData, planParams, t) => {
 /**
  * Zpracovává rozsah hodin a další metadata.
  * @param {object} subjectData - Surová data o předmětu a jeho operaci (přidat/přepsat).
- * @param {object[]} transformedEvents - Pole již transformovaných událostí pro tento předmět.
+ * @param {object[]} transformedEvents - Pole již transformovaných rozvrhových akcí.
  * @param {object} planParams - Parametry zadané uživatelem (rok, semestr).
  * @param {boolean} useDemoApi - Příznak, zda se používá demo API (ovlivňuje 'source' pole).
  * @returns {object} Objekt předmětu připravený pro přidání do `WorkspaceService`.
@@ -126,6 +127,7 @@ export const transformStagSubject = (subjectData, transformedEvents, planParams,
             (subjectData.rawSubject.vyukaZS === 'A' ? 'ZS' : (subjectData.rawSubject.vyukaLS === 'A' ? 'LS' : 'ZS'));
     }
 
+    // Vytvoříme objekt s daty předmětu, který bude použit v WorkspaceService
     return {
         stagId: subjectData.rawSubject.predmetId,
         name: subjectData.rawSubject.nazev,

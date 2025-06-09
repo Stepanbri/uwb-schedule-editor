@@ -1,13 +1,13 @@
-// Třída reprezentující rozvrh (schedule) uživatele
+// Třída reprezentující rozvrh
 // Spravuje seznam zapsaných rozvrhových akcí a operace s nimi
 
 /**
  * Reprezentuje sestavený rozvrh studenta.
- * Obsahuje seznam zapsaných instancí CourseEventClass[cite: 150].
+ * Obsahuje seznam zapsaných instancí CourseEventClass
  */
 class ScheduleClass {
     constructor() {
-        this.enrolledEvents = []; // Pole instancí CourseEventClass [cite: 150]
+        this.enrolledEvents = []; // Pole instancí CourseEventClass
     }
 
     /**
@@ -43,11 +43,11 @@ class ScheduleClass {
     }
 
     /**
-     * Odstraní všechny události patřící danému předmětu,
-     * pokud jejich ID nejsou v poskytnuté sadě nových ID událostí.
+     * Odstraní všechny rozvrhové akce patřící danému předmětu,
+     * pokud jejich ID nejsou v poskytnuté sadě nových ID rozvrhových akcí.
      * Používá se při přepisu předmětu novými daty.
-     * @param {string} courseId - ID předmětu, jehož staré události se mají odstranit.
-     * @param {Set<string>} newEventIdsSet - Sada ID nových událostí, které mají být zachovány.
+     * @param {string} courseId - ID předmětu, jehož staré rozvrhové akce se mají odstranit.
+     * @param {Set<string>} newEventIdsSet - Sada ID nových rozvrhových akcí, které mají být zachovány.
      */
     removeEventsByCourseIdIfNoLongerPresent(courseId, newEventIdsSet) {
         this.enrolledEvents = this.enrolledEvents.filter(event => {
@@ -90,14 +90,14 @@ class ScheduleClass {
      */
     clone() {
         const clonedSchedule = new ScheduleClass();
-        // Reference na objekty událostí jsou dostačující, 
+        // Reference na objekty rozvrhových akcí jsou dostačující, 
         // protože CourseEventClass instance se nemění, jen se přidávají/odebírají
         clonedSchedule.addEvents(this.enrolledEvents);
         return clonedSchedule;
     }
     
     /**
-     * Kontroluje, zda by přidání nové události způsobilo konflikt s již zapsanými událostmi.
+     * Kontroluje, zda by přidání nové rozvrhové akce způsobilo konflikt s již zapsanými událostmi.
      * @param {CourseEventClass} newEvent - Nová událost ke kontrole.
      * @param {Function} conflictFunc - Funkce pro kontrolu konfliktu mezi dvěma událostmi.
      * @returns {boolean} True, pokud existuje konflikt.
@@ -111,9 +111,6 @@ class ScheduleClass {
             conflictFunc(existingEvent, newEvent)
         );
     }
-
-    // Metody pro kontrolu překryvů, získání akcí pro den atd. mohou být přidány zde.
-    // Například pro grafické zobrazení dle
 }
 
 export default ScheduleClass;

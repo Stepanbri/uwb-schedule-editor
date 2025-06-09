@@ -1,4 +1,3 @@
-// src/contexts/SnackbarContext.jsx
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { Snackbar, Alert as MuiAlert } from '@mui/material';
 

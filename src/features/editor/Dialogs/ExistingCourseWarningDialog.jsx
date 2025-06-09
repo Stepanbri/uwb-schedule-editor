@@ -1,4 +1,3 @@
-// PROJEKT/NEW/src/features/editor/Dialogs/ExistingCourseWarningDialog.jsx
 import React from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from '@mui/material';
 import { useTranslation } from 'react-i18next';

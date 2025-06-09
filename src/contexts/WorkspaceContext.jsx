@@ -1,4 +1,3 @@
-// src/contexts/WorkspaceContext.jsx
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import workspaceService, { LOCAL_STORAGE_KEY } from '../services/WorkspaceService';
 import ScheduleClass from '../services/ScheduleClass';

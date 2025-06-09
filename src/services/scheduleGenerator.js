@@ -25,14 +25,14 @@ const timeToMinutes = (timeStr) => {
 };
 
 /**
- * Kontroluje, zda dvě události v rozvrhu kolidují.
+ * Kontroluje, zda dvě rozvrhové akce v rozvrhu kolidují.
  * Bere v úvahu den, čas a frekvenci opakování (lichý/sudý týden).
  * @param {import('./CourseEventClass').default} event1 - První událost.
  * @param {import('./CourseEventClass').default} event2 - Druhá událost.
- * @returns {boolean} Vrací `true`, pokud události kolidují.
+ * @returns {boolean} Vrací `true`, pokud rozvrhové akce kolidují.
  */
 const eventsConflict = (event1, event2) => {
-    // Pokud jsou události v jiné dny, nemohou kolidovat
+    // Pokud jsou rozvrhové akce v jiné dny, nemohou kolidovat
     if (event1.day !== event2.day) return false;
 
     // Převod časů na minuty pro snadnější porovnání
@@ -49,7 +49,7 @@ const eventsConflict = (event1, event2) => {
     const freq1 = event1.recurrence;
     const freq2 = event2.recurrence;
 
-    // Jednorázové události vždy kolidují, pokud se překrývají v čase
+    // Jednorázové rozvrhové akce vždy kolidují, pokud se překrývají v čase
     if (freq1 === "jednorázově" || freq2 === "jednorázově") {
         return true;
     }
@@ -70,7 +70,7 @@ const calculateGapsCost = (schedule) => {
     const events = schedule.getAllEnrolledEvents();
     let totalGapsCost = 0;
 
-    // Rozdělení událostí podle dnů
+    // Rozdělení rozvrhových akcí podle dnů
     const eventsByDay = {};
     events.forEach(event => {
         if (!eventsByDay[event.day]) {
@@ -83,7 +83,7 @@ const calculateGapsCost = (schedule) => {
     Object.values(eventsByDay).forEach(dayEvents => {
         if (dayEvents.length <= 1) return; // V daném dni je nejvýše jedna událost, žádná mezera
 
-        // Seřazení událostí podle času začátku
+        // Seřazení rozvrhových akcí podle času začátku
         dayEvents.sort((a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
 
         // Výpočet mezer mezi událostmi
@@ -114,7 +114,7 @@ const checkFreeDayPreference = (preference, schedule) => {
     
     if (dayToCheck === -1) return true; // Neplatný den, ignorujeme preferenci
     
-    // Kontrola, zda v daném dni nejsou žádné události
+    // Kontrola, zda v daném dni nejsou žádné rozvrhové akce
     return !schedule.getAllEnrolledEvents().some(event => event.day === dayToCheck);
 };
 
@@ -134,7 +134,7 @@ const checkAvoidTimesPreference = (preference, schedule) => {
     const startToAvoid = timeToMinutes(params.startTime);
     const endToAvoid = timeToMinutes(params.endTime);
     
-    // Kontrola, zda v daném dni a čase nejsou žádné události
+    // Kontrola, zda v daném dni a čase nejsou žádné rozvrhové akce
     return !schedule.getAllEnrolledEvents().some(event => {
         if (event.day !== dayToCheck) return false;
         
@@ -171,17 +171,17 @@ const checkPreferInstructorPreference = (preference, schedule, courses) => {
     
     const eventType = EVENT_TYPE_TO_KEY_MAP[params.eventType.toLowerCase()];
     if (!eventType) {
-        console.log("PREFER_INSTRUCTOR: Neplatný typ události", params.eventType);
-        return true; // Neplatný typ události, ignorujeme preferenci
+        console.log("PREFER_INSTRUCTOR: Neplatný typ rozvrhové akce", params.eventType);
+        return true; // Neplatný typ rozvrhové akce, ignorujeme preferenci
     }
     
-    // Zjistíme všechny zapsané události daného předmětu a typu
+    // Zjistíme všechny zapsané rozvrhové akce daného předmětu a typu
     const enrolledEvents = schedule.getAllEnrolledEvents().filter(event => 
         event.courseId === course.id && 
         EVENT_TYPE_TO_KEY_MAP[event.type.toLowerCase()] === eventType
     );
     
-    console.log("PREFER_INSTRUCTOR: Zapsané události:", enrolledEvents.map(e => ({ 
+    console.log("PREFER_INSTRUCTOR: Zapsané rozvrhové akce:", enrolledEvents.map(e => ({ 
         id: e.id, 
         type: e.type, 
         instructor: e.instructor 
@@ -189,7 +189,7 @@ const checkPreferInstructorPreference = (preference, schedule, courses) => {
     
     // Pokud nemá zapsanou žádnou událost tohoto typu, preference není splněna
     if (enrolledEvents.length === 0) {
-        console.log("PREFER_INSTRUCTOR: Žádné zapsané události tohoto typu");
+        console.log("PREFER_INSTRUCTOR: Žádné zapsané rozvrhové akce tohoto typu");
         return false;
     }
     
@@ -256,7 +256,7 @@ export const generateScheduleAlgorithm = (coursesToSchedule = [], preferences = 
     let generatedSchedules = [];
     let solutionsFound = 0;
     
-    // Krok 1: Seskupit všechny události podle předmětu a typu (přednáška, cvičení...).
+    // Krok 1: Seskupit všechny rozvrhové akce podle předmětu a typu (přednáška, cvičení...).
     const allEventGroups = {};
     relevantCourses.forEach(course => {
         allEventGroups[course.id] = {};
@@ -272,7 +272,7 @@ export const generateScheduleAlgorithm = (coursesToSchedule = [], preferences = 
     });
     
     /**
-     * Rekurzivní funkce, která prochází předměty a zkouší pro ně najít platné kombinace událostí.
+     * Rekurzivní funkce, která prochází předměty a zkouší pro ně najít platné kombinace rozvrhových akcí.
      * @param {number} courseIdx - Index aktuálně zpracovávaného předmětu v poli `relevantCourses`.
      * @param {ScheduleClass} currentScheduleInProgress - Rozvrh sestavený v předchozích krocích rekurze.
      */
@@ -303,10 +303,10 @@ export const generateScheduleAlgorithm = (coursesToSchedule = [], preferences = 
         const groupKeys = Object.keys(eventGroupsForCourse);
 
         /**
-         * Vnořená rekurzivní funkce, která generuje kombinace událostí pro jeden konkrétní předmět.
-         * Prochází typy akcí (přednášky, cvičení...) a pro každý hledá platné sady událostí.
+         * Vnořená rekurzivní funkce, která generuje kombinace rozvrhových akcí pro jeden konkrétní předmět.
+         * Prochází typy akcí (přednášky, cvičení...) a pro každý hledá platné sady rozvrhových akcí.
          * @param {number} groupKeyIndex - Index aktuálně zpracovávaného typu akce (např. 'lecture').
-         * @param {import('./CourseEventClass').default[]} tempEventsForCourse - Dočasné pole událostí vybraných pro tento předmět.
+         * @param {import('./CourseEventClass').default[]} tempEventsForCourse - Dočasné pole rozvrhových akcí vybraných pro tento předmět.
          */
         const generateEventCombinationsForCourse = (groupKeyIndex, tempEventsForCourse) => {
             if (solutionsFound >= MAX_GENERATED_SCHEDULES) return;
@@ -338,8 +338,8 @@ export const generateScheduleAlgorithm = (coursesToSchedule = [], preferences = 
             }
 
             /**
-             * Najde všechny kombinace událostí daného typu, které splňují nebo překračují požadovanou hodinovou dotaci.
-             * @param {import('./CourseEventClass').default[]} events - Pole událostí, ze kterých se vybírá (např. všechny přednášky).
+             * Najde všechny kombinace rozvrhových akcí daného typu, které splňují nebo překračují požadovanou hodinovou dotaci.
+             * @param {import('./CourseEventClass').default[]} events - Pole rozvrhových akcí, ze kterých se vybírá (např. všechny přednášky).
              * @param {number} targetHours - Požadovaný počet hodin.
              * @returns {import('./CourseEventClass').default[][]} Pole polí, kde každé vnitřní pole je jedna platná kombinace.
              */

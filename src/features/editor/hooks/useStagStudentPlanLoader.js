@@ -181,7 +181,6 @@ export const useStagStudentPlanLoader = () => {
             const studentDetailInfo = await stagApiService.getStudentInfo(osCisloForLookup, stagApiYearForStudentInfo, false, i18n.language);
 
             if (studentDetailInfo && studentDetailInfo.osCislo) {
-                // ... (kód pro získání contextu jako dříve) ...
                 const primaryOborIdno = studentDetailInfo.oborIdnos ? studentDetailInfo.oborIdnos.split(',')[0].trim() : null;
                 let studyDetailsToUse = null;
                 if (Array.isArray(studentDetailInfo.studiumInfo) && studentDetailInfo.studiumInfo.length > 0) {

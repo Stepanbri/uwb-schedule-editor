@@ -1,4 +1,3 @@
-// src/styles/theme.js
 import { createTheme, responsiveFontSizes } from '@mui/material/styles';
 import { csCZ } from '@mui/material/locale';
 import { alpha } from '@mui/material/styles';
@@ -228,7 +227,7 @@ export const createAppTheme = (mode) => {
         if (theme.palette.mode === 'light') {
             return theme.palette.text.primary; // Vždy tmavý text ve světlém módu
         }
-        // V tmavém módu jsou pozadí událostí také tmavá, takže potřebujeme světlý text.
+        // V tmavém módu jsou pozadí rozvrhových akcí také tmavá, takže potřebujeme světlý text.
         return theme.palette.text.primary;
     };
 

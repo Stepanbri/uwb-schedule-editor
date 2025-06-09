@@ -1,4 +1,3 @@
-// src/contexts/StagApiContext.jsx
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import StagApiService from '../services/StagApiService';
 import { STAG_LOGIN_FLOW_KEY } from '../constants/stagConstants'; // Vytvoříme tento soubor

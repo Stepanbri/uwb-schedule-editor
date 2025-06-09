@@ -1,8 +1,8 @@
-// Třída reprezentující rozvrhovou akci (událost) předmětu
-// Obsahuje všechny potřebné informace o konkrétní výukové jednotce
+// Třída reprezentující rozvrhovou akci předmětu
+// Obsahuje všechny potřebné informace o konkrétní rozvrhové akce
 class CourseEventClass {
     constructor({
-                    id, // Identifikátor události, může být ze STAGu nebo generovaný
+                    id, // Identifikátor rozvrhové akce, může být ze STAGu nebo generovaný
                     stagId = null,
                     startTime,         // Čas začátku (např. "14:00")
                     endTime,           // Čas konce (např. "15:30")
@@ -15,13 +15,13 @@ class CourseEventClass {
                     room = '',         // Místnost (např. UU303)
                     type,              // Typ výuky (přednáška, cvičení, seminář)
                     instructor = '',   // Vyučující
-                    currentCapacity = 0, // Aktuální počet zapsaných studentů
-                    maxCapacity = 0,     // Maximální kapacita
-                    note = '',         // Poznámka k události
-                    isVirtual = false, // Příznak pro virtuální výuku
+                    currentCapacity = 0, // Aktuální maximální kapacity akce
+                    maxCapacity = 0,     // Maximální kapacita místnosti
+                    note = '',         // Poznámka k rozvrhové akce
+                    isVirtual = false, // Zda se jedná o virtuální rozvrhovou akci
                     year = '',         // Akademický rok
                     semester = '',     // Semestr (ZS, LS)
-                    groupId = null,    // ID skupiny událostí
+                    groupId = null,    // ID skupiny rozvrhových akcí (Pro spojené rozvrhové akce jako např. u UJP/AEP6 - NENÍ IMPLEMENTOVÁNO)
                     departmentCode = '',// Kód katedry (např. KIV)
                     durationHours = 0  // Délka v hodinách
                 }) {
@@ -42,7 +42,7 @@ class CourseEventClass {
         this.currentCapacity = currentCapacity;
         this.maxCapacity = maxCapacity;
         this.note = note;
-        this.isVirtual = isVirtual || !room; // Pokud není zadaná místnost, předpokládáme virtuální výuku
+        this.isVirtual = isVirtual || !room;
         this.year = year;
         this.semester = semester;
         this.groupId = groupId;
@@ -66,7 +66,7 @@ class CourseEventClass {
             courseCode: this.courseCode,
             room: this.room,
             type: this.type,
-            instructor: this.instructor, // Předpokládáme, že instructor je již string nebo serializovatelný objekt
+            instructor: this.instructor, 
             currentCapacity: this.currentCapacity,
             maxCapacity: this.maxCapacity,
             note: this.note,

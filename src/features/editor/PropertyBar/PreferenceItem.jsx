@@ -1,4 +1,3 @@
-// src/features/editor/PropertyBar/PreferenceItem.jsx
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Paper, Stack, Switch, IconButton, Typography, Box, Tooltip } from '@mui/material';

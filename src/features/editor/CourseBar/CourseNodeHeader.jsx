@@ -1,4 +1,3 @@
-// PROJEKT/NEW/src/features/editor/CourseBar/CourseNodeHeader.jsx
 import React, { useState } from 'react'; // Přidán useState
 import { Box, Typography, IconButton, Tooltip, Chip, Stack } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';

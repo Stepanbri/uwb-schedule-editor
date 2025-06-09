@@ -1,13 +1,11 @@
 /**
  * Zjistí aktuální akademický rok ve formátu "RRRR/RRRR".
- * Předpokládá se, že akademický rok se mění v srpnu.
  * @returns {string} Aktuální akademický rok.
  */
 export const getCurrentAcademicYear = () => {
     const today = new Date();
     const year = today.getFullYear();
     const month = today.getMonth(); // 0 (leden) - 11 (prosinec)
-    // Akademický rok obvykle začíná na podzim. Jako hranici použijeme srpen (index 7).
     return month >= 8 ? `${year}/${year + 1}` : `${year - 1}/${year}`;
 };
 

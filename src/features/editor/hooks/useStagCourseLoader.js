@@ -55,16 +55,16 @@ export const useStagCourseLoader = () => {
 
         try {
             // Načtení základních informací o předmětu ze STAGu
-            const subjectInfoArray = await stagApiService.getSubjectInfo(formData.departmentCode, formData.subjectCode, stagApiYearValue, lang);
-            const subjectInfo = Array.isArray(subjectInfoArray) && subjectInfoArray.length > 0 ? subjectInfoArray[0] : subjectInfoArray;
+            const subjectInfoArray = await stagApiService.getSubjectInfo(formData.departmentCode, formData.subjectCode, stagApiYearValue, lang); // Načtení informací o předmětu podle kódu katedry a předmětu
+            const subjectInfo = Array.isArray(subjectInfoArray) && subjectInfoArray.length > 0 ? subjectInfoArray[0] : subjectInfoArray; // Získání prvního objektu z pole, pokud existuje
 
             if (!subjectInfo || (Object.keys(subjectInfo).length === 0 && subjectInfo.constructor === Object)) {
                 showSnackbar(t('alerts.stagSubjectNotFound', { subjectCode: `${formData.departmentCode}/${formData.subjectCode}` }), 'error');
                 setIsProcessingCourse(false);
                 return;
             }
-
-            const scheduleEventsData = await stagApiService.getRozvrhByPredmet({
+            
+            const scheduleEventsData = await stagApiService.getRozvrhByPredmet({ // Načtení rozvrhových akcí pro daný předmět 
                 katedra: subjectInfo.katedra,
                 zkratka: subjectInfo.zkratka,
                 rok: stagApiYearValue,
@@ -105,76 +105,80 @@ export const useStagCourseLoader = () => {
                         .map(u => `${u.titulPred ? u.titulPred + ' ' : ''}${u.jmeno} ${u.prijmeni}${u.titulZa ? ', ' + u.titulZa : ''}`)
                         .join(', ');
                 }
-
+                
                 const dayKey = stagEvent.denZkr?.toUpperCase() || stagEvent.den?.toUpperCase();
                 let formattedRoom = t('common.notSpecified');
                 if (stagEvent.budova && stagEvent.mistnost) formattedRoom = `${stagEvent.budova.toUpperCase()}${stagEvent.mistnost.replace(/\s|-/g, '')}`;
                 else if (stagEvent.mistnost) formattedRoom = stagEvent.mistnost.replace(/\s|-/g, '');
                 else if (stagEvent.mistnostZkr) formattedRoom = stagEvent.mistnostZkr.replace(/\s|-/g, '');
 
+                // Vrací objekt s transformovanými daty o rozvrhové akce
                 return {
                     id: eventId, stagId: stagEvent.roakIdno || stagEvent.akceIdno,
                     startTime: startTime,
                     endTime: endTime,
                     day: dayMapping[dayKey] ?? (Number.isInteger(parseInt(stagEvent.den)) ? (parseInt(stagEvent.den) - 1) : 0),
-                    recurrence: recurrenceMapping[stagEvent.tydenZkr?.toUpperCase()] || recurrenceMapping[stagEvent.tyden?.toUpperCase()] || stagEvent.tyden || "KAŽDÝ TÝDEN",
+                    recurrence: recurrenceMapping[stagEvent.tydenZkr?.toUpperCase()] || recurrenceMapping[stagEvent.tyden?.toUpperCase()] || stagEvent.tyden || "KAŽDÝ TÝDEN", // Opakování (sudý, lichý, každý týden)
                     room: formattedRoom,
-                    type: typeMapping[stagEvent.typAkceZkr?.toUpperCase()] || typeMapping[stagEvent.typAkce?.toUpperCase()] || stagEvent.typAkce || "NEZNÁMÝ",
+                    type: typeMapping[stagEvent.typAkceZkr?.toUpperCase()] || typeMapping[stagEvent.typAkce?.toUpperCase()] || stagEvent.typAkce || "NEZNÁMÝ", // Typ akce (přednáška, cvičení, seminář atd.)
                     instructor: instructorName,
-                    currentCapacity: parseInt(stagEvent.obsazeni || stagEvent.pocetZapsanychStudentu || 0),
-                    maxCapacity: parseInt(stagEvent.kapacita || stagEvent.maxKapacita || stagEvent.kapacitaMistnosti || 0),
+                    currentCapacity: parseInt(stagEvent.planObsazeni || 0), // Aktuální maximální kapacita rozvrhové akce
+                    maxCapacity: parseInt(stagEvent.kapacitaMistnosti || 0), // Maximální kapacita místnosti
                     note: stagEvent.poznamka,
                     year: formData.year,
                     semester: formData.semester,
                     departmentCode: subjectInfo.katedra,
                     courseCode: subjectInfo.zkratka,
-                    durationHours: durationHours,
+                    durationHours: durationHours, // Délka akce v hodinách
                 };
             }).filter(Boolean);
 
+            // courseDataForWorkspace obsahuje všechny potřebné informace o předmětu a jeho akcích
+            // Připravíme data pro přidání do workspace
             const courseDataForWorkspace = {
                 stagId: subjectInfo.predmetId,
                 name: subjectInfo.nazevEn || subjectInfo.nazev,
                 departmentCode: subjectInfo.katedra,
                 courseCode: subjectInfo.zkratka,
                 credits: parseInt(subjectInfo.kreditu) || 0,
-                neededHours: {
-                    lecture: parseInt(subjectInfo.jednotekPrednasek) || 0,
-                    practical: parseInt(subjectInfo.jednotekCviceni) || 0,
-                    seminar: parseInt(subjectInfo.jednotekSeminare) || 0
+                neededHours: { 
+                    lecture: parseInt(subjectInfo.jednotekPrednasek) || 0, // Počet hodin přednášek
+                    practical: parseInt(subjectInfo.jednotekCviceni) || 0, // Počet hodin cvičení
+                    seminar: parseInt(subjectInfo.jednotekSeminare) || 0 // Počet hodin seminářů
                 },
                 semester: formData.semester,
                 year: formData.year,
                 events: transformedEvents,
-                source: useDemoApi ? 'demo' : 'prod'
+                source: useDemoApi ? 'demo' : 'prod' // String místo booleanu umožňujě v budoucnu rozšíření o další zdroje dat, jako např. jiných univerzit/vysokých škol, které taky použivají STAG.
             };
 
             const courseIdentifier = `${subjectInfo.katedra}/${subjectInfo.zkratka}`;
             const existingCourse = workspaceService.courses.find(c => c.id === courseIdentifier);
-
+            // Kontrola, zda již předmět existuje v workspace
             if (existingCourse) {
-                setOverwriteSingleCourseDialog({
+                setOverwriteSingleCourseDialog({ // Nastavení dialogu pro přepsání existujícího kurzu
                     open: true,
                     title: t('Dialogs.existingCourseWarning.title'),
                     message: t('Dialogs.existingCourseWarning.message', { courseIdentifier: `${courseIdentifier} (pro ${formData.year}, ${formData.semester})` }),
                     courseDataForWorkspace: courseDataForWorkspace,
                     onConfirm: () => {
-                        addCourse(courseDataForWorkspace);
-                        closeOverwriteSingleCourseDialog();
-                        setIsProcessingCourse(false);
+                        addCourse(courseDataForWorkspace); // Přidání kurzu do workspace, přepíše existující předmět
+                        closeOverwriteSingleCourseDialog(); // Zavření dialogu přepsání
+                        setIsProcessingCourse(false); // Ukončení stavu zpracování po přidání kurzu
                     }
                 });
-            } else {
-                addCourse(courseDataForWorkspace);
-                setIsProcessingCourse(false);
+            } else { // Pokud předmět neexistuje, přidáme ho přímo
+                closeOverwriteSingleCourseDialog(); // Zavření dialogu přepsání, pokud byl otevřen
+                addCourse(courseDataForWorkspace); // Přidání kurzu do workspace
+                setIsProcessingCourse(false); // Ukončení stavu zpracování
             }
 
         } catch (error) {
             console.error("Chyba při načítání předmětu ze STAGu:", error);
             showSnackbar(error.message || t('alerts.stagLoadError'), 'error');
-            setIsProcessingCourse(false);
+            setIsProcessingCourse(false); // Ukončení stavu zpracování při chybě
         }
-    }, [stagApiService, addCourse, closeLoadCourseDialog, showSnackbar, t, i18n.language, workspaceService, useDemoApi]);
+    }, [stagApiService, addCourse, closeLoadCourseDialog, showSnackbar, t, i18n.language, workspaceService, useDemoApi]); 
 
     return {
         isLoadCourseDialogOpen, openLoadCourseDialog, closeLoadCourseDialog, handleSubmitLoadCourse,

@@ -1,4 +1,3 @@
-// src/features/editor/CourseBar.jsx
 import React, { useState } from 'react';
 import { Box, Typography, CircularProgress, Button, Stack, alpha, Tooltip } from '@mui/material';
 import { SimpleTreeView, TreeItem } from '@mui/x-tree-view';

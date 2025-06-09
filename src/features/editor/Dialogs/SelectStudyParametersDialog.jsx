@@ -1,4 +1,3 @@
-// PROJEKT/NEW/src/features/editor/Dialogs/SelectStudyParametersDialog.jsx
 import React, { useState, useEffect, useMemo } from 'react';
 import {
     Dialog, DialogTitle, DialogContent, DialogActions, Button,
