@@ -6,15 +6,15 @@ import { getColorForCourse } from '../utils/colorUtils';
 // Mapování různých formátů zápisu typů rozvrhových akcí na jednotné interní klíče
 // Slouží k normalizaci dat z různých zdrojů (STAG, uživatelský vstup)
 export const EVENT_TYPE_TO_KEY_MAP = {
-    'přednáška': 'lecture',
-    'lecture': 'lecture',
-    'př': 'lecture',
-    'cvičení': 'practical',
-    'practical': 'practical',
-    'cv': 'practical',
-    'seminář': 'seminar',
-    'seminar': 'seminar',
-    'se': 'seminar',
+    přednáška: 'lecture',
+    lecture: 'lecture',
+    př: 'lecture',
+    cvičení: 'practical',
+    practical: 'practical',
+    cv: 'practical',
+    seminář: 'seminar',
+    seminar: 'seminar',
+    se: 'seminar',
 };
 
 // Pořadí typů akcí pro konzistentní zobrazení v UI
@@ -24,18 +24,18 @@ export const ENROLLMENT_KEYS_ORDER = ['lecture', 'practical', 'seminar'];
 // Uchovává metadata předmětu a spravuje seznam jeho rozvrhových akcí
 class CourseClass {
     constructor({
-                    stagId = null,           // ID předmětu ve STAGu
-                    name,                    // Název předmětu
-                    departmentCode,          // Kód katedry (např. KIV)
-                    courseCode,              // Kód předmětu (např. PPA1)
-                    credits,                 // Počet kreditů
-                    neededHours = {},        // Požadované hodiny podle typu výuky
-                    events = [],             // Seznam rozvrhových akcí
-                    semester = '',           // Semestr (ZS, LS)
-                    year = '',               // Akademický rok
-                    source = 'prod',         // Zdroj dat (prod, demo)
-                    color = null             // Barva předmětu v UI
-                }) {
+        stagId = null, // ID předmětu ve STAGu
+        name, // Název předmětu
+        departmentCode, // Kód katedry (např. KIV)
+        courseCode, // Kód předmětu (např. PPA1)
+        credits, // Počet kreditů
+        neededHours = {}, // Požadované hodiny podle typu výuky
+        events = [], // Seznam rozvrhových akcí
+        semester = '', // Semestr (ZS, LS)
+        year = '', // Akademický rok
+        source = 'prod', // Zdroj dat (prod, demo)
+        color = null, // Barva předmětu v UI
+    }) {
         this.stagId = stagId;
         this.name = name;
         this.departmentCode = departmentCode;
@@ -67,7 +67,7 @@ class CourseClass {
             year: this.year,
             id: this.id,
             source: this.source,
-            color: this.color
+            color: this.color,
         };
     }
 
@@ -87,8 +87,12 @@ class CourseClass {
         // pak se jedná o substituční případ. Student si má vybrat jen jednu.
         // Bohužel, v STAG API mají některé předměty pomerně špatně definované parametry (). STAG system si s tím poradí ale znamená to další potřebné záplaty chyb pro aplikace třetích stran...
         if (this.neededHours.lecture > 0) {
-            const lectureEvents = this.events.filter(e => EVENT_TYPE_TO_KEY_MAP[e.type.toLowerCase()] === 'lecture');
-            const allLecturesHaveRequiredHours = lectureEvents.every(e => e.durationHours >= this.neededHours.lecture);
+            const lectureEvents = this.events.filter(
+                e => EVENT_TYPE_TO_KEY_MAP[e.type.toLowerCase()] === 'lecture'
+            );
+            const allLecturesHaveRequiredHours = lectureEvents.every(
+                e => e.durationHours >= this.neededHours.lecture
+            );
             return lectureEvents.length > 1 && allLecturesHaveRequiredHours;
         }
         return false;
@@ -102,14 +106,17 @@ class CourseClass {
         if (!eventData) return;
 
         // Zajistíme, aby eventData byla instance CourseEventClass
-        const event = (eventData instanceof CourseEventClass) ? eventData : new CourseEventClass({
-            ...eventData,
-            courseId: this.id, // Předáme ID předmětu
-            departmentCode: this.departmentCode,
-            courseCode: this.courseCode,
-            year: this.year,
-            semester: this.semester
-        });
+        const event =
+            eventData instanceof CourseEventClass
+                ? eventData
+                : new CourseEventClass({
+                      ...eventData,
+                      courseId: this.id, // Předáme ID předmětu
+                      departmentCode: this.departmentCode,
+                      courseCode: this.courseCode,
+                      year: this.year,
+                      semester: this.semester,
+                  });
 
         if (!this.events.some(e => e.id === event.id)) {
             this.events.push(event);
@@ -165,8 +172,9 @@ class CourseClass {
                 }
             }
         });
-        
-        enrolledHours.total = enrolledHours.lecture + enrolledHours.practical + enrolledHours.seminar;
+
+        enrolledHours.total =
+            enrolledHours.lecture + enrolledHours.practical + enrolledHours.seminar;
         return enrolledHours;
     }
 
@@ -180,9 +188,9 @@ class CourseClass {
         if (!enrollmentKey || !allEnrolledEventIdsInSchedule) {
             return false;
         }
-        
+
         const needed = this.neededHours[enrollmentKey] || 0;
-        
+
         // Pokud pro daný typ není nic potřeba...
         if (needed === 0) {
             // ...ale akce tohoto typu existují, umožníme uživateli je zapsat
@@ -193,29 +201,30 @@ class CourseClass {
         // Speciální případ pro volitelné přednášky
         if (enrollmentKey === 'lecture' && this.isSpecialLectureSubstitutionCase()) {
             // Zjistíme, zda už má zapsanou alespoň jednu přednášku
-            const enrolledEvents = this.events.filter(e => 
-                allEnrolledEventIdsInSchedule.has(e.id) && 
-                EVENT_TYPE_TO_KEY_MAP[e.type.toLowerCase()] === 'lecture'
+            const enrolledEvents = this.events.filter(
+                e =>
+                    allEnrolledEventIdsInSchedule.has(e.id) &&
+                    EVENT_TYPE_TO_KEY_MAP[e.type.toLowerCase()] === 'lecture'
             );
             return enrolledEvents.length > 0;
         }
 
         // Standardní případ - kontrola počtu hodin
         let enrolledHoursOfThisType = 0;
-        
+
         for (const event of this.events) {
             // Kontrola, zda je rozvrhová akce zapsaná
             if (allEnrolledEventIdsInSchedule.has(event.id)) {
                 // Kontrola typu rozvrhové akce
                 const eventTypeKey = EVENT_TYPE_TO_KEY_MAP[event.type.toLowerCase()];
-                
+
                 // Pokud jde o hledaný typ, přičteme jeho hodiny
                 if (eventTypeKey === enrollmentKey) {
-                    enrolledHoursOfThisType += (event.durationHours || 0);
+                    enrolledHoursOfThisType += event.durationHours || 0;
                 }
             }
         }
-        
+
         // Vrátíme true, pokud je počet zapsaných hodin >= potřebnému počtu
         return enrolledHoursOfThisType >= needed;
     }
@@ -224,7 +233,7 @@ class CourseClass {
     // Vstupem je sada ID zapsaných akcí v rozvrhu
     // Vrací true, pokud jsou splněny požadavky pro všechny typy (přednášky, cvičení, semináře)
     // Pokud pro daný typ není nic potřeba, ale existují akce tohoto typu, umožní zápis (jsou volitelné)
-    areAllEnrollmentRequirementsMet(allEnrolledEventIdsInSchedule) { 
+    areAllEnrollmentRequirementsMet(allEnrolledEventIdsInSchedule) {
         return ENROLLMENT_KEYS_ORDER.every(key =>
             this.isEnrollmentTypeRequirementMet(key, allEnrolledEventIdsInSchedule)
         );

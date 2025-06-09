@@ -19,7 +19,7 @@ const MAX_GENERATED_SCHEDULES = 10;
  * @param {string} timeStr - Časový řetězec (např. "14:30").
  * @returns {number} Počet minut od půlnoci.
  */
-const timeToMinutes = (timeStr) => {
+const timeToMinutes = timeStr => {
     const [hours, minutes] = timeStr.split(':').map(Number);
     return hours * 60 + minutes;
 };
@@ -50,11 +50,11 @@ const eventsConflict = (event1, event2) => {
     const freq2 = event2.recurrence;
 
     // Jednorázové rozvrhové akce vždy kolidují, pokud se překrývají v čase
-    if (freq1 === "jednorázově" || freq2 === "jednorázově") {
+    if (freq1 === 'jednorázově' || freq2 === 'jednorázově') {
         return true;
     }
 
-    if (freq1 === "každýtýden" || freq2 === "každýtýden") return true;
+    if (freq1 === 'každýtýden' || freq2 === 'každýtýden') return true;
     if (freq1 === freq2) return true;
 
     return false;
@@ -66,7 +66,7 @@ const eventsConflict = (event1, event2) => {
  * @param {ScheduleClass} schedule - Rozvrh pro výpočet ceny oken.
  * @returns {number} Cena oken v rozvrhu.
  */
-const calculateGapsCost = (schedule) => {
+const calculateGapsCost = schedule => {
     const events = schedule.getAllEnrolledEvents();
     let totalGapsCost = 0;
 
@@ -91,7 +91,7 @@ const calculateGapsCost = (schedule) => {
             const currentEnd = timeToMinutes(dayEvents[i].endTime);
             const nextStart = timeToMinutes(dayEvents[i + 1].startTime);
             const gap = nextStart - currentEnd;
-            
+
             if (gap > 0) {
                 // Cena mezery je kvadratická, abychom více penalizovali velké mezery
                 totalGapsCost += gap * gap;
@@ -111,9 +111,9 @@ const calculateGapsCost = (schedule) => {
 const checkFreeDayPreference = (preference, schedule) => {
     const params = preference.params || {};
     const dayToCheck = ['PO', 'UT', 'ST', 'CT', 'PA', 'SO', 'NE'].indexOf(params.day);
-    
+
     if (dayToCheck === -1) return true; // Neplatný den, ignorujeme preferenci
-    
+
     // Kontrola, zda v daném dni nejsou žádné rozvrhové akce
     return !schedule.getAllEnrolledEvents().some(event => event.day === dayToCheck);
 };
@@ -127,22 +127,22 @@ const checkFreeDayPreference = (preference, schedule) => {
 const checkAvoidTimesPreference = (preference, schedule) => {
     const params = preference.params || {};
     const dayToCheck = ['PO', 'UT', 'ST', 'CT', 'PA', 'SO', 'NE'].indexOf(params.day);
-    
+
     if (dayToCheck === -1) return true; // Neplatný den, ignorujeme preferenci
     if (!params.startTime || !params.endTime) return true; // Chybějící parametry, ignorujeme preferenci
-    
+
     const startToAvoid = timeToMinutes(params.startTime);
     const endToAvoid = timeToMinutes(params.endTime);
-    
+
     // Kontrola, zda v daném dni a čase nejsou žádné rozvrhové akce
     return !schedule.getAllEnrolledEvents().some(event => {
         if (event.day !== dayToCheck) return false;
-        
+
         const eventStart = timeToMinutes(event.startTime);
         const eventEnd = timeToMinutes(event.endTime);
-        
+
         // Kontrola překryvu časových intervalů
-        return (eventStart < endToAvoid && startToAvoid < eventEnd);
+        return eventStart < endToAvoid && startToAvoid < eventEnd;
     });
 };
 
@@ -155,47 +155,58 @@ const checkAvoidTimesPreference = (preference, schedule) => {
  */
 const checkPreferInstructorPreference = (preference, schedule, courses) => {
     const params = preference.params || {};
-    
+
     if (!params.courseCode || !params.eventType || !params.instructorName) {
-        console.log("PREFER_INSTRUCTOR: Chybějící parametry preference", params);
+        console.log('PREFER_INSTRUCTOR: Chybějící parametry preference', params);
         return true; // Chybějící parametry, ignorujeme preferenci
     }
-    
-    console.log("PREFER_INSTRUCTOR: Kontroluji preferenci pro", params);
-    
+
+    console.log('PREFER_INSTRUCTOR: Kontroluji preferenci pro', params);
+
     const course = courses.find(c => c.getShortCode() === params.courseCode);
     if (!course) {
-        console.log("PREFER_INSTRUCTOR: Předmět nenalezen", params.courseCode);
+        console.log('PREFER_INSTRUCTOR: Předmět nenalezen', params.courseCode);
         return true; // Předmět neexistuje, ignorujeme preferenci
     }
-    
+
     const eventType = EVENT_TYPE_TO_KEY_MAP[params.eventType.toLowerCase()];
     if (!eventType) {
-        console.log("PREFER_INSTRUCTOR: Neplatný typ rozvrhové akce", params.eventType);
+        console.log('PREFER_INSTRUCTOR: Neplatný typ rozvrhové akce', params.eventType);
         return true; // Neplatný typ rozvrhové akce, ignorujeme preferenci
     }
-    
+
     // Zjistíme všechny zapsané rozvrhové akce daného předmětu a typu
-    const enrolledEvents = schedule.getAllEnrolledEvents().filter(event => 
-        event.courseId === course.id && 
-        EVENT_TYPE_TO_KEY_MAP[event.type.toLowerCase()] === eventType
+    const enrolledEvents = schedule
+        .getAllEnrolledEvents()
+        .filter(
+            event =>
+                event.courseId === course.id &&
+                EVENT_TYPE_TO_KEY_MAP[event.type.toLowerCase()] === eventType
+        );
+
+    console.log(
+        'PREFER_INSTRUCTOR: Zapsané rozvrhové akce:',
+        enrolledEvents.map(e => ({
+            id: e.id,
+            type: e.type,
+            instructor: e.instructor,
+        }))
     );
-    
-    console.log("PREFER_INSTRUCTOR: Zapsané rozvrhové akce:", enrolledEvents.map(e => ({ 
-        id: e.id, 
-        type: e.type, 
-        instructor: e.instructor 
-    })));
-    
+
     // Pokud nemá zapsanou žádnou událost tohoto typu, preference není splněna
     if (enrolledEvents.length === 0) {
-        console.log("PREFER_INSTRUCTOR: Žádné zapsané rozvrhové akce tohoto typu");
+        console.log('PREFER_INSTRUCTOR: Žádné zapsané rozvrhové akce tohoto typu');
         return false;
     }
-    
+
     // Kontrola, zda alespoň jedna zapsaná událost má požadovaného vyučujícího
     const result = enrolledEvents.some(event => event.instructor === params.instructorName);
-    console.log("PREFER_INSTRUCTOR: Výsledek kontroly:", result, "pro vyučujícího", params.instructorName);
+    console.log(
+        'PREFER_INSTRUCTOR: Výsledek kontroly:',
+        result,
+        'pro vyučujícího',
+        params.instructorName
+    );
     return result;
 };
 
@@ -208,7 +219,7 @@ const checkPreferInstructorPreference = (preference, schedule, courses) => {
  */
 const checkPreference = (preference, schedule, courses) => {
     if (!preference || !preference.isActive) return true; // Neaktivní preference je vždy splněna
-    
+
     switch (preference.type) {
         case 'FREE_DAY':
             return checkFreeDayPreference(preference, schedule);
@@ -229,33 +240,36 @@ const checkPreference = (preference, schedule, courses) => {
  * @returns {ScheduleClass[]} Pole vygenerovaných validních rozvrhů.
  */
 export const generateScheduleAlgorithm = (coursesToSchedule = [], preferences = {}) => {
-    console.log("generateScheduleAlgorithm called with:", { 
-        coursesCount: coursesToSchedule.length, 
-        preferencesCount: Object.keys(preferences).length 
+    console.log('generateScheduleAlgorithm called with:', {
+        coursesCount: coursesToSchedule.length,
+        preferencesCount: Object.keys(preferences).length,
     });
-    
+
     // Seřadíme preference podle priority (od nejvyšší po nejnižší)
-    const orderedPreferences = Object.values(preferences || {})
-        .sort((a, b) => a.priority - b.priority);
-    
-    console.log("Ordered preferences:", orderedPreferences);
-    
+    const orderedPreferences = Object.values(preferences || {}).sort(
+        (a, b) => a.priority - b.priority
+    );
+
+    console.log('Ordered preferences:', orderedPreferences);
+
     // Filtrujeme pouze předměty, které mají nějaké rozvrhové akce
-    const relevantCourses = coursesToSchedule.filter(course => course.events && course.events.length > 0);
-    
-    console.log("Relevant courses:", { 
-        count: relevantCourses.length, 
-        courses: relevantCourses.map(c => c.id) 
+    const relevantCourses = coursesToSchedule.filter(
+        course => course.events && course.events.length > 0
+    );
+
+    console.log('Relevant courses:', {
+        count: relevantCourses.length,
+        courses: relevantCourses.map(c => c.id),
     });
-    
+
     if (relevantCourses.length === 0) {
-        console.log("No relevant courses, returning empty array");
+        console.log('No relevant courses, returning empty array');
         return [];
     }
-    
+
     let generatedSchedules = [];
     let solutionsFound = 0;
-    
+
     // Krok 1: Seskupit všechny rozvrhové akce podle předmětu a typu (přednáška, cvičení...).
     const allEventGroups = {};
     relevantCourses.forEach(course => {
@@ -270,7 +284,7 @@ export const generateScheduleAlgorithm = (coursesToSchedule = [], preferences = 
             }
         });
     });
-    
+
     /**
      * Rekurzivní funkce, která prochází předměty a zkouší pro ně najít platné kombinace rozvrhových akcí.
      * @param {number} courseIdx - Index aktuálně zpracovávaného předmětu v poli `relevantCourses`.
@@ -285,12 +299,15 @@ export const generateScheduleAlgorithm = (coursesToSchedule = [], preferences = 
             // Kontrola aktivních preferencí
             let allPreferencesMet = true;
             for (const pref of orderedPreferences) {
-                if (pref.isActive && !checkPreference(pref, currentScheduleInProgress, relevantCourses)) {
+                if (
+                    pref.isActive &&
+                    !checkPreference(pref, currentScheduleInProgress, relevantCourses)
+                ) {
                     allPreferencesMet = false;
                     break;
                 }
             }
-            
+
             if (allPreferencesMet) {
                 generatedSchedules.push(currentScheduleInProgress.clone());
                 solutionsFound++;
@@ -372,7 +389,10 @@ export const generateScheduleAlgorithm = (coursesToSchedule = [], preferences = 
                 const uniqueCombinations = [];
                 const seenCombinations = new Set();
                 result.forEach(comb => {
-                    const combId = comb.map(e => e.id).sort().join(',');
+                    const combId = comb
+                        .map(e => e.id)
+                        .sort()
+                        .join(',');
                     if (!seenCombinations.has(combId)) {
                         uniqueCombinations.push(comb);
                         seenCombinations.add(combId);
@@ -386,17 +406,20 @@ export const generateScheduleAlgorithm = (coursesToSchedule = [], preferences = 
 
             for (const combination of combinations) {
                 if (solutionsFound >= MAX_GENERATED_SCHEDULES) return;
-                generateEventCombinationsForCourse(groupKeyIndex + 1, [...tempEventsForCourse, ...combination]);
+                generateEventCombinationsForCourse(groupKeyIndex + 1, [
+                    ...tempEventsForCourse,
+                    ...combination,
+                ]);
             }
         };
         generateEventCombinationsForCourse(0, []);
     };
-    
+
     findSchedulesRecursive(0, new ScheduleClass());
-    
+
     // Seřazení rozvrhů podle ceny oken (od nejmenší po největší)
     generatedSchedules.sort((a, b) => calculateGapsCost(a) - calculateGapsCost(b));
-    
+
     return generatedSchedules;
 };
 
@@ -409,4 +432,4 @@ export const generateScheduleAlgorithm = (coursesToSchedule = [], preferences = 
  */
 export const generateSchedule = (coursesToSchedule = [], preferences = {}) => {
     return generateScheduleAlgorithm(coursesToSchedule, preferences);
-}; 
+};

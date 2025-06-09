@@ -2,31 +2,34 @@
 // Obsahuje všechny potřebné informace o konkrétní rozvrhové akce
 class CourseEventClass {
     constructor({
-                    id, // Identifikátor rozvrhové akce, může být ze STAGu nebo generovaný
-                    stagId = null,
-                    startTime,         // Čas začátku (např. "14:00")
-                    endTime,           // Čas konce (např. "15:30")
-                    day,               // Den v týdnu (index nebo textový identifikátor)
-                    recurrence,        // Opakování (každý týden, sudý, lichý)
-                    validityStart = null, // Datum začátku platnosti
-                    validityEnd = null,   // Datum konce platnosti
-                    courseId,          // ID kurzu, ke kterému událost patří
-                    courseCode,        // Kód předmětu (např. PPA1)
-                    room = '',         // Místnost (např. UU303)
-                    type,              // Typ výuky (přednáška, cvičení, seminář)
-                    instructor = '',   // Vyučující
-                    currentCapacity = 0, // Aktuální maximální kapacity akce
-                    maxCapacity = 0,     // Maximální kapacita místnosti
-                    note = '',         // Poznámka k rozvrhové akce
-                    isVirtual = false, // Zda se jedná o virtuální rozvrhovou akci
-                    year = '',         // Akademický rok
-                    semester = '',     // Semestr (ZS, LS)
-                    groupId = null,    // ID skupiny rozvrhových akcí (Pro spojené rozvrhové akce jako např. u UJP/AEP6 - NENÍ IMPLEMENTOVÁNO)
-                    departmentCode = '',// Kód katedry (např. KIV)
-                    durationHours = 0  // Délka v hodinách
-                }) {
+        id, // Identifikátor rozvrhové akce, může být ze STAGu nebo generovaný
+        stagId = null,
+        startTime, // Čas začátku (např. "14:00")
+        endTime, // Čas konce (např. "15:30")
+        day, // Den v týdnu (index nebo textový identifikátor)
+        recurrence, // Opakování (každý týden, sudý, lichý)
+        validityStart = null, // Datum začátku platnosti
+        validityEnd = null, // Datum konce platnosti
+        courseId, // ID kurzu, ke kterému událost patří
+        courseCode, // Kód předmětu (např. PPA1)
+        room = '', // Místnost (např. UU303)
+        type, // Typ výuky (přednáška, cvičení, seminář)
+        instructor = '', // Vyučující
+        currentCapacity = 0, // Aktuální maximální kapacity akce
+        maxCapacity = 0, // Maximální kapacita místnosti
+        note = '', // Poznámka k rozvrhové akce
+        isVirtual = false, // Zda se jedná o virtuální rozvrhovou akci
+        year = '', // Akademický rok
+        semester = '', // Semestr (ZS, LS)
+        groupId = null, // ID skupiny rozvrhových akcí (Pro spojené rozvrhové akce jako např. u UJP/AEP6 - NENÍ IMPLEMENTOVÁNO)
+        departmentCode = '', // Kód katedry (např. KIV)
+        durationHours = 0, // Délka v hodinách
+    }) {
         // Použijeme stagId jako primární id, pokud je dostupné, jinak dodané id, jinak generujeme
-        this.id = id || stagId || `${departmentCode}-${courseCode}-${type}-${day}-${startTime}-${Math.random().toString(36).substring(2, 9)}`;
+        this.id =
+            id ||
+            stagId ||
+            `${departmentCode}-${courseCode}-${type}-${day}-${startTime}-${Math.random().toString(36).substring(2, 9)}`;
         this.stagId = stagId || (id && id.startsWith('STAG_') ? id : null); // Pokud id je stagId
         this.startTime = startTime;
         this.endTime = endTime;
@@ -47,9 +50,8 @@ class CourseEventClass {
         this.semester = semester;
         this.groupId = groupId;
         this.departmentCode = departmentCode;
-        this.durationHours = durationHours
+        this.durationHours = durationHours;
     }
-
 
     serialize() {
         // Vrátí prostý objekt se všemi vlastnostmi pro JSON serializaci
@@ -66,7 +68,7 @@ class CourseEventClass {
             courseCode: this.courseCode,
             room: this.room,
             type: this.type,
-            instructor: this.instructor, 
+            instructor: this.instructor,
             currentCapacity: this.currentCapacity,
             maxCapacity: this.maxCapacity,
             note: this.note,
@@ -75,7 +77,7 @@ class CourseEventClass {
             semester: this.semester,
             groupId: this.groupId,
             departmentCode: this.departmentCode,
-            durationHours: this.durationHours
+            durationHours: this.durationHours,
         };
     }
 
@@ -87,7 +89,7 @@ class CourseEventClass {
             tFunction('courseEvent.thursday', 'Čtvrtek'),
             tFunction('courseEvent.friday', 'Pátek'),
             tFunction('courseEvent.saturday', 'Sobota'),
-            tFunction('courseEvent.sunday', 'Neděle')
+            tFunction('courseEvent.sunday', 'Neděle'),
         ];
         return days[this.day] || '';
     }

@@ -1,8 +1,8 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
-import workspaceService, { LOCAL_STORAGE_KEY } from '../services/WorkspaceService';
-import ScheduleClass from '../services/ScheduleClass';
-import { useSnackbar } from './SnackbarContext';
+import { createContext, useCallback, useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import ScheduleClass from '../services/ScheduleClass';
+import workspaceService, { LOCAL_STORAGE_KEY } from '../services/WorkspaceService';
+import { useSnackbar } from './SnackbarContext';
 
 const WorkspaceContext = createContext(null);
 
@@ -21,33 +21,42 @@ export const WorkspaceProvider = ({ children }) => {
     const [workspaceSemester, setWorkspaceSemester] = useState('');
     const [scheduleColorMode, setScheduleColorMode] = useState('type');
 
-    const syncStateFromService = useCallback((showSaveNotification = false) => {
-        setCourses([...workspaceService.getAllCourses()]);
-        const currentServiceSchedule = workspaceService.getActiveSchedule();
-        if (currentServiceSchedule instanceof ScheduleClass) {
-            setActiveSchedule(currentServiceSchedule);
-        } else {
-            console.error("WorkspaceContext: workspaceService.getActiveSchedule() did not return a ScheduleClass instance!", currentServiceSchedule);
-            const fallbackSchedule = new ScheduleClass();
-            if (currentServiceSchedule && Array.isArray(currentServiceSchedule.enrolledEvents)) {
-                const eventInstances = currentServiceSchedule.enrolledEvents
-                    .map(eventData => workspaceService.findEventByIdGlobal(eventData.id))
-                    .filter(Boolean);
-                fallbackSchedule.addEvents(eventInstances);
+    const syncStateFromService = useCallback(
+        (showSaveNotification = false) => {
+            setCourses([...workspaceService.getAllCourses()]);
+            const currentServiceSchedule = workspaceService.getActiveSchedule();
+            if (currentServiceSchedule instanceof ScheduleClass) {
+                setActiveSchedule(currentServiceSchedule);
+            } else {
+                console.error(
+                    'WorkspaceContext: workspaceService.getActiveSchedule() did not return a ScheduleClass instance!',
+                    currentServiceSchedule
+                );
+                const fallbackSchedule = new ScheduleClass();
+                if (
+                    currentServiceSchedule &&
+                    Array.isArray(currentServiceSchedule.enrolledEvents)
+                ) {
+                    const eventInstances = currentServiceSchedule.enrolledEvents
+                        .map(eventData => workspaceService.findEventByIdGlobal(eventData.id))
+                        .filter(Boolean);
+                    fallbackSchedule.addEvents(eventInstances);
+                }
+                setActiveSchedule(fallbackSchedule);
             }
-            setActiveSchedule(fallbackSchedule);
-        }
-        setGeneratedSchedules([...workspaceService.generatedSchedules]);
-        setActiveScheduleIndex(workspaceService.activeScheduleIndex);
-        setPreferences({ ...workspaceService.preferences });
-        setWorkspaceYear(workspaceService.year);
-        setWorkspaceSemester(workspaceService.semester);
-        setScheduleColorMode(workspaceService.scheduleColorMode || 'type');
+            setGeneratedSchedules([...workspaceService.generatedSchedules]);
+            setActiveScheduleIndex(workspaceService.activeScheduleIndex);
+            setPreferences({ ...workspaceService.preferences });
+            setWorkspaceYear(workspaceService.year);
+            setWorkspaceSemester(workspaceService.semester);
+            setScheduleColorMode(workspaceService.scheduleColorMode || 'type');
 
-        if (isWorkspaceInitialized) {
-            workspaceService.saveWorkspace();
-        }
-    }, [workspaceService, isWorkspaceInitialized, t]);
+            if (isWorkspaceInitialized) {
+                workspaceService.saveWorkspace();
+            }
+        },
+        [workspaceService, isWorkspaceInitialized, t]
+    );
 
     const initializeWorkspace = useCallback(() => {
         if (isWorkspaceInitialized && !isLoadingWorkspace) return;
@@ -61,30 +70,46 @@ export const WorkspaceProvider = ({ children }) => {
         } else if (loadedFromStorage && !localStorage.getItem(LOCAL_STORAGE_KEY)) {
         }
         workspaceService.saveWorkspace();
-    }, [isWorkspaceInitialized, isLoadingWorkspace, workspaceService, syncStateFromService, showSnackbar, t]);
+    }, [
+        isWorkspaceInitialized,
+        isLoadingWorkspace,
+        workspaceService,
+        syncStateFromService,
+        showSnackbar,
+        t,
+    ]);
 
-    const addCourse = useCallback((courseData) => {
-        if (!isWorkspaceInitialized) return;
-        const courseIdentifier = `${courseData.departmentCode}/${courseData.courseCode}`;
-        const existingCourse = workspaceService.courses.find(c => c.id === courseIdentifier);
+    const addCourse = useCallback(
+        courseData => {
+            if (!isWorkspaceInitialized) return;
+            const courseIdentifier = `${courseData.departmentCode}/${courseData.courseCode}`;
+            const existingCourse = workspaceService.courses.find(c => c.id === courseIdentifier);
 
-        workspaceService.addCourse(courseData);
-        syncStateFromService(true);
-        if (existingCourse) {
-            showSnackbar(t('alerts.courseOverwritten', { courseCode: courseIdentifier }), 'info');
-        } else {
-            showSnackbar(t('alerts.courseAdded', { courseCode: courseIdentifier }), 'success');
-        }
-    }, [workspaceService, syncStateFromService, showSnackbar, t, isWorkspaceInitialized]);
+            workspaceService.addCourse(courseData);
+            syncStateFromService(true);
+            if (existingCourse) {
+                showSnackbar(
+                    t('alerts.courseOverwritten', { courseCode: courseIdentifier }),
+                    'info'
+                );
+            } else {
+                showSnackbar(t('alerts.courseAdded', { courseCode: courseIdentifier }), 'success');
+            }
+        },
+        [workspaceService, syncStateFromService, showSnackbar, t, isWorkspaceInitialized]
+    );
 
-    const removeCourse = useCallback((courseId) => {
-        if (!isWorkspaceInitialized) return;
-        const courseToRemove = workspaceService.courses.find(c => c.id === courseId);
-        const courseIdentifier = courseToRemove ? courseToRemove.getShortCode() : courseId;
-        workspaceService.removeCourse(courseId);
-        syncStateFromService(true);
-        showSnackbar(t('alerts.courseRemoved', { courseId: courseIdentifier }), 'success');
-    }, [workspaceService, syncStateFromService, showSnackbar, t, isWorkspaceInitialized]);
+    const removeCourse = useCallback(
+        courseId => {
+            if (!isWorkspaceInitialized) return;
+            const courseToRemove = workspaceService.courses.find(c => c.id === courseId);
+            const courseIdentifier = courseToRemove ? courseToRemove.getShortCode() : courseId;
+            workspaceService.removeCourse(courseId);
+            syncStateFromService(true);
+            showSnackbar(t('alerts.courseRemoved', { courseId: courseIdentifier }), 'success');
+        },
+        [workspaceService, syncStateFromService, showSnackbar, t, isWorkspaceInitialized]
+    );
 
     const handleRemoveAllCourses = useCallback(() => {
         if (!isWorkspaceInitialized) return;
@@ -93,43 +118,55 @@ export const WorkspaceProvider = ({ children }) => {
         showSnackbar(t('alerts.allCoursesRemoved'), 'success');
     }, [workspaceService, syncStateFromService, showSnackbar, t, isWorkspaceInitialized]);
 
-    const toggleEventInSchedule = useCallback((eventToToggle, isCurrentlyEnrolled) => {
-        if (!isWorkspaceInitialized) return false;
-        const schedule = workspaceService.getActiveSchedule();
-        if (!schedule) {
-            console.error("WorkspaceContext: Cannot toggle event, activeSchedule is null.");
-            return false;
-        }
-        if (isCurrentlyEnrolled) {
-            schedule.removeEventById(eventToToggle.id);
-        } else {
-            schedule.addEvent(eventToToggle);
-        }
-        syncStateFromService(false);
-        return true;
-    }, [workspaceService, syncStateFromService, isWorkspaceInitialized]);
+    const toggleEventInSchedule = useCallback(
+        (eventToToggle, isCurrentlyEnrolled) => {
+            if (!isWorkspaceInitialized) return false;
+            const schedule = workspaceService.getActiveSchedule();
+            if (!schedule) {
+                console.error('WorkspaceContext: Cannot toggle event, activeSchedule is null.');
+                return false;
+            }
+            if (isCurrentlyEnrolled) {
+                schedule.removeEventById(eventToToggle.id);
+            } else {
+                schedule.addEvent(eventToToggle);
+            }
+            syncStateFromService(false);
+            return true;
+        },
+        [workspaceService, syncStateFromService, isWorkspaceInitialized]
+    );
 
-    const updateWorkspaceSettings = useCallback((year, semester) => {
-        if (!isWorkspaceInitialized) return;
-        workspaceService.year = year;
-        workspaceService.semester = semester;
-        syncStateFromService(true);
-        showSnackbar(t('alerts.workspaceSaved'), 'info');
-    }, [workspaceService, syncStateFromService, showSnackbar, t, isWorkspaceInitialized]);
+    const updateWorkspaceSettings = useCallback(
+        (year, semester) => {
+            if (!isWorkspaceInitialized) return;
+            workspaceService.year = year;
+            workspaceService.semester = semester;
+            syncStateFromService(true);
+            showSnackbar(t('alerts.workspaceSaved'), 'info');
+        },
+        [workspaceService, syncStateFromService, showSnackbar, t, isWorkspaceInitialized]
+    );
 
-    const addPreference = useCallback((preference) => {
-        if (!isWorkspaceInitialized) return;
-        workspaceService.addPreference(preference);
-        syncStateFromService(true);
-        showSnackbar(t('preferences.alerts.added'), 'success');
-    }, [workspaceService, syncStateFromService, showSnackbar, t, isWorkspaceInitialized]);
+    const addPreference = useCallback(
+        preference => {
+            if (!isWorkspaceInitialized) return;
+            workspaceService.addPreference(preference);
+            syncStateFromService(true);
+            showSnackbar(t('preferences.alerts.added'), 'success');
+        },
+        [workspaceService, syncStateFromService, showSnackbar, t, isWorkspaceInitialized]
+    );
 
-    const deletePreference = useCallback((preferenceId) => {
-        if (!isWorkspaceInitialized) return;
-        workspaceService.deletePreference(preferenceId);
-        syncStateFromService(true);
-        showSnackbar(t('preferences.alerts.deleted'), 'info');
-    }, [workspaceService, syncStateFromService, showSnackbar, t, isWorkspaceInitialized]);
+    const deletePreference = useCallback(
+        preferenceId => {
+            if (!isWorkspaceInitialized) return;
+            workspaceService.deletePreference(preferenceId);
+            syncStateFromService(true);
+            showSnackbar(t('preferences.alerts.deleted'), 'info');
+        },
+        [workspaceService, syncStateFromService, showSnackbar, t, isWorkspaceInitialized]
+    );
 
     const handleRemoveAllPreferences = useCallback(() => {
         if (!isWorkspaceInitialized) return;
@@ -138,26 +175,35 @@ export const WorkspaceProvider = ({ children }) => {
         showSnackbar(t('preferences.alerts.allDeleted'), 'success');
     }, [workspaceService, syncStateFromService, showSnackbar, t, isWorkspaceInitialized]);
 
-    const updatePreference = useCallback((preferenceId, updatedData) => {
-        if (!isWorkspaceInitialized) return;
-        workspaceService.updatePreference(preferenceId, updatedData);
-        syncStateFromService(true);
-        showSnackbar(t('preferences.alerts.updated'), 'success');
-    }, [workspaceService, syncStateFromService, showSnackbar, t, isWorkspaceInitialized]);
+    const updatePreference = useCallback(
+        (preferenceId, updatedData) => {
+            if (!isWorkspaceInitialized) return;
+            workspaceService.updatePreference(preferenceId, updatedData);
+            syncStateFromService(true);
+            showSnackbar(t('preferences.alerts.updated'), 'success');
+        },
+        [workspaceService, syncStateFromService, showSnackbar, t, isWorkspaceInitialized]
+    );
 
-    const updatePreferencePriority = useCallback((preferenceId, direction) => {
-        if (!isWorkspaceInitialized) return;
-        workspaceService.updatePreferencePriority(preferenceId, direction);
-        syncStateFromService(true);
-        showSnackbar(t('preferences.alerts.priorityChanged'), 'info');
-    }, [workspaceService, syncStateFromService, showSnackbar, t, isWorkspaceInitialized]);
+    const updatePreferencePriority = useCallback(
+        (preferenceId, direction) => {
+            if (!isWorkspaceInitialized) return;
+            workspaceService.updatePreferencePriority(preferenceId, direction);
+            syncStateFromService(true);
+            showSnackbar(t('preferences.alerts.priorityChanged'), 'info');
+        },
+        [workspaceService, syncStateFromService, showSnackbar, t, isWorkspaceInitialized]
+    );
 
-    const togglePreferenceActive = useCallback((preferenceId) => {
-        if (!isWorkspaceInitialized) return;
-        workspaceService.togglePreferenceActive(preferenceId);
-        syncStateFromService(true);
-        showSnackbar(t('preferences.alerts.activityChanged'), 'info');
-    }, [workspaceService, syncStateFromService, showSnackbar, t, isWorkspaceInitialized]);
+    const togglePreferenceActive = useCallback(
+        preferenceId => {
+            if (!isWorkspaceInitialized) return;
+            workspaceService.togglePreferenceActive(preferenceId);
+            syncStateFromService(true);
+            showSnackbar(t('preferences.alerts.activityChanged'), 'info');
+        },
+        [workspaceService, syncStateFromService, showSnackbar, t, isWorkspaceInitialized]
+    );
 
     const generateAndSetSchedules = useCallback(() => {
         if (!isWorkspaceInitialized) return false;
@@ -166,11 +212,14 @@ export const WorkspaceProvider = ({ children }) => {
         return success;
     }, [workspaceService, syncStateFromService, isWorkspaceInitialized]);
 
-    const setActiveGeneratedSchedule = useCallback((index) => {
-        if (!isWorkspaceInitialized) return;
-        workspaceService.setActiveScheduleIndex(index);
-        syncStateFromService();
-    }, [workspaceService, syncStateFromService, isWorkspaceInitialized]);
+    const setActiveGeneratedSchedule = useCallback(
+        index => {
+            if (!isWorkspaceInitialized) return;
+            workspaceService.setActiveScheduleIndex(index);
+            syncStateFromService();
+        },
+        [workspaceService, syncStateFromService, isWorkspaceInitialized]
+    );
 
     const clearFullWorkspace = useCallback(() => {
         workspaceService.clearWorkspace(true);
@@ -181,16 +230,21 @@ export const WorkspaceProvider = ({ children }) => {
         setPreferences({});
         setWorkspaceYear('');
         setWorkspaceSemester('');
-        
+
         setIsWorkspaceInitialized(true);
-        
+
         workspaceService.saveWorkspace();
         showSnackbar(t('alerts.workspaceCleared'), 'info');
     }, [workspaceService, showSnackbar, t]);
 
     const handleExportWorkspace = useCallback(() => {
         if (!isWorkspaceInitialized) {
-            showSnackbar(t('common.error') + ': ' + t('alerts.workspaceNotInitializedYet', 'Pracovní plocha ještě nebyla načtena.'), 'warning');
+            showSnackbar(
+                t('common.error') +
+                    ': ' +
+                    t('alerts.workspaceNotInitializedYet', 'Pracovní plocha ještě nebyla načtena.'),
+                'warning'
+            );
             return;
         }
         if (workspaceService.exportWorkspaceAsJson()) {
@@ -200,45 +254,62 @@ export const WorkspaceProvider = ({ children }) => {
         }
     }, [workspaceService, showSnackbar, t, isWorkspaceInitialized]);
 
-    const handleImportWorkspace = useCallback(async (file) => {
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-            const text = e.target.result;
-            const wasInitialized = isWorkspaceInitialized;
-            if (workspaceService.importWorkspaceFromJson(text)) {
-                setIsWorkspaceInitialized(true);
-                syncStateFromService(true);
-                showSnackbar(t('alerts.workspaceImported'), 'success');
-            } else {
-                if (!wasInitialized) setIsWorkspaceInitialized(false);
-                showSnackbar(t('alerts.workspaceImportFailed'), 'error');
+    const handleImportWorkspace = useCallback(
+        async file => {
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async e => {
+                const text = e.target.result;
+                const wasInitialized = isWorkspaceInitialized;
+                if (workspaceService.importWorkspaceFromJson(text)) {
+                    setIsWorkspaceInitialized(true);
+                    syncStateFromService(true);
+                    showSnackbar(t('alerts.workspaceImported'), 'success');
+                } else {
+                    if (!wasInitialized) setIsWorkspaceInitialized(false);
+                    showSnackbar(t('alerts.workspaceImportFailed'), 'error');
+                }
+            };
+            reader.onerror = () => {
+                showSnackbar(t('alerts.fileReadError'), 'error');
+            };
+            reader.readAsText(file);
+        },
+        [workspaceService, syncStateFromService, showSnackbar, t, isWorkspaceInitialized]
+    );
+
+    const handleSaveScheduleImage = useCallback(
+        async scheduleElement => {
+            if (!isWorkspaceInitialized) {
+                showSnackbar(
+                    t('common.error') +
+                        ': ' +
+                        t(
+                            'alerts.workspaceNotInitializedYet',
+                            'Pracovní plocha ještě nebyla načtena.'
+                        ),
+                    'warning'
+                );
+                return;
             }
-        };
-        reader.onerror = () => {
-            showSnackbar(t('alerts.fileReadError'), 'error');
-        };
-        reader.readAsText(file);
-    }, [workspaceService, syncStateFromService, showSnackbar, t, isWorkspaceInitialized]);
+            if (!scheduleElement) {
+                showSnackbar(t('alerts.imageSaveError'), 'error');
+                return;
+            }
+            const success = await workspaceService.saveScheduleImage(scheduleElement);
+            if (!success) {
+                showSnackbar(t('alerts.imageSaveError'), 'error');
+            }
+        },
+        [workspaceService, showSnackbar, t, isWorkspaceInitialized]
+    );
 
-    const handleSaveScheduleImage = useCallback(async (scheduleElement) => {
-        if (!isWorkspaceInitialized) {
-            showSnackbar(t('common.error') + ': ' + t('alerts.workspaceNotInitializedYet', 'Pracovní plocha ještě nebyla načtena.'), 'warning');
-            return;
-        }
-        if (!scheduleElement) {
-            showSnackbar(t('alerts.imageSaveError'), 'error');
-            return;
-        }
-        const success = await workspaceService.saveScheduleImage(scheduleElement);
-        if (!success) {
-            showSnackbar(t('alerts.imageSaveError'), 'error');
-        }
-    }, [workspaceService, showSnackbar, t, isWorkspaceInitialized]);
-
-    const findEventByIdGlobal = useCallback((eventId) => {
-        return workspaceService.findEventByIdGlobal(eventId);
-    }, [workspaceService]);
+    const findEventByIdGlobal = useCallback(
+        eventId => {
+            return workspaceService.findEventByIdGlobal(eventId);
+        },
+        [workspaceService]
+    );
 
     const toggleScheduleColorMode = useCallback(() => {
         const newMode = workspaceService.scheduleColorMode === 'type' ? 'course' : 'type';
@@ -247,21 +318,41 @@ export const WorkspaceProvider = ({ children }) => {
     }, [workspaceService, syncStateFromService]);
 
     const value = {
-        workspaceService, courses, activeSchedule, generatedSchedules, activeScheduleIndex,
-        preferences, isLoadingWorkspace, isWorkspaceInitialized, workspaceYear, workspaceSemester,
-        scheduleColorMode, toggleScheduleColorMode,
-        initializeWorkspace, addCourse, removeCourse, handleRemoveAllCourses, toggleEventInSchedule,
-        updateWorkspaceSettings, addPreference, deletePreference, handleRemoveAllPreferences,
-        updatePreference, updatePreferencePriority, togglePreferenceActive, generateAndSetSchedules,
-        setActiveGeneratedSchedule, clearFullWorkspace, syncStateFromService, findEventByIdGlobal,
-        handleExportWorkspace, handleImportWorkspace, handleSaveScheduleImage,
+        workspaceService,
+        courses,
+        activeSchedule,
+        generatedSchedules,
+        activeScheduleIndex,
+        preferences,
+        isLoadingWorkspace,
+        isWorkspaceInitialized,
+        workspaceYear,
+        workspaceSemester,
+        scheduleColorMode,
+        toggleScheduleColorMode,
+        initializeWorkspace,
+        addCourse,
+        removeCourse,
+        handleRemoveAllCourses,
+        toggleEventInSchedule,
+        updateWorkspaceSettings,
+        addPreference,
+        deletePreference,
+        handleRemoveAllPreferences,
+        updatePreference,
+        updatePreferencePriority,
+        togglePreferenceActive,
+        generateAndSetSchedules,
+        setActiveGeneratedSchedule,
+        clearFullWorkspace,
+        syncStateFromService,
+        findEventByIdGlobal,
+        handleExportWorkspace,
+        handleImportWorkspace,
+        handleSaveScheduleImage,
     };
 
-    return (
-        <WorkspaceContext.Provider value={value}>
-            {children}
-        </WorkspaceContext.Provider>
-    );
+    return <WorkspaceContext.Provider value={value}>{children}</WorkspaceContext.Provider>;
 };
 
 export const useWorkspace = () => {

@@ -1,15 +1,27 @@
-import React from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Button } from '@mui/material';
+import {
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+} from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
 const ExistingCourseWarningDialog = ({ open, courseIdentifier, onConfirm, onCancel }) => {
     const { t } = useTranslation();
     return (
         <Dialog open={open} onClose={onCancel}>
-            <DialogTitle>{t('Dialogs.existingCourseWarning.title', 'Předmět již existuje')}</DialogTitle>
+            <DialogTitle>
+                {t('Dialogs.existingCourseWarning.title', 'Předmět již existuje')}
+            </DialogTitle>
             <DialogContent>
                 <DialogContentText>
-                    {t('Dialogs.existingCourseWarning.message', `Předmět "${courseIdentifier}" již máte načtený. Přejete si přepsat jeho stávající data novými daty ze STAGu?`, { courseIdentifier })}
+                    {t(
+                        'Dialogs.existingCourseWarning.message',
+                        `Předmět "${courseIdentifier}" již máte načtený. Přejete si přepsat jeho stávající data novými daty ze STAGu?`,
+                        { courseIdentifier }
+                    )}
                 </DialogContentText>
             </DialogContent>
             <DialogActions>

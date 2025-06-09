@@ -1,10 +1,10 @@
 import { alpha } from '@mui/material/styles';
 
-const getPatternUrl = (svg) => `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+const getPatternUrl = svg => `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
 
 // Pozor, tyto paterny byly vygenerované pomocí chatGPT a nějak si je nepřivlastnuji.
 
-export const getEventTypePatterns = (theme) => {
+export const getEventTypePatterns = theme => {
     const patternColor = alpha(theme.palette.text.primary, 0.3);
 
     return {
@@ -16,6 +16,6 @@ export const getEventTypePatterns = (theme) => {
         ), // Polka dots
         seminar: getPatternUrl(
             `<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8'><path d='M0 0L8 8ZM8 0L0 8Z' stroke-width='0.4' stroke='${patternColor}'/></svg>`
-        ), // Cross-hatch 
+        ), // Cross-hatch
     };
-}; 
+};

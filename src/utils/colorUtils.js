@@ -28,7 +28,7 @@ export const courseColorPalette = [
  * @param {number} courseIndex - Index předmětu v poli všech kurzů.
  * @returns {string} Hex kód barvy.
  */
-export const getColorForCourse = (courseIndex) => {
+export const getColorForCourse = courseIndex => {
     if (courseIndex < 0) return courseColorPalette[0];
     return courseColorPalette[courseIndex % courseColorPalette.length];
-}; 
+};

@@ -7,27 +7,27 @@ export const DAY_I18N_KEYS = [
     'courseEvent.thursday',
     'courseEvent.friday',
     'courseEvent.saturday',
-    'courseEvent.sunday'
+    'courseEvent.sunday',
 ];
 
 // Konstanty pro typy preferencí - definují možné druhy preferencí, které může uživatel nastavit
 export const PREFERENCE_TYPE_IDS = {
-    FREE_DAY: 0,         // Preference pro volný den v týdnu
-    FREE_TIME_BLOCK: 1,  // Preference pro volný časový blok
+    FREE_DAY: 0, // Preference pro volný den v týdnu
+    FREE_TIME_BLOCK: 1, // Preference pro volný časový blok
     PREFER_INSTRUCTOR: 2, // Preference pro konkrétního vyučujícího
 };
 
 // Mapování typů rozvrhových akcí na interní klíče - zajišťuje jednotné zpracování různých pojmenování
 // stejných typů rozvrhových akcí (např. přednáška, lecture, př -> všechny převedeny na 'lecture')
 export const EVENT_TYPE_TO_KEY_MAP = {
-    'přednáška': 'lecture',
-    'lecture': 'lecture',
-    'př': 'lecture',
-    'cv': 'practical',
-    'cvičení': 'practical',
-    'practical': 'practical',
-    'seminář': 'seminar',
-    'seminar': 'seminar',
+    přednáška: 'lecture',
+    lecture: 'lecture',
+    př: 'lecture',
+    cv: 'practical',
+    cvičení: 'practical',
+    practical: 'practical',
+    seminář: 'seminar',
+    seminar: 'seminar',
 };
 
 // Mapování klíčů rozvrhových akcí na zkrácené i18n klíče pro překlady

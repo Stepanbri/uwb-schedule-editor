@@ -1,17 +1,39 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import {
-    Dialog, DialogTitle, DialogContent, DialogActions, Button,
-    TextField, FormControl, InputLabel, Select, MenuItem, Grid,
-    FormGroup, FormControlLabel, Checkbox, FormHelperText, Typography, Box, Alert, Autocomplete
-} from '@mui/material';
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
+import {
+    Alert,
+    Autocomplete,
+    Box,
+    Button,
+    Checkbox,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    FormControl,
+    FormControlLabel,
+    FormGroup,
+    FormHelperText,
+    Grid,
+    InputLabel,
+    MenuItem,
+    Select,
+    TextField,
+    Typography,
+} from '@mui/material';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { getCurrentAcademicYear, generateAcademicYears } from '../../../utils/academicYearUtils';
+import { generateAcademicYears, getCurrentAcademicYear } from '../../../utils/academicYearUtils';
 
 // academicYearsSource a currentAcademicYear již nebudou primárně použity pro tento dialog
 // ale ponecháme je, pokud by byly potřeba pro defaultní hodnotu jiného pole (např. rok pro rozvrhové akce)
 
-const SelectStudyParametersDialog = ({ open, onClose, onSubmitParameters, studentContext, defaultAcademicYear /* Může být stále relevantní pro rok rozvrhových akcí */ }) => {
+const SelectStudyParametersDialog = ({
+    open,
+    onClose,
+    onSubmitParameters,
+    studentContext,
+    defaultAcademicYear /* Může být stále relevantní pro rok rozvrhových akcí */,
+}) => {
     const { t } = useTranslation();
     // Nový stav pro ročník studia
     const [studyYearNum, setStudyYearNum] = useState('1'); // Výchozí ročník
@@ -34,12 +56,12 @@ const SelectStudyParametersDialog = ({ open, onClose, onSubmitParameters, studen
         }
     }, [open, defaultAcademicYear]);
 
-    const handleStatusChange = (event) => {
+    const handleStatusChange = event => {
         setStatuses({ ...statuses, [event.target.name]: event.target.checked });
         setError('');
     };
 
-    const handleSelectAllStatuses = (event) => {
+    const handleSelectAllStatuses = event => {
         const isChecked = event.target.checked;
         setStatuses({ A: isChecked, B: isChecked, C: isChecked });
         setError('');
@@ -48,16 +70,32 @@ const SelectStudyParametersDialog = ({ open, onClose, onSubmitParameters, studen
     const validate = () => {
         const selectedStatuses = Object.keys(statuses).filter(key => statuses[key]);
         if (selectedStatuses.length === 0) {
-            setError(t('Dialogs.selectStudyParams.errorNoStatusSelected', 'Musíte vybrat alespoň jeden status předmětu.'));
+            setError(
+                t(
+                    'Dialogs.selectStudyParams.errorNoStatusSelected',
+                    'Musíte vybrat alespoň jeden status předmětu.'
+                )
+            );
             return false;
         }
         const yearNum = parseInt(studyYearNum, 10);
-        if (isNaN(yearNum) || yearNum < 1 || yearNum > 7) { // Obvykle 1-3 Bc., 1-2 Mgr., 1-4 PhD.
-            setError(t('Dialogs.selectStudyParams.errorStudyYearInvalid', 'Ročník studia musí být číslo (např. 1-5).'));
+        if (isNaN(yearNum) || yearNum < 1 || yearNum > 7) {
+            // Obvykle 1-3 Bc., 1-2 Mgr., 1-4 PhD.
+            setError(
+                t(
+                    'Dialogs.selectStudyParams.errorStudyYearInvalid',
+                    'Ročník studia musí být číslo (např. 1-5).'
+                )
+            );
             return false;
         }
         if (!scheduleAcademicYear || !/^\d{4}\/\d{4}$/.test(scheduleAcademicYear)) {
-            setError(t('Dialogs.selectStudyParams.errorScheduleYearInvalid', 'Akademický rok pro rozvrhové akce je neplatný (formát RRRR/RRRR).'));
+            setError(
+                t(
+                    'Dialogs.selectStudyParams.errorScheduleYearInvalid',
+                    'Akademický rok pro rozvrhové akce je neplatný (formát RRRR/RRRR).'
+                )
+            );
             return false;
         }
         if (!semester) {
@@ -86,85 +124,148 @@ const SelectStudyParametersDialog = ({ open, onClose, onSubmitParameters, studen
     const academicYearsSourceForSchedule = () => {
         const years = [];
         const currentYearStart = new Date().getFullYear();
-        for (let i = 1; i >= -1; i--) { // Aktuální, minulý, příští
+        for (let i = 1; i >= -1; i--) {
+            // Aktuální, minulý, příští
             years.push(`${currentYearStart - i}/${currentYearStart - i + 1}`);
         }
         return years;
     };
 
-
     return (
         <Dialog open={open} onClose={() => onClose(true)} fullWidth maxWidth="sm">
-            <DialogTitle sx={{display: 'flex', alignItems: 'center'}}>
-                <LibraryBooksIcon sx={{mr:1, color: 'primary.main'}}/>
+            <DialogTitle sx={{ display: 'flex', alignItems: 'center' }}>
+                <LibraryBooksIcon sx={{ mr: 1, color: 'primary.main' }} />
                 {t('Dialogs.selectStudyParams.title', 'Parametry pro načtení předmětů oboru')}
             </DialogTitle>
             <DialogContent dividers>
                 {studentContext && (
                     <Typography variant="body2" gutterBottom>
-                        {t('Dialogs.selectStudyParams.studentInfo', 'Načítání pro:')} <strong>{studentContext.jmeno} {studentContext.prijmeni}</strong> ({studentContext.osCislo})
+                        {t('Dialogs.selectStudyParams.studentInfo', 'Načítání pro:')}{' '}
+                        <strong>
+                            {studentContext.jmeno} {studentContext.prijmeni}
+                        </strong>{' '}
+                        ({studentContext.osCislo})
                         <br />
-                        {t('Dialogs.selectStudyParams.studyProgram', 'Program/Obor:')} {studentContext.studProgramNazev} / {studentContext.oborNazev} ({studentContext.fakulta})
+                        {t('Dialogs.selectStudyParams.studyProgram', 'Program/Obor:')}{' '}
+                        {studentContext.studProgramNazev} / {studentContext.oborNazev} (
+                        {studentContext.fakulta})
                     </Typography>
                 )}
-                <Box sx={{borderTop: 1, borderColor: 'divider', pt: 2, mt: studentContext ? 2 : 0}} />
+                <Box
+                    sx={{ borderTop: 1, borderColor: 'divider', pt: 2, mt: studentContext ? 2 : 0 }}
+                />
 
-                <Grid container spacing={2} sx={{pt: 1}}>
+                <Grid container spacing={2} sx={{ pt: 1 }}>
                     <Grid item xs={12} sm={6}>
                         <TextField
                             label={t('Dialogs.selectStudyParams.studyYearNumLabel', 'Ročník')}
                             type="number"
                             value={studyYearNum}
-                            onChange={(e) => setStudyYearNum(e.target.value)}
+                            onChange={e => setStudyYearNum(e.target.value)}
                             fullWidth
                             required
                             slotProps={{ input: { min: 1, max: 7 } }} // Omezení vstupu
-                            error={!!error && error.includes(t('Dialogs.selectStudyParams.errorStudyYearInvalid','Ročník'))}
-                            helperText={error.includes('Ročník') ? error : ""}
+                            error={
+                                !!error &&
+                                error.includes(
+                                    t('Dialogs.selectStudyParams.errorStudyYearInvalid', 'Ročník')
+                                )
+                            }
+                            helperText={error.includes('Ročník') ? error : ''}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={6} sx={{width: '7.5rem'}}>
+                    <Grid item xs={12} sm={6} sx={{ width: '7.5rem' }}>
                         <Autocomplete
                             disableClearable
                             options={academicYearsOptions}
-                            getOptionLabel={(option) => option.label || ''}
-                            value={academicYearsOptions.find(opt => opt.value === scheduleAcademicYear) || null}
+                            getOptionLabel={option => option.label || ''}
+                            value={
+                                academicYearsOptions.find(
+                                    opt => opt.value === scheduleAcademicYear
+                                ) || null
+                            }
                             fullWidth
                             onChange={(event, newValue) => {
                                 setScheduleAcademicYear(newValue ? newValue.value : null);
                             }}
                             isOptionEqualToValue={(option, value) => option.value === value.value}
-                            renderInput={(params) => (
+                            renderInput={params => (
                                 <TextField
                                     {...params}
-                                    label={t('Dialogs.selectStudyParams.scheduleAcademicYearLabel', 'Akademický rok rozvrhu')}
+                                    label={t(
+                                        'Dialogs.selectStudyParams.scheduleAcademicYearLabel',
+                                        'Akademický rok rozvrhu'
+                                    )}
                                     required
-                                    error={!!error && error.includes(t('Dialogs.selectStudyParams.errorScheduleYearInvalid', 'Akademický rok'))}
-                                    helperText={error.includes('Akademický rok') ? error : ""}
+                                    error={
+                                        !!error &&
+                                        error.includes(
+                                            t(
+                                                'Dialogs.selectStudyParams.errorScheduleYearInvalid',
+                                                'Akademický rok'
+                                            )
+                                        )
+                                    }
+                                    helperText={error.includes('Akademický rok') ? error : ''}
                                 />
                             )}
                         />
                     </Grid>
                     <Grid item xs={12}>
-                        <FormControl fullWidth required error={!!error && error.includes(t('Dialogs.selectStudyParams.errorSemesterRequired', 'Semestr'))}>
-                            <InputLabel id="semester-sp-select-label">{t('Dialogs.selectStudyParams.semesterLabel', 'Semestr předmětů')}</InputLabel>
+                        <FormControl
+                            fullWidth
+                            required
+                            error={
+                                !!error &&
+                                error.includes(
+                                    t('Dialogs.selectStudyParams.errorSemesterRequired', 'Semestr')
+                                )
+                            }
+                        >
+                            <InputLabel id="semester-sp-select-label">
+                                {t('Dialogs.selectStudyParams.semesterLabel', 'Semestr předmětů')}
+                            </InputLabel>
                             <Select
                                 labelId="semester-sp-select-label"
                                 value={semester}
-                                label={t('Dialogs.selectStudyParams.semesterLabel', 'Semestr předmětů')}
-                                onChange={(e) => setSemester(e.target.value)}
-                                variant={"filled"}
+                                label={t(
+                                    'Dialogs.selectStudyParams.semesterLabel',
+                                    'Semestr předmětů'
+                                )}
+                                onChange={e => setSemester(e.target.value)}
+                                variant={'filled'}
                             >
-                                <MenuItem value="ZS">{t('Dialogs.selectStudyParams.semesterZS', 'Zimní (ZS)')}</MenuItem>
-                                <MenuItem value="LS">{t('Dialogs.selectStudyParams.semesterLS', 'Letní (LS)')}</MenuItem>
-                                <MenuItem value="%">{t('Dialogs.selectStudyParams.semesterBoth', 'Oba (ZS i LS)')}</MenuItem>
+                                <MenuItem value="ZS">
+                                    {t('Dialogs.selectStudyParams.semesterZS', 'Zimní (ZS)')}
+                                </MenuItem>
+                                <MenuItem value="LS">
+                                    {t('Dialogs.selectStudyParams.semesterLS', 'Letní (LS)')}
+                                </MenuItem>
+                                <MenuItem value="%">
+                                    {t('Dialogs.selectStudyParams.semesterBoth', 'Oba (ZS i LS)')}
+                                </MenuItem>
                             </Select>
                             {error.includes('Semestr') && <FormHelperText>{error}</FormHelperText>}
                         </FormControl>
                     </Grid>
                     <Grid item xs={12}>
-                        <Typography variant="subtitle2" gutterBottom>{t('Dialogs.selectStudyParams.subjectStatusesTitle', 'Statuty předmětů k načtení:')}</Typography>
-                        <FormControl component="fieldset" variant="standard" required error={!!error && error.includes(t('Dialogs.selectStudyParams.errorNoStatusSelected','status'))}>
+                        <Typography variant="subtitle2" gutterBottom>
+                            {t(
+                                'Dialogs.selectStudyParams.subjectStatusesTitle',
+                                'Statuty předmětů k načtení:'
+                            )}
+                        </Typography>
+                        <FormControl
+                            component="fieldset"
+                            variant="standard"
+                            required
+                            error={
+                                !!error &&
+                                error.includes(
+                                    t('Dialogs.selectStudyParams.errorNoStatusSelected', 'status')
+                                )
+                            }
+                        >
                             <FormGroup row>
                                 <FormControlLabel
                                     control={
@@ -177,15 +278,36 @@ const SelectStudyParametersDialog = ({ open, onClose, onSubmitParameters, studen
                                     label={t('Dialogs.selectStudyParams.statusAll', 'Všechny')}
                                 />
                                 <FormControlLabel
-                                    control={<Checkbox checked={statuses.A} onChange={handleStatusChange} name="A" />}
+                                    control={
+                                        <Checkbox
+                                            checked={statuses.A}
+                                            onChange={handleStatusChange}
+                                            name="A"
+                                        />
+                                    }
                                     label={t('Dialogs.selectStudyParams.statusA', 'A (Povinný)')}
                                 />
                                 <FormControlLabel
-                                    control={<Checkbox checked={statuses.B} onChange={handleStatusChange} name="B" />}
-                                    label={t('Dialogs.selectStudyParams.statusB', 'B (Povinně vol.)')}
+                                    control={
+                                        <Checkbox
+                                            checked={statuses.B}
+                                            onChange={handleStatusChange}
+                                            name="B"
+                                        />
+                                    }
+                                    label={t(
+                                        'Dialogs.selectStudyParams.statusB',
+                                        'B (Povinně vol.)'
+                                    )}
                                 />
                                 <FormControlLabel
-                                    control={<Checkbox checked={statuses.C} onChange={handleStatusChange} name="C" />}
+                                    control={
+                                        <Checkbox
+                                            checked={statuses.C}
+                                            onChange={handleStatusChange}
+                                            name="C"
+                                        />
+                                    }
                                     label={t('Dialogs.selectStudyParams.statusC', 'C (Volitelný)')}
                                 />
                             </FormGroup>
@@ -193,9 +315,15 @@ const SelectStudyParametersDialog = ({ open, onClose, onSubmitParameters, studen
                         </FormControl>
                     </Grid>
                 </Grid>
-                {error && !error.includes('status') && !error.includes('Ročník') && !error.includes('Semestr') && !error.includes('Akademický rok') && (
-                    <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>
-                )}
+                {error &&
+                    !error.includes('status') &&
+                    !error.includes('Ročník') &&
+                    !error.includes('Semestr') &&
+                    !error.includes('Akademický rok') && (
+                        <Alert severity="error" sx={{ mt: 2 }}>
+                            {error}
+                        </Alert>
+                    )}
             </DialogContent>
             <DialogActions sx={{ padding: '16px 24px' }}>
                 <Button onClick={() => onClose(true)}>{t('common.cancel', 'Zrušit')}</Button>

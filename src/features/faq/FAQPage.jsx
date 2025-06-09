@@ -1,6 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { Typography, Container, Paper, Box, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import {
+    Accordion,
+    AccordionDetails,
+    AccordionSummary,
+    Box,
+    Container,
+    Paper,
+    Typography,
+} from '@mui/material';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 
@@ -36,7 +44,7 @@ function FAQPage() {
         // Zde můžete přidat další otázky a odpovědi
     ];
 
-    const handleAccordionChange = (panelId) => (event, isExpanded) => {
+    const handleAccordionChange = panelId => (event, isExpanded) => {
         setExpandedId(isExpanded ? panelId : null);
     };
 
@@ -47,7 +55,7 @@ function FAQPage() {
                     {t('faqPage.title')}
                 </Typography>
                 <Box mt={3}>
-                    {faqs.map((faqItem) => (
+                    {faqs.map(faqItem => (
                         <Accordion
                             key={faqItem.id}
                             expanded={expandedId === faqItem.id}
@@ -61,7 +69,9 @@ function FAQPage() {
                                 <Typography variant="h6">{faqItem.question}</Typography>
                             </AccordionSummary>
                             <AccordionDetails>
-                                <Typography variant="body1" sx={{ whiteSpace: 'pre-line' }}>{faqItem.answer}</Typography>
+                                <Typography variant="body1" sx={{ whiteSpace: 'pre-line' }}>
+                                    {faqItem.answer}
+                                </Typography>
                             </AccordionDetails>
                         </Accordion>
                     ))}

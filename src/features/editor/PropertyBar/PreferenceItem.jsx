@@ -1,18 +1,22 @@
-import React, { useState } from 'react';
+import {
+    ArrowDownward as ArrowDownwardIcon,
+    ArrowUpward as ArrowUpwardIcon,
+    Delete as DeleteIcon,
+} from '@mui/icons-material';
+import { Box, IconButton, Paper, Stack, Switch, Tooltip, Typography } from '@mui/material';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Paper, Stack, Switch, IconButton, Typography, Box, Tooltip } from '@mui/material';
-import { Delete as DeleteIcon, ArrowUpward as ArrowUpwardIcon, ArrowDownward as ArrowDownwardIcon } from '@mui/icons-material';
 import GenericConfirmationDialog from '../Dialogs/GenericConfirmationDialog';
 
 function PreferenceItem({
-                            preference,
-                            onPriorityChange,
-                            onToggleActive,
-                            onDelete,
-                            isFirst,
-                            isLast,
-                            displayLabel
-                        }) {
+    preference,
+    onPriorityChange,
+    onToggleActive,
+    onDelete,
+    isFirst,
+    isLast,
+    displayLabel,
+}) {
     const { t } = useTranslation();
     const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
 
@@ -42,10 +46,21 @@ function PreferenceItem({
                 }}
             >
                 {/* Left part: Priority controls */}
-                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', alignSelf: 'stretch' }}>
+                <Box
+                    sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        alignSelf: 'stretch',
+                    }}
+                >
                     <Tooltip title={t('propertiesBar.preferenceItem.increasePriority')}>
                         <span>
-                            <IconButton size="small" onClick={handleIncreasePriority} disabled={isFirst}>
+                            <IconButton
+                                size="small"
+                                onClick={handleIncreasePriority}
+                                disabled={isFirst}
+                            >
                                 <ArrowUpwardIcon sx={{ fontSize: '1rem' }} />
                             </IconButton>
                         </span>
@@ -54,8 +69,12 @@ function PreferenceItem({
                         {preference.priority}
                     </Typography>
                     <Tooltip title={t('propertiesBar.preferenceItem.decreasePriority')}>
-                         <span>
-                            <IconButton size="small" onClick={handleDecreasePriority} disabled={isLast}>
+                        <span>
+                            <IconButton
+                                size="small"
+                                onClick={handleDecreasePriority}
+                                disabled={isLast}
+                            >
                                 <ArrowDownwardIcon sx={{ fontSize: '1rem' }} />
                             </IconButton>
                         </span>
@@ -79,7 +98,13 @@ function PreferenceItem({
 
                 {/* Right part: Actions */}
                 <Stack direction="row" alignItems="center">
-                    <Tooltip title={preference.isActive ? t('propertiesBar.preferenceItem.deactivatePreference') : t('propertiesBar.preferenceItem.activatePreference')}>
+                    <Tooltip
+                        title={
+                            preference.isActive
+                                ? t('propertiesBar.preferenceItem.deactivatePreference')
+                                : t('propertiesBar.preferenceItem.activatePreference')
+                        }
+                    >
                         <Switch
                             checked={preference.isActive}
                             onChange={() => onToggleActive(preference.id)}

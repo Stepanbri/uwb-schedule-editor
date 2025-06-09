@@ -1,6 +1,5 @@
-import { createTheme, responsiveFontSizes } from '@mui/material/styles';
 import { csCZ } from '@mui/material/locale';
-import { alpha } from '@mui/material/styles';
+import { alpha, createTheme, responsiveFontSizes } from '@mui/material/styles';
 
 // Základní barvy z vašich komentářů a původního souboru
 const primaryLight = '#25696a';
@@ -28,91 +27,92 @@ const eventColors = {
 
     // Plné barvy patky/okraje (bez průhlednosti)
     lectureSolidLight: '#e53935', // red 600
-    lectureSolidDark: '#ef5350',  // red 400
-    practicalSolidLight: '#43a047',// green 600
+    lectureSolidDark: '#ef5350', // red 400
+    practicalSolidLight: '#43a047', // green 600
     practicalSolidDark: '#66bb6a', // green 400
     seminarSolidLight: '#fdd835', // yellow 600
-    seminarSolidDark: '#ffee58',  // yellow 400
-    otherSolidLight: '#9e9e9e',   // grey 500
-    otherSolidDark: '#bdbdbd',    // grey 400
+    seminarSolidDark: '#ffee58', // yellow 400
+    otherSolidLight: '#9e9e9e', // grey 500
+    otherSolidDark: '#bdbdbd', // grey 400
 };
 
-const getDesignTokens = (mode) => ({
+const getDesignTokens = mode => ({
     palette: {
         mode,
         ...(mode === 'light'
             ? {
-                primary: {
-                    main: primaryLight,
-                },
-                secondary: {
-                    main: secondaryLight,
-                },
-                accent: {
-                    main: accentLight,
-                    contrastText: '#000000',
-                },
-                background: {
-                    default: backgroundLight,
-                    paper: backgroundLight,
-                },
-                text: {
-                    primary: textLight,
-                    secondary: alpha(textLight, 0.7),
-                    disabled: alpha(textLight, 0.5),
-                },
-                eventTypes: {
-                    lecture: eventColors.lectureBgLight,
-                    practical: eventColors.practicalBgLight,
-                    seminar: eventColors.seminarBgLight,
-                    other: eventColors.otherBgLight,
-                    // Solid colors for notches/borders
-                    lectureSolid: eventColors.lectureSolidLight,
-                    practicalSolid: eventColors.practicalSolidLight,
-                    seminarSolid: eventColors.seminarSolidLight,
-                    otherSolid: eventColors.otherSolidLight,
-                },
-                common: {
-                    black: '#000',
-                    white: '#fff'
-                }
-            }
-            : { // Dark Mode
-                primary: {
-                    main: primaryDark,
-                },
-                secondary: {
-                    main: secondaryDark,
-                },
-                accent: {
-                    main: accentDark,
-                    contrastText: '#000000',
-                },
-                background: {
-                    default: backgroundDark,
-                    paper: backgroundDark,
-                },
-                text: {
-                    primary: textDark,
-                    secondary: alpha(textDark, 0.7),
-                    disabled: alpha(textDark, 0.5),
-                },
-                eventTypes: {
-                    lecture: eventColors.lectureBgDark,
-                    practical: eventColors.practicalBgDark,
-                    seminar: eventColors.seminarBgDark,
-                    other: eventColors.otherBgDark,
-                    // Solid colors for notches/borders
-                    lectureSolid: eventColors.lectureSolidDark,
-                    practicalSolid: eventColors.practicalSolidDark,
-                    seminarSolid: eventColors.seminarSolidDark,
-                    otherSolid: eventColors.otherSolidDark,
-                },
-                common: {
-                    black: '#000',
-                    white: '#fff'
-                }
-            }),
+                  primary: {
+                      main: primaryLight,
+                  },
+                  secondary: {
+                      main: secondaryLight,
+                  },
+                  accent: {
+                      main: accentLight,
+                      contrastText: '#000000',
+                  },
+                  background: {
+                      default: backgroundLight,
+                      paper: backgroundLight,
+                  },
+                  text: {
+                      primary: textLight,
+                      secondary: alpha(textLight, 0.7),
+                      disabled: alpha(textLight, 0.5),
+                  },
+                  eventTypes: {
+                      lecture: eventColors.lectureBgLight,
+                      practical: eventColors.practicalBgLight,
+                      seminar: eventColors.seminarBgLight,
+                      other: eventColors.otherBgLight,
+                      // Solid colors for notches/borders
+                      lectureSolid: eventColors.lectureSolidLight,
+                      practicalSolid: eventColors.practicalSolidLight,
+                      seminarSolid: eventColors.seminarSolidLight,
+                      otherSolid: eventColors.otherSolidLight,
+                  },
+                  common: {
+                      black: '#000',
+                      white: '#fff',
+                  },
+              }
+            : {
+                  // Dark Mode
+                  primary: {
+                      main: primaryDark,
+                  },
+                  secondary: {
+                      main: secondaryDark,
+                  },
+                  accent: {
+                      main: accentDark,
+                      contrastText: '#000000',
+                  },
+                  background: {
+                      default: backgroundDark,
+                      paper: backgroundDark,
+                  },
+                  text: {
+                      primary: textDark,
+                      secondary: alpha(textDark, 0.7),
+                      disabled: alpha(textDark, 0.5),
+                  },
+                  eventTypes: {
+                      lecture: eventColors.lectureBgDark,
+                      practical: eventColors.practicalBgDark,
+                      seminar: eventColors.seminarBgDark,
+                      other: eventColors.otherBgDark,
+                      // Solid colors for notches/borders
+                      lectureSolid: eventColors.lectureSolidDark,
+                      practicalSolid: eventColors.practicalSolidDark,
+                      seminarSolid: eventColors.seminarSolidDark,
+                      otherSolid: eventColors.otherSolidDark,
+                  },
+                  common: {
+                      black: '#000',
+                      white: '#fff',
+                  },
+              }),
         divider: mode === 'light' ? alpha(textLight, 0.12) : alpha(textDark, 0.12),
     },
     typography: {
@@ -131,7 +131,7 @@ const getDesignTokens = (mode) => ({
         button: {
             textTransform: 'none',
             fontWeight: 500,
-        }
+        },
     },
     shape: {
         borderRadius: 6,
@@ -143,7 +143,7 @@ const getDesignTokens = (mode) => ({
                     boxShadow: 'none',
                     borderBottom: `1px solid ${theme.palette.divider}`,
                 }),
-            }
+            },
         },
         MuiPaper: {
             defaultProps: {
@@ -153,10 +153,10 @@ const getDesignTokens = (mode) => ({
                 root: ({ theme }) => ({
                     // border: `1px solid ${theme.palette.divider}`, // Jemné ohraničení pro Paper
                 }),
-                outlined: ({theme}) => ({
+                outlined: ({ theme }) => ({
                     border: `1px solid ${theme.palette.divider}`,
-                })
-            }
+                }),
+            },
         },
         MuiCard: {
             defaultProps: {
@@ -167,7 +167,7 @@ const getDesignTokens = (mode) => ({
                     border: `1px solid ${theme.palette.divider}`,
                     transition: 'box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out',
                 }),
-            }
+            },
         },
         MuiButton: {
             defaultProps: {
@@ -176,52 +176,53 @@ const getDesignTokens = (mode) => ({
             styleOverrides: {
                 root: {},
                 containedPrimary: ({ theme }) => ({}),
-            }
+            },
         },
         MuiTooltip: {
             styleOverrides: {
                 tooltip: {
-                    backgroundColor: mode === 'light' ? alpha('#000000', 0.87) : alpha('#ffffff', 0.87),
+                    backgroundColor:
+                        mode === 'light' ? alpha('#000000', 0.87) : alpha('#ffffff', 0.87),
                     color: mode === 'light' ? '#ffffff' : '#000000',
                     fontSize: '0.8rem',
                 },
                 arrow: {
                     color: mode === 'light' ? alpha('#000000', 0.87) : alpha('#ffffff', 0.87),
-                }
-            }
+                },
+            },
         },
         MuiDialog: {
             styleOverrides: {
-                paper: ({theme}) => ({
+                paper: ({ theme }) => ({
                     border: `1px solid ${theme.palette.divider}`,
-                })
-            }
+                }),
+            },
         },
         MuiDrawer: {
             styleOverrides: {
-                paper: ({theme}) => ({
+                paper: ({ theme }) => ({
                     borderRight: `1px solid ${theme.palette.divider}`,
                     borderLeft: `1px solid ${theme.palette.divider}`,
-                })
-            }
+                }),
+            },
         },
         MuiPopover: {
             styleOverrides: {
                 paper: {
                     border: `1px solid ${mode === 'light' ? 'rgba(0, 0, 0, 0.12)' : 'rgba(255, 255, 255, 0.12)'}`,
                     boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                }
-            }
+                },
+            },
         },
-    }
+    },
 });
 
 // Funkce pro vytvoření tématu
-export const createAppTheme = (mode) => {
+export const createAppTheme = mode => {
     let theme = createTheme(getDesignTokens(mode), csCZ);
 
     // Přepsání getContrastText, aby vždy vracel barvu s dobrým kontrastem
-    theme.palette.getContrastText = (background) => {
+    theme.palette.getContrastText = background => {
         // Jednoduchá heuristika - pro světlé pozadí tmavý text, pro tmavé světlý.
         // MUI používá složitější výpočet, ale pro naše světlé alfa barvy je lepší toto.
         if (theme.palette.mode === 'light') {

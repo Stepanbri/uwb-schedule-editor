@@ -1,17 +1,32 @@
-import React, { useState, useEffect } from 'react';
-import {
-    Box, Typography, Button, Divider, Dialog, DialogTitle,
-    DialogContent, DialogActions, Select, MenuItem, TextField,
-    FormControl, InputLabel, Tooltip
-} from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import {
+    Box,
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Divider,
+    FormControl,
+    InputLabel,
+    MenuItem,
+    Select,
+    TextField,
+    Tooltip,
+    Typography,
+} from '@mui/material';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import PreferenceList from './PreferenceList';
-import { usePreferenceManagement, PREFERENCE_CONFIG, PREFERENCE_OPTIONS } from '../hooks/usePreferenceManagement';
 import { useWorkspace } from '../../../contexts/WorkspaceContext';
 import { EVENT_TYPE_TO_KEY_MAP } from '../../../services/CourseClass';
+import {
+    PREFERENCE_CONFIG,
+    PREFERENCE_OPTIONS,
+    usePreferenceManagement,
+} from '../hooks/usePreferenceManagement';
+import PreferenceList from './PreferenceList';
 
 const getUniqueValues = (array, keyAccessor) => {
     const values = array.map(item => keyAccessor(item));
@@ -34,7 +49,9 @@ function PropertiesBar() {
     const { courses } = useWorkspace();
 
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-    const [selectedPreferenceType, setSelectedPreferenceType] = useState(Object.keys(PREFERENCE_CONFIG)[0]);
+    const [selectedPreferenceType, setSelectedPreferenceType] = useState(
+        Object.keys(PREFERENCE_CONFIG)[0]
+    );
     const [currentPreferenceParams, setCurrentPreferenceParams] = useState({});
 
     // Stavy pro dynamické selecty PREFER_INSTRUCTOR
@@ -63,24 +80,34 @@ function PropertiesBar() {
                 // Pokud je PREFER_INSTRUCTOR a jsou již nějaké parametry (např. dialog se znovu otevřel se starými hodnotami),
                 // pokusíme se je znovu načíst.
                 if (newParams.courseCode) {
-                    const foundCourse = courses.find(c => c.getShortCode() === newParams.courseCode);
+                    const foundCourse = courses.find(
+                        c => c.getShortCode() === newParams.courseCode
+                    );
                     if (foundCourse) {
                         setSelectedCourseEvents(foundCourse.events || []);
-                        const types = getUniqueValues(foundCourse.events || [], event => event.type);
+                        const types = getUniqueValues(
+                            foundCourse.events || [],
+                            event => event.type
+                        );
                         setAvailableEventTypes(types);
                         if (newParams.eventType) {
                             const instructors = getUniqueValues(
-                                (foundCourse.events || []).filter(event => event.type === newParams.eventType),
-                                event => typeof event.instructor === 'object' ? event.instructor.name : event.instructor
+                                (foundCourse.events || []).filter(
+                                    event => event.type === newParams.eventType
+                                ),
+                                event =>
+                                    typeof event.instructor === 'object'
+                                        ? event.instructor.name
+                                        : event.instructor
                             );
                             setAvailableInstructors(instructors);
                         } else {
-                             setAvailableInstructors([]);
+                            setAvailableInstructors([]);
                         }
                     } else {
-                         setSelectedCourseEvents([]);
-                         setAvailableEventTypes([]);
-                         setAvailableInstructors([]);
+                        setSelectedCourseEvents([]);
+                        setAvailableEventTypes([]);
+                        setAvailableInstructors([]);
                     }
                 } else {
                     // Žádný předmět není vybrán, resetujeme vše
@@ -95,7 +122,9 @@ function PropertiesBar() {
     // Efekt pro aktualizaci dostupných typů akcí při změně vybraného kurzu
     useEffect(() => {
         if (selectedPreferenceType === 'PREFER_INSTRUCTOR' && currentPreferenceParams.courseCode) {
-            const selectedCourse = courses.find(c => c.getShortCode() === currentPreferenceParams.courseCode);
+            const selectedCourse = courses.find(
+                c => c.getShortCode() === currentPreferenceParams.courseCode
+            );
             if (selectedCourse) {
                 setSelectedCourseEvents(selectedCourse.events || []);
                 const types = getUniqueValues(selectedCourse.events || [], event => event.type);
@@ -112,10 +141,17 @@ function PropertiesBar() {
 
     // Efekt pro aktualizaci dostupných vyučujících při změně typu akce
     useEffect(() => {
-        if (selectedPreferenceType === 'PREFER_INSTRUCTOR' && currentPreferenceParams.eventType && selectedCourseEvents.length > 0) {
+        if (
+            selectedPreferenceType === 'PREFER_INSTRUCTOR' &&
+            currentPreferenceParams.eventType &&
+            selectedCourseEvents.length > 0
+        ) {
             const instructors = getUniqueValues(
-                selectedCourseEvents.filter(event => event.type === currentPreferenceParams.eventType),
-                event => typeof event.instructor === 'object' ? event.instructor.name : event.instructor
+                selectedCourseEvents.filter(
+                    event => event.type === currentPreferenceParams.eventType
+                ),
+                event =>
+                    typeof event.instructor === 'object' ? event.instructor.name : event.instructor
             );
             setAvailableInstructors(instructors);
         } else {
@@ -124,7 +160,6 @@ function PropertiesBar() {
         // Reset instructorName, protože se změnil typ akce
         setCurrentPreferenceParams(prev => ({ ...prev, instructorName: '' }));
     }, [currentPreferenceParams.eventType, selectedCourseEvents, selectedPreferenceType]);
-
 
     const handleOpenAddDialog = () => {
         setSelectedPreferenceType(Object.keys(PREFERENCE_CONFIG)[0]);
@@ -144,12 +179,14 @@ function PropertiesBar() {
         addPreference({
             type: selectedPreferenceType,
             params: Object.keys(currentPreferenceParams).reduce((acc, key) => {
-                const paramDef = PREFERENCE_CONFIG[selectedPreferenceType]?.params.find(p => p.name === key);
+                const paramDef = PREFERENCE_CONFIG[selectedPreferenceType]?.params.find(
+                    p => p.name === key
+                );
                 if (paramDef) {
                     acc[key] = currentPreferenceParams[key];
                 }
                 return acc;
-            }, {})
+            }, {}),
         });
         handleCloseAddDialog();
     };
@@ -163,7 +200,7 @@ function PropertiesBar() {
                 display: 'flex',
                 flexDirection: 'column',
                 height: '100%',
-                backgroundColor: (theme) => theme.palette.background.paper,
+                backgroundColor: theme => theme.palette.background.paper,
                 flexGrow: 1,
                 overflowY: 'auto',
                 scrollbarGutter: 'unset',
@@ -191,7 +228,7 @@ function PropertiesBar() {
                         color="error"
                         startIcon={<DeleteSweepIcon />}
                         onClick={handleRemoveAllPreferences}
-                        sx={{mb: 2, textTransform: 'none', justifyContent: 'flex-start' }}
+                        sx={{ mb: 2, textTransform: 'none', justifyContent: 'flex-start' }}
                         fullWidth
                         size="small"
                     >
@@ -200,7 +237,15 @@ function PropertiesBar() {
                 </Tooltip>
             )}
 
-            <Box sx={{ flexGrow: 1, overflowY: 'auto', minHeight: 0, mb: 2, scrollbarGutter: 'stable' }}>
+            <Box
+                sx={{
+                    flexGrow: 1,
+                    overflowY: 'auto',
+                    minHeight: 0,
+                    mb: 2,
+                    scrollbarGutter: 'stable',
+                }}
+            >
                 <PreferenceList
                     preferences={preferences}
                     onPriorityChange={changePreferencePriority}
@@ -218,7 +263,7 @@ function PropertiesBar() {
                 startIcon={<PlayArrowIcon />}
                 onClick={handleGenerateSchedule}
                 fullWidth
-                sx={{ mt: 2, textTransform: 'none'}}
+                sx={{ mt: 2, textTransform: 'none' }}
                 size="small"
             >
                 {t('propertiesBar.generateButton')}
@@ -229,22 +274,33 @@ function PropertiesBar() {
                 onClose={handleCloseAddDialog}
                 fullWidth
                 maxWidth="xs"
-                PaperProps={{ component: 'form', onSubmit: (e) => { e.preventDefault(); handleConfirmAddPreference(); } }}
+                PaperProps={{
+                    component: 'form',
+                    onSubmit: e => {
+                        e.preventDefault();
+                        handleConfirmAddPreference();
+                    },
+                }}
             >
                 <DialogTitle>{t('propertiesBar.addDialog.title')}</DialogTitle>
                 <DialogContent dividers>
                     <FormControl fullWidth margin="normal">
-                        <InputLabel id="preference-type-label">{t('propertiesBar.addDialog.preferenceType')}</InputLabel>
+                        <InputLabel id="preference-type-label">
+                            {t('propertiesBar.addDialog.preferenceType')}
+                        </InputLabel>
                         <Select
                             labelId="preference-type-label"
                             value={selectedPreferenceType}
                             label={t('propertiesBar.addDialog.preferenceType')}
-                            onChange={(e) => setSelectedPreferenceType(e.target.value)}
+                            onChange={e => setSelectedPreferenceType(e.target.value)}
                             variant="filled"
                         >
                             {Object.keys(PREFERENCE_CONFIG).map(typeKey => (
                                 <MenuItem key={typeKey} value={typeKey}>
-                                    {t(PREFERENCE_CONFIG[typeKey].labelKey, PREFERENCE_CONFIG[typeKey].defaultLabel)}
+                                    {t(
+                                        PREFERENCE_CONFIG[typeKey].labelKey,
+                                        PREFERENCE_CONFIG[typeKey].defaultLabel
+                                    )}
                                 </MenuItem>
                             ))}
                         </Select>
@@ -254,17 +310,34 @@ function PropertiesBar() {
                         <FormControl key={param.name} fullWidth margin="normal">
                             {param.type === 'select' && (
                                 <>
-                                    <InputLabel id={`${param.name}-label`}>{t(param.labelKey, param.name)}</InputLabel>
+                                    <InputLabel id={`${param.name}-label`}>
+                                        {t(param.labelKey, param.name)}
+                                    </InputLabel>
                                     <Select
                                         labelId={`${param.name}-label`}
-                                        value={currentPreferenceParams[param.name] || param.defaultValue || ''}
+                                        value={
+                                            currentPreferenceParams[param.name] ||
+                                            param.defaultValue ||
+                                            ''
+                                        }
                                         label={t(param.labelKey, param.name)}
-                                        onChange={(e) => handleParamChange(param.name, e.target.value)}
+                                        onChange={e =>
+                                            handleParamChange(param.name, e.target.value)
+                                        }
                                         variant="filled"
                                     >
-                                        {(PREFERENCE_OPTIONS[param.optionsKey] || param.options || []).map(optValue => (
+                                        {(
+                                            PREFERENCE_OPTIONS[param.optionsKey] ||
+                                            param.options ||
+                                            []
+                                        ).map(optValue => (
                                             <MenuItem key={optValue} value={optValue}>
-                                                {param.optionsKey ? t(`preferences.${param.optionsKey}.${optValue}`, optValue) : optValue}
+                                                {param.optionsKey
+                                                    ? t(
+                                                          `preferences.${param.optionsKey}.${optValue}`,
+                                                          optValue
+                                                      )
+                                                    : optValue}
                                             </MenuItem>
                                         ))}
                                     </Select>
@@ -272,12 +345,16 @@ function PropertiesBar() {
                             )}
                             {param.type === 'customCourseSelect' && (
                                 <>
-                                    <InputLabel id={`${param.name}-label`}>{t(param.labelKey, param.name)}</InputLabel>
+                                    <InputLabel id={`${param.name}-label`}>
+                                        {t(param.labelKey, param.name)}
+                                    </InputLabel>
                                     <Select
                                         labelId={`${param.name}-label`}
                                         value={currentPreferenceParams[param.name] || ''}
                                         label={t(param.labelKey, param.name)}
-                                        onChange={(e) => handleParamChange(param.name, e.target.value)}
+                                        onChange={e =>
+                                            handleParamChange(param.name, e.target.value)
+                                        }
                                         variant="filled"
                                         disabled={courses.length === 0}
                                     >
@@ -291,18 +368,28 @@ function PropertiesBar() {
                             )}
                             {param.type === 'customEventTypeSelect' && (
                                 <>
-                                    <InputLabel id={`${param.name}-label`}>{t(param.labelKey, param.name)}</InputLabel>
+                                    <InputLabel id={`${param.name}-label`}>
+                                        {t(param.labelKey, param.name)}
+                                    </InputLabel>
                                     <Select
                                         labelId={`${param.name}-label`}
                                         value={currentPreferenceParams[param.name] || ''}
                                         label={t(param.labelKey, param.name)}
-                                        onChange={(e) => handleParamChange(param.name, e.target.value)}
+                                        onChange={e =>
+                                            handleParamChange(param.name, e.target.value)
+                                        }
                                         variant="filled"
-                                        disabled={!currentPreferenceParams.courseCode || availableEventTypes.length === 0}
+                                        disabled={
+                                            !currentPreferenceParams.courseCode ||
+                                            availableEventTypes.length === 0
+                                        }
                                     >
                                         {availableEventTypes.map(eventType => (
                                             <MenuItem key={eventType} value={eventType}>
-                                                {t(`courseEvent.${EVENT_TYPE_TO_KEY_MAP[eventType.toLowerCase()] || 'other'}`, eventType)}
+                                                {t(
+                                                    `courseEvent.${EVENT_TYPE_TO_KEY_MAP[eventType.toLowerCase()] || 'other'}`,
+                                                    eventType
+                                                )}
                                             </MenuItem>
                                         ))}
                                     </Select>
@@ -310,14 +397,21 @@ function PropertiesBar() {
                             )}
                             {param.type === 'customInstructorSelect' && (
                                 <>
-                                    <InputLabel id={`${param.name}-label`}>{t(param.labelKey, param.name)}</InputLabel>
+                                    <InputLabel id={`${param.name}-label`}>
+                                        {t(param.labelKey, param.name)}
+                                    </InputLabel>
                                     <Select
                                         labelId={`${param.name}-label`}
                                         value={currentPreferenceParams[param.name] || ''}
                                         label={t(param.labelKey, param.name)}
-                                        onChange={(e) => handleParamChange(param.name, e.target.value)}
+                                        onChange={e =>
+                                            handleParamChange(param.name, e.target.value)
+                                        }
                                         variant="filled"
-                                        disabled={!currentPreferenceParams.eventType || availableInstructors.length === 0}
+                                        disabled={
+                                            !currentPreferenceParams.eventType ||
+                                            availableInstructors.length === 0
+                                        }
                                     >
                                         {availableInstructors.map(instructor => (
                                             <MenuItem key={instructor} value={instructor}>
@@ -331,8 +425,12 @@ function PropertiesBar() {
                                 <TextField
                                     label={t(param.labelKey, param.name)}
                                     type="time"
-                                    value={currentPreferenceParams[param.name] || param.defaultValue || ''}
-                                    onChange={(e) => handleParamChange(param.name, e.target.value)}
+                                    value={
+                                        currentPreferenceParams[param.name] ||
+                                        param.defaultValue ||
+                                        ''
+                                    }
+                                    onChange={e => handleParamChange(param.name, e.target.value)}
                                     slotProps={{ input: { step: 300 } }}
                                     variant="filled"
                                 />
@@ -341,8 +439,12 @@ function PropertiesBar() {
                                 <TextField
                                     label={t(param.labelKey, param.name)}
                                     type="text"
-                                    value={currentPreferenceParams[param.name] || param.defaultValue || ''}
-                                    onChange={(e) => handleParamChange(param.name, e.target.value)}
+                                    value={
+                                        currentPreferenceParams[param.name] ||
+                                        param.defaultValue ||
+                                        ''
+                                    }
+                                    onChange={e => handleParamChange(param.name, e.target.value)}
                                     variant="filled"
                                 />
                             )}
@@ -351,7 +453,9 @@ function PropertiesBar() {
                 </DialogContent>
                 <DialogActions sx={{ padding: '16px 24px' }}>
                     <Button onClick={handleCloseAddDialog}>{t('common.cancel')}</Button>
-                    <Button type="submit" variant="contained">{t('common.add')}</Button>
+                    <Button type="submit" variant="contained">
+                        {t('common.add')}
+                    </Button>
                 </DialogActions>
             </Dialog>
         </Box>

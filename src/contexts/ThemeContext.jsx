@@ -1,6 +1,6 @@
-import React, {createContext, useContext, useState, useMemo, useEffect, useCallback} from 'react';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
-import { createAppTheme } from '../styles/theme'; 
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createAppTheme } from '../styles/theme';
 
 const AppThemeContext = createContext(null);
 
@@ -8,13 +8,14 @@ export const AppThemeProvider = ({ children }) => {
     const [mode, setMode] = useState(() => {
         const savedMode = localStorage.getItem('themeMode');
         if (savedMode) return savedMode;
-        const prefersDarkModeSystem = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const prefersDarkModeSystem =
+            window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
         return prefersDarkModeSystem ? 'dark' : 'light';
     });
 
     useEffect(() => {
         const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        const handleChange = (e) => {
+        const handleChange = e => {
             // Pokud uživatel explicitně nevybral režim, přizpůsob se systému
             if (!localStorage.getItem('themeMode')) {
                 setMode(e.matches ? 'dark' : 'light');
@@ -25,7 +26,7 @@ export const AppThemeProvider = ({ children }) => {
     }, []);
 
     const toggleColorMode = useCallback(() => {
-        setMode((prevMode) => {
+        setMode(prevMode => {
             const newMode = prevMode === 'light' ? 'dark' : 'light';
             localStorage.setItem('themeMode', newMode);
             return newMode;
@@ -41,9 +42,7 @@ export const AppThemeProvider = ({ children }) => {
 
     return (
         <AppThemeContext.Provider value={value}>
-            <MuiThemeProvider theme={theme}>
-                {children}
-            </MuiThemeProvider>
+            <MuiThemeProvider theme={theme}>{children}</MuiThemeProvider>
         </AppThemeContext.Provider>
     );
 };

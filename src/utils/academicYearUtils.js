@@ -27,4 +27,4 @@ export const generateAcademicYears = () => {
         years.push({ value: academicYearValue, label: academicYearLabel });
     }
     return years;
-}; 
+};

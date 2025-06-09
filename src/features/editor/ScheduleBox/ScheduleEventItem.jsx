@@ -1,9 +1,17 @@
-import React, { useState } from 'react';
-import { Box, Typography, Popover, Paper, Tooltip, alpha, styled, Stack, Divider } from '@mui/material';
+import {
+    Box,
+    Divider,
+    Paper,
+    Popover,
+    Tooltip,
+    Typography,
+    alpha,
+    styled
+} from '@mui/material';
 import { useTheme } from '@mui/material/styles';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { EVENT_TYPE_TO_KEY_MAP } from '../../../services/CourseClass';
-import { ENROLLMENT_KEY_TO_SHORT_I18N_KEY } from '../../../constants/constants.js';
 import { getEventTypePatterns } from '../../../styles/patterns';
 
 // Funkce pro získání barvy rozvrhové akce na základě typu a tématu
@@ -41,7 +49,7 @@ const EventWrapper = styled(Box)(({ theme, eventcolor, notchcolor, patternimage 
         borderColor: theme.palette.primary.main,
         boxShadow: theme.shadows[2],
         transform: 'scale(1.02)',
-        zIndex: 10
+        zIndex: 10,
     },
     '&::before': {
         content: '""',
@@ -53,7 +61,7 @@ const EventWrapper = styled(Box)(({ theme, eventcolor, notchcolor, patternimage 
         backgroundColor: notchcolor,
         borderTopLeftRadius: '3px',
         borderBottomLeftRadius: '3px',
-    }
+    },
 }));
 
 // Komponenta ScheduleEventItem zobrazuje jednotlivé akce v rozvrhu
@@ -64,7 +72,7 @@ function ScheduleEventItem({ eventData, course, style, scheduleColorMode }) {
     const theme = useTheme();
     const [anchorEl, setAnchorEl] = useState(null);
 
-    const handleClick = (event) => setAnchorEl(event.currentTarget);
+    const handleClick = event => setAnchorEl(event.currentTarget);
     const handleClose = () => setAnchorEl(null);
     const open = Boolean(anchorEl);
     const popoverId = open ? `event-popover-${eventData.id}` : undefined;
@@ -79,12 +87,12 @@ function ScheduleEventItem({ eventData, course, style, scheduleColorMode }) {
     const courseColor = course.color || theme.palette.grey[500]; // Barva předmětu, pokud není nastavená - použije se šedá
 
     const patterns = getEventTypePatterns(theme);
-    const patternImage = isCourseColorMode ? 'none' : (patterns[eventTypeKey] || 'none');
-    
+    const patternImage = isCourseColorMode ? 'none' : patterns[eventTypeKey] || 'none';
+
     const backgroundColor = isCourseColorMode ? alpha(courseColor, 0.25) : eventTypeBgColor; //
-    
+
     const notchColor = isCourseColorMode ? eventTypeSolidColor : courseColor;
-    
+
     const courseShortCode = course.getShortCode();
     const capacityText = `${eventData.currentCapacity} / ${eventData.maxCapacity}`;
     const fullInstructorNameForPopover = eventData.instructor || '-';
@@ -93,11 +101,16 @@ function ScheduleEventItem({ eventData, course, style, scheduleColorMode }) {
         const nameTokens = eventData.instructor.split(',')[0].trim().split(' ').filter(Boolean);
         displayInstructorName = nameTokens[nameTokens.length - 1];
     }
-    const roomText = eventData.isVirtual ? t('labels.virtualEvent', 'Virtuální') : (eventData.room || '-'); // Zobrazí text místnosti, pokud se jedná o virtuální akci, zobrazí se "Virtuální", jinak se zobrazí zadaná místnost nebo '-'
+    const roomText = eventData.isVirtual
+        ? t('labels.virtualEvent', 'Virtuální')
+        : eventData.room || '-'; // Zobrazí text místnosti, pokud se jedná o virtuální akci, zobrazí se "Virtuální", jinak se zobrazí zadaná místnost nebo '-'
     let recurrenceDisplay = ''; // Proměnná pro zobrazení opakování akce
     if (eventData.recurrence) {
         const recurrenceKey = eventData.recurrence.toLowerCase().replace(/\s+/g, '');
-        recurrenceDisplay = t(`courseEvent.recurrenceShort.${recurrenceKey}`, eventData.recurrence.substring(0,2).toUpperCase());
+        recurrenceDisplay = t(
+            `courseEvent.recurrenceShort.${recurrenceKey}`,
+            eventData.recurrence.substring(0, 2).toUpperCase()
+        );
     }
 
     return (
@@ -118,13 +131,21 @@ function ScheduleEventItem({ eventData, course, style, scheduleColorMode }) {
                     <Typography variant="caption" fontWeight="bold" noWrap sx={{ lineHeight: 1.2 }}>
                         {courseShortCode}
                     </Typography>
-                    <Typography variant="caption" noWrap sx={{ fontSize: '0.7rem', lineHeight: 1.1 }}>
+                    <Typography
+                        variant="caption"
+                        noWrap
+                        sx={{ fontSize: '0.7rem', lineHeight: 1.1 }}
+                    >
                         {roomText || '-'} {recurrenceDisplay && `(${recurrenceDisplay})`}
                     </Typography>
-                    
+
                     <Box display="flex" justifyContent="space-between" alignItems="center">
-                        <Typography variant="caption" noWrap sx={{ fontSize: '0.7rem', lineHeight: 1.1 }}>
-                            {(displayInstructorName || '-').substring(0,15)}
+                        <Typography
+                            variant="caption"
+                            noWrap
+                            sx={{ fontSize: '0.7rem', lineHeight: 1.1 }}
+                        >
+                            {(displayInstructorName || '-').substring(0, 15)}
                         </Typography>
                     </Box>
                 </EventWrapper>
@@ -139,15 +160,37 @@ function ScheduleEventItem({ eventData, course, style, scheduleColorMode }) {
                 transformOrigin={{ vertical: 'top', horizontal: 'left' }}
             >
                 <Paper sx={{ p: 2, maxWidth: 300 }}>
-                    <Typography variant="subtitle1">{course.name} ({courseShortCode})</Typography>
-                    <Typography variant="subtitle2">{t(`courseEvent.${eventTypeKey}`, eventData.type)}</Typography>
+                    <Typography variant="subtitle1">
+                        {course.name} ({courseShortCode})
+                    </Typography>
+                    <Typography variant="subtitle2">
+                        {t(`courseEvent.${eventTypeKey}`, eventData.type)}
+                    </Typography>
                     <Divider sx={{ my: 1 }} />
-                    <Typography variant="body2">{t('labels.time', 'Čas')}: {`${eventData.startTime} - ${eventData.endTime}`}</Typography>
-                    <Typography variant="body2">{t('labels.room', 'Místnost')}: {roomText || '-'}</Typography>
-                    <Typography variant="body2">{t('labels.instructor', 'Vyučující')}: {fullInstructorNameForPopover}</Typography>
-                    <Typography variant="body2">{t('labels.capacity', 'Kapacita')}: {capacityText}</Typography>
-                    <Typography variant="body2">{t('labels.recurrence', 'Opakování')}: {t(`courseEvent.${eventData.recurrence.toLowerCase().replace(/\s+/g, '')}`, eventData.recurrence)}</Typography>
-                    {eventData.note && <Typography variant="body2" sx={{mt: 1, fontStyle: 'italic'}}>{t('labels.notes', 'Poznámka')}: {eventData.note}</Typography>}
+                    <Typography variant="body2">
+                        {t('labels.time', 'Čas')}: {`${eventData.startTime} - ${eventData.endTime}`}
+                    </Typography>
+                    <Typography variant="body2">
+                        {t('labels.room', 'Místnost')}: {roomText || '-'}
+                    </Typography>
+                    <Typography variant="body2">
+                        {t('labels.instructor', 'Vyučující')}: {fullInstructorNameForPopover}
+                    </Typography>
+                    <Typography variant="body2">
+                        {t('labels.capacity', 'Kapacita')}: {capacityText}
+                    </Typography>
+                    <Typography variant="body2">
+                        {t('labels.recurrence', 'Opakování')}:{' '}
+                        {t(
+                            `courseEvent.${eventData.recurrence.toLowerCase().replace(/\s+/g, '')}`,
+                            eventData.recurrence
+                        )}
+                    </Typography>
+                    {eventData.note && (
+                        <Typography variant="body2" sx={{ mt: 1, fontStyle: 'italic' }}>
+                            {t('labels.notes', 'Poznámka')}: {eventData.note}
+                        </Typography>
+                    )}
                 </Paper>
             </Popover>
         </>

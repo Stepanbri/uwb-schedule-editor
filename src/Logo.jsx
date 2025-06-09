@@ -1,14 +1,14 @@
-import React from 'react';
-import { Button, Box, Typography } from '@mui/material';
-import { Link as RouterLink } from 'react-router-dom';
+import { Box, Button, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { Link as RouterLink } from 'react-router-dom';
 import WebLogoSrc from './assets/logo.svg'; // Import SVG jako zdroj
 
 const Logo = ({ inDrawer = false }) => {
     const { t } = useTranslation();
 
     return (
-        <Button disableRipple
+        <Button
+            disableRipple
             component={RouterLink}
             to="/" // Přesměrování na Landing Page
             sx={{
@@ -35,7 +35,11 @@ const Logo = ({ inDrawer = false }) => {
                 }}
             />
             {!inDrawer && (
-                <Typography variant="h5" component="div" sx={{ flexGrow: 0, whiteSpace: 'nowrap', display: { xs: 'none', sm: 'block' } }}>
+                <Typography
+                    variant="h5"
+                    component="div"
+                    sx={{ flexGrow: 0, whiteSpace: 'nowrap', display: { xs: 'none', sm: 'block' } }}
+                >
                     {t('appTitleShort', 'Planner')}
                 </Typography>
             )}

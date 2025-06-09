@@ -1,9 +1,22 @@
-import React, { useMemo } from 'react';
-import { Paper, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, styled, Box, Tabs, Tab, Tooltip, Pagination, Stack } from '@mui/material';
+import {
+    Box,
+    Pagination,
+    Paper,
+    Stack,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Typography,
+    styled
+} from '@mui/material';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { DAY_I18N_KEYS } from '../../../constants/constants';
 import { useWorkspace } from '../../../contexts/WorkspaceContext';
 import { timeToMinutes } from '../../../utils/timeUtils';
-import { DAY_I18N_KEYS } from '../../../constants/constants';
 import ScheduleEventItem from './ScheduleEventItem';
 
 // Konstanty pro rozvrh
@@ -36,7 +49,7 @@ const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
     maxHeight: `calc(100vh - ${theme.mixins.toolbar.minHeight}px - 48px - ${TIME_HEADER_HEIGHT}px - ${theme.spacing(1.5)} )`,
     overflow: 'auto',
     position: 'relative',
-    border: `1px solid ${theme.palette.divider}`
+    border: `1px solid ${theme.palette.divider}`,
 }));
 
 const StickyTableCell = styled(TableCell)(({ theme, stickytype }) => ({
@@ -66,7 +79,7 @@ const StickyTableCell = styled(TableCell)(({ theme, stickytype }) => ({
         minWidth: DAY_CELL_WIDTH,
         width: DAY_CELL_WIDTH,
         borderRight: `1px solid ${theme.palette.divider}`,
-    })
+    }),
 }));
 
 const DayRowCell = styled(TableCell)(({ theme }) => ({
@@ -86,7 +99,7 @@ const ScheduleSwitcherWrapper = styled(Box)(({ theme }) => ({
     backgroundColor: theme.palette.background.default,
 }));
 
-export const layoutEvents = (eventsForDay) => {
+export const layoutEvents = eventsForDay => {
     if (!eventsForDay || eventsForDay.length === 0) return [];
 
     const sortedEvents = [...eventsForDay].sort((a, b) => {
@@ -128,30 +141,33 @@ export const layoutEvents = (eventsForDay) => {
 
 function ScheduleBox() {
     const { t } = useTranslation();
-    const { 
-        activeSchedule, 
-        courses, 
-        scheduleColorMode, 
-        generatedSchedules, 
-        activeScheduleIndex, 
-        setActiveGeneratedSchedule 
+    const {
+        activeSchedule,
+        courses,
+        scheduleColorMode,
+        generatedSchedules,
+        activeScheduleIndex,
+        setActiveGeneratedSchedule,
     } = useWorkspace();
 
     const scheduledEvents = activeSchedule ? activeSchedule.getAllEnrolledEvents() : [];
 
     const eventsByDay = useMemo(() => {
-        const grouped = Array(7).fill(null).map(() => []);
+        const grouped = Array(7)
+            .fill(null)
+            .map(() => []);
         scheduledEvents.forEach(event => {
             if (event.day >= 0 && event.day < 7) {
-                const course = courses.find(c => c.id === event.courseId || c.stagId === event.courseId);
+                const course = courses.find(
+                    c => c.id === event.courseId || c.stagId === event.courseId
+                );
                 grouped[event.day].push({ ...event, course });
             }
         });
         return grouped.map(dayEvents => layoutEvents(dayEvents));
     }, [scheduledEvents, courses]);
 
-
-    const timeToBlockPosition = (timeInMinutes) => {
+    const timeToBlockPosition = timeInMinutes => {
         const firstBlockStart = timeToMinutes(TIME_BLOCKS[0].start);
         if (timeInMinutes <= firstBlockStart) return 0;
 
@@ -164,7 +180,10 @@ function ScheduleBox() {
             const blockEnd = timeToMinutes(block.end);
 
             if (timeInMinutes >= blockStart && timeInMinutes <= blockEnd) {
-                const progressInBlock = (blockEnd - blockStart > 0) ? (timeInMinutes - blockStart) / (blockEnd - blockStart) : 0;
+                const progressInBlock =
+                    blockEnd - blockStart > 0
+                        ? (timeInMinutes - blockStart) / (blockEnd - blockStart)
+                        : 0;
                 return i + progressInBlock;
             }
 
@@ -210,24 +229,33 @@ function ScheduleBox() {
     };
 
     return (
-        <Box elevation={1} sx={{ height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column'}}>
+        <Box
+            elevation={1}
+            sx={{ height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}
+        >
             <StyledTableContainer component={Paper}>
                 <Table stickyHeader size="small">
                     <TableHead>
-                        <TableRow sx={{ height: 'auto' /* TIME_HEADER_HEIGHT -> auto pro přizpůsobení obsahu */}}>
+                        <TableRow
+                            sx={{
+                                height: 'auto' /* TIME_HEADER_HEIGHT -> auto pro přizpůsobení obsahu */,
+                            }}
+                        >
                             <StickyTableCell stickytype="corner">
                                 {t('schedule.dayTime', 'Den/Čas')}
                             </StickyTableCell>
                             {TIME_BLOCKS.map((block, index) => (
                                 <StickyTableCell key={index} stickytype="time">
-                                    <Box sx={{
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        justifyContent: 'flex-start',
-                                        alignItems: 'center',
-                                        height: '100%',
-                                        lineHeight: 1.2,
-                                    }}>
+                                    <Box
+                                        sx={{
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            justifyContent: 'flex-start',
+                                            alignItems: 'center',
+                                            height: '100%',
+                                            lineHeight: 1.2,
+                                        }}
+                                    >
                                         <Typography
                                             variant="caption"
                                             display="block"
@@ -242,20 +270,38 @@ function ScheduleBox() {
                                         >
                                             {block.label}
                                         </Typography>
-                                        <Box sx={{ 
-                                            display: 'flex', 
-                                            flexDirection: 'column', 
-                                            justifyContent: 'space-between',
-                                            alignItems: 'stretch',
-                                            width: '100%', 
-                                            px: '4px',
-                                            pb: '4px',
-                                            flexGrow: 1 
-                                        }}>
-                                            <Typography component="div" variant="caption" sx={{ fontSize: 'inherit', lineHeight: 1.1, textAlign: 'left' }}>
+                                        <Box
+                                            sx={{
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                justifyContent: 'space-between',
+                                                alignItems: 'stretch',
+                                                width: '100%',
+                                                px: '4px',
+                                                pb: '4px',
+                                                flexGrow: 1,
+                                            }}
+                                        >
+                                            <Typography
+                                                component="div"
+                                                variant="caption"
+                                                sx={{
+                                                    fontSize: 'inherit',
+                                                    lineHeight: 1.1,
+                                                    textAlign: 'left',
+                                                }}
+                                            >
                                                 {block.start}
                                             </Typography>
-                                            <Typography component="div" variant="caption" sx={{ fontSize: 'inherit', lineHeight: 1.1, textAlign: 'right' }}>
+                                            <Typography
+                                                component="div"
+                                                variant="caption"
+                                                sx={{
+                                                    fontSize: 'inherit',
+                                                    lineHeight: 1.1,
+                                                    textAlign: 'right',
+                                                }}
+                                            >
                                                 {block.end}
                                             </Typography>
                                         </Box>
@@ -267,17 +313,25 @@ function ScheduleBox() {
                     <TableBody>
                         {DAY_I18N_KEYS.map((dayKey, dayIndex) => {
                             const levelsForDay = eventsByDay[dayIndex] || [];
-                            const rowHeight = Math.max(1, levelsForDay.length) * (MIN_EVENT_HEIGHT + 4) - 4;
+                            const rowHeight =
+                                Math.max(1, levelsForDay.length) * (MIN_EVENT_HEIGHT + 4) - 4;
 
                             return (
-                                <TableRow key={dayKey} sx={{ height: `${rowHeight}px`}}>
-                                    <StickyTableCell stickytype="day" component="th" scope="row" variant="head">
+                                <TableRow key={dayKey} sx={{ height: `${rowHeight}px` }}>
+                                    <StickyTableCell
+                                        stickytype="day"
+                                        component="th"
+                                        scope="row"
+                                        variant="head"
+                                    >
                                         <Typography fontWeight="bold">{t(dayKey)}</Typography>
                                     </StickyTableCell>
                                     <DayRowCell colSpan={TIME_BLOCKS.length}>
-                                        {levelsForDay.map((levelEvents, levelIndex) => (
-                                            levelEvents.map(eventData => renderEvent(eventData, levelIndex, dayIndex))
-                                        ))}
+                                        {levelsForDay.map((levelEvents, levelIndex) =>
+                                            levelEvents.map(eventData =>
+                                                renderEvent(eventData, levelIndex, dayIndex)
+                                            )
+                                        )}
                                     </DayRowCell>
                                 </TableRow>
                             );
@@ -285,15 +339,15 @@ function ScheduleBox() {
                     </TableBody>
                 </Table>
             </StyledTableContainer>
-            
+
             {generatedSchedules.length > 0 && (
                 <ScheduleSwitcherWrapper>
                     <Stack spacing={1} direction="column" alignItems="center">
                         <Typography variant="body2" color="text.secondary">
                             {t('schedule.switcherTitle', 'Varianty rozvrhu')}
                         </Typography>
-                        <Pagination 
-                            count={generatedSchedules.length + 1} 
+                        <Pagination
+                            count={generatedSchedules.length + 1}
                             page={activeScheduleIndex + 2} // +2 protože -1 je primární a indexy začínají od 1
                             onChange={(event, value) => setActiveGeneratedSchedule(value - 2)} // -2 pro konverzi zpět na indexy
                             color="primary"
@@ -302,18 +356,22 @@ function ScheduleBox() {
                             showLastButton
                             siblingCount={1}
                             boundaryCount={1}
-                            sx={{ 
+                            sx={{
                                 '& .MuiPaginationItem-root.Mui-selected': {
                                     fontWeight: 'bold',
                                     backgroundColor: theme => theme.palette.primary.main,
                                     color: theme => theme.palette.primary.contrastText,
-                                }
+                                },
                             }}
                         />
                         <Typography variant="caption" color="text.secondary">
-                            {activeScheduleIndex === -1 
-                                ? t('schedule.primarySchedule', 'Primární rozvrh') 
-                                : t('schedule.generatedSchedule', 'Vygenerovaný rozvrh č. {{number}}', { number: activeScheduleIndex + 1 })}
+                            {activeScheduleIndex === -1
+                                ? t('schedule.primarySchedule', 'Primární rozvrh')
+                                : t(
+                                      'schedule.generatedSchedule',
+                                      'Vygenerovaný rozvrh č. {{number}}',
+                                      { number: activeScheduleIndex + 1 }
+                                  )}
                         </Typography>
                     </Stack>
                 </ScheduleSwitcherWrapper>

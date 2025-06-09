@@ -1,19 +1,18 @@
-import React from 'react';
-import { Link as RouterLink, useLocation } from 'react-router-dom';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
+import LanguageIcon from '@mui/icons-material/Language';
 import {
-    Drawer,
     Box,
+    Divider,
+    Drawer,
     List,
     ListItem,
     ListItemButton,
     ListItemIcon,
     ListItemText,
-    Divider
 } from '@mui/material';
-import Brightness4Icon from '@mui/icons-material/Brightness4';
-import Brightness7Icon from '@mui/icons-material/Brightness7';
-import LanguageIcon from '@mui/icons-material/Language';
 import { useTranslation } from 'react-i18next';
+import { Link as RouterLink, useLocation } from 'react-router-dom';
 import Logo from '../../Logo';
 
 /**
@@ -37,7 +36,7 @@ const SideDrawer = ({
     toggleLanguage,
     onDrawerToggle,
     mobileOpen,
-    isMobileOrSmaller
+    isMobileOrSmaller,
 }) => {
     const { t } = useTranslation();
     const location = useLocation();
@@ -45,16 +44,26 @@ const SideDrawer = ({
     // Obsah, který se zobrazí uvnitř menu.
     // Při kliknutí na jakoukoliv položku se menu zavře díky onDrawerToggle na root elementu.
     const drawerContent = (
-        <Box onClick={onDrawerToggle} sx={{ textAlign: 'center', width: { xs: '80vw', sm: 280 } }} role="presentation">
+        <Box
+            onClick={onDrawerToggle}
+            sx={{ textAlign: 'center', width: { xs: '80vw', sm: 280 } }}
+            role="presentation"
+        >
             <Box sx={{ my: 2, display: 'flex', justifyContent: 'center' }}>
                 <Logo inDrawer={true} />
             </Box>
             <Divider />
             <List>
-                {navItems.map((item) => (
+                {navItems.map(item => (
                     <ListItem key={item.textKey} disablePadding>
-                        <ListItemButton component={RouterLink} to={item.path} selected={location.pathname === item.path}>
-                            <ListItemIcon sx={{ minWidth: 'auto', mr: 2 }}>{item.icon}</ListItemIcon>
+                        <ListItemButton
+                            component={RouterLink}
+                            to={item.path}
+                            selected={location.pathname === item.path}
+                        >
+                            <ListItemIcon sx={{ minWidth: 'auto', mr: 2 }}>
+                                {item.icon}
+                            </ListItemIcon>
                             <ListItemText primary={t(item.textKey)} />
                         </ListItemButton>
                     </ListItem>
@@ -64,14 +73,24 @@ const SideDrawer = ({
             <List>
                 <ListItem disablePadding>
                     <ListItemButton onClick={toggleLanguage}>
-                        <ListItemIcon sx={{ minWidth: 'auto', mr: 2 }}><LanguageIcon /></ListItemIcon>
-                        <ListItemText primary={`${t('languageToggle')}: ${currentLanguage.toUpperCase()}`} />
+                        <ListItemIcon sx={{ minWidth: 'auto', mr: 2 }}>
+                            <LanguageIcon />
+                        </ListItemIcon>
+                        <ListItemText
+                            primary={`${t('languageToggle')}: ${currentLanguage.toUpperCase()}`}
+                        />
                     </ListItemButton>
                 </ListItem>
                 <ListItem disablePadding>
                     <ListItemButton onClick={toggleColorMode}>
-                        <ListItemIcon sx={{ minWidth: 'auto', mr: 2 }}>{mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}</ListItemIcon>
-                        <ListItemText primary={mode === 'dark' ? t('themeToggle.light') : t('themeToggle.dark')} />
+                        <ListItemIcon sx={{ minWidth: 'auto', mr: 2 }}>
+                            {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+                        </ListItemIcon>
+                        <ListItemText
+                            primary={
+                                mode === 'dark' ? t('themeToggle.light') : t('themeToggle.dark')
+                            }
+                        />
                     </ListItemButton>
                 </ListItem>
             </List>
@@ -92,4 +111,4 @@ const SideDrawer = ({
     );
 };
 
-export default SideDrawer; 
+export default SideDrawer;

@@ -1,24 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
-import {
-    CssBaseline,
-    Box,
-    useMediaQuery,
-    Container
-} from '@mui/material';
-import { useTheme } from '@mui/material/styles';
 import EditIcon from '@mui/icons-material/Edit';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import { Box, CssBaseline, useMediaQuery } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Route, Routes, useLocation } from 'react-router-dom';
 
+import { SnackbarProvider } from './contexts/SnackbarContext';
+import { StagApiProvider } from './contexts/StagApiContext';
 import { AppThemeProvider, useAppContextTheme } from './contexts/ThemeContext';
 import { WorkspaceProvider } from './contexts/WorkspaceContext';
-import { StagApiProvider } from './contexts/StagApiContext';
-import { SnackbarProvider } from './contexts/SnackbarContext';
 
-import LandingPage from './features/landing/LandingPage.jsx';
-import FAQPage from './features/faq/FAQPage.jsx';
 import EditorPage from './features/editor/EditorPage.jsx';
+import FAQPage from './features/faq/FAQPage.jsx';
+import LandingPage from './features/landing/LandingPage.jsx';
 import Header from './features/navigation/Header.jsx';
 import SideDrawer from './features/navigation/SideDrawer.jsx';
 
@@ -43,7 +38,7 @@ const MainAppContent = () => {
     // Efekt pro nastavení jazyka při prvním načtení komponenty
     useEffect(() => {
         const savedLang = localStorage.getItem('i18nextLng')?.split('-')[0];
-        const targetLang = (savedLang && ['cs', 'en'].includes(savedLang)) ? savedLang : 'cs';
+        const targetLang = savedLang && ['cs', 'en'].includes(savedLang) ? savedLang : 'cs';
         setCurrentLanguage(targetLang);
         if (i18n.language !== targetLang) {
             i18n.changeLanguage(targetLang);
@@ -102,7 +97,7 @@ const MainAppContent = () => {
                         // Pro stránku editoru chceme zamezit skrolování na hlavní úrovni,
                         // protože layout je rozdělen na samostatně skrolovatelné panely.
                         overflowY: location.pathname === '/editor' ? 'hidden' : 'auto',
-                        height: location.pathname === '/editor' ? 'calc(100vh - 64px)' : 'auto' // Předpoklad výšky Appbaru 64px
+                        height: location.pathname === '/editor' ? 'calc(100vh - 64px)' : 'auto', // Předpoklad výšky Appbaru 64px
                     }}
                 >
                     <Routes>
@@ -114,7 +109,7 @@ const MainAppContent = () => {
             </Box>
         </>
     );
-}
+};
 
 /**
  * Kořenová komponenta aplikace.
