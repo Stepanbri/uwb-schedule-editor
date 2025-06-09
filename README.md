@@ -1,5 +1,8 @@
 # UWB Schedule Editor
 
+[![Deploy to GitHub Pages](https://github.com/stepanbri/uwb-schedule-editor/actions/workflows/deploy.yml/badge.svg)](https://github.com/stepanbri/uwb-schedule-editor/actions/workflows/deploy.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A React-based web application for students at the University of West Bohemia (UWB) to create, edit, and manage their course schedules. Integrates with the university's STAG system.
 
 ![UWB Schedule Editor Screenshot](https://via.placeholder.com/800x450?text=UWB+Schedule+Editor+Screenshot)
@@ -58,6 +61,9 @@ This Schedule Planner was created as a semester project for the KIV/UUR (User In
 ---
 
 # UWB Schedule Editor (Česky)
+
+[![Deploy to GitHub Pages](https://github.com/stepanbri/uwb-schedule-editor/actions/workflows/deploy.yml/badge.svg)](https://github.com/stepanbri/uwb-schedule-editor/actions/workflows/deploy.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Webová aplikace založená na Reactu, umožňující studentům Západočeské univerzity (ZČU) vytvářet a spravovat své rozvrhy. Integruje se s univerzitním systémem STAG.
 
