@@ -30,7 +30,7 @@ function LandingPage() {
     const { t } = useTranslation();
     const theme = useTheme();
     const UNIVERSITY_URL = 'https://www.zcu.cz';
-    const PROJECT_GITHUB_URL = 'https://github.com/stepanbri/uwb-scheduler';
+    const PROJECT_GITHUB_URL = 'https://github.com/stepanbri/uwb-schedule-editor';
 
     const technologies = [
         {

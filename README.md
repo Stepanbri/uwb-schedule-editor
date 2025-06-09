@@ -4,7 +4,7 @@ A React-based web application for students at the University of West Bohemia (UW
 
 ![UWB Schedule Editor Screenshot](https://via.placeholder.com/800x450?text=UWB+Schedule+Editor+Screenshot)
 
-## 🌟 Features
+## Features
 
 - **Course Management**: Add, remove, and organize courses in your schedule
 - **STAG Integration**: Import courses directly from the university's STAG system
@@ -14,7 +14,7 @@ A React-based web application for students at the University of West Bohemia (UW
 - **Responsive Design**: Works on desktop and mobile devices
 - **Export Functionality**: Save and export your schedule as an image
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
 # Clone repository
@@ -30,14 +30,14 @@ npm run dev
 
 Open your browser: `http://localhost:5173`
 
-## 🛠️ Commands
+## Commands
 
 - **Development**: `npm run dev`
 - **Build**: `npm run build`
 - **Lint**: `npm run lint`
-- **Format**: `npm run format` (add to package.json if needed)
+- **Format**: `npm run format`
 
-## 🧩 Project Structure
+## Project Structure
 
 The project follows a feature-based architecture with these main components:
 
@@ -46,15 +46,14 @@ The project follows a feature-based architecture with these main components:
 - **Contexts**: Snackbar, StagApi, Theme, Workspace providers
 - **Internationalization**: Czech and English translations
 
-## 📚 About the Project
+## About the Project
 
 This Schedule Planner was created as a semester project for the KIV/UUR (User Interface Design) course at the Faculty of Applied Sciences, University of West Bohemia. The goal was to build a modern and user-friendly tool for students to plan their schedules before the official course registration.
 
-## 🙏 Acknowledgements
+## Acknowledgements
 
 - University of West Bohemia for providing the STAG API
 - Ing. Richard Lipka, Ph.D., and Ing. Michal Nykl, Ph.D., for their instruction in KIV/UUR
-- All contributors who have helped with the development
 
 ---
 
@@ -62,7 +61,7 @@ This Schedule Planner was created as a semester project for the KIV/UUR (User In
 
 Webová aplikace založená na Reactu, umožňující studentům Západočeské univerzity (ZČU) vytvářet a spravovat své rozvrhy. Integruje se s univerzitním systémem STAG.
 
-## 🌟 Funkce
+## Funkce
 
 - **Správa předmětů**: Přidávání a organizace předmětů v rozvrhu
 - **Integrace se STAGem**: Import předmětů přímo z univerzitního systému
@@ -72,7 +71,7 @@ Webová aplikace založená na Reactu, umožňující studentům Západočeské 
 - **Responzivní design**: Funguje na počítačích i mobilních zařízeních
 - **Funkce exportu**: Uložení a export rozvrhu jako obrázku
 
-## 🚀 Rychlý start
+## Rychlý start
 
 ```bash
 # Klonování repozitáře
@@ -88,18 +87,18 @@ npm run dev
 
 Otevřete prohlížeč: `http://localhost:5173`
 
-## 🛠️ Příkazy
+## Příkazy
 
 - **Vývoj**: `npm run dev`
 - **Sestavení**: `npm run build`
 - **Lint**: `npm run lint`
-- **Formátování**: `npm run format` (je třeba přidat do package.json)
+- **Formátování**: `npm run format`
 
-## 📚 O projektu
+## O projektu
 
 Tento Plánovač rozvrhu vznikl jako semestrální práce v rámci předmětu KIV/UUR (Úvod do uživatelských rozhraní) na Fakultě aplikovaných věd Západočeské univerzity v Plzni. Cílem bylo vytvořit uživatelsky přívětivý nástroj pro studenty k sestavení rozvrhu před oficiálním termínem předezápisu.
 
-## 🙏 Poděkování
+## Poděkování
 
 - Západočeská univerzita za poskytnutí STAG API
 - Ing. Richard Lipka, Ph.D., a Ing. Michal Nykl, Ph.D., za vedení předmětu KIV/UUR

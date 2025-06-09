@@ -409,7 +409,7 @@
     "q6": "Mohu si svůj rozvrh uložit nebo sdílet s kamarádem?",
     "a6": "Ano. V nástrojové liště nad rozvrhem naleznete ikony pro export a import. Tlačítko 'Exportovat pracovní plochu' stáhne soubor ve formátu JSON, který obsahuje všechny vaše načtené předměty, nastavené preference a aktuálně zobrazený rozvrh. Tento soubor si můžete zálohovat nebo ho poslat komukoli, kdo si ho může pomocí tlačítka 'Importovat pracovní plochu' nahrát do své aplikace a vidět tak přesně vaši konfiguraci.",
     "q7": "Našel jsem chybu nebo mám nápad na vylepšení. Co s tím?",
-    "a7": "Super! Jelikož se jedná o studentský projekt, zpětná vazba je velmi vítána. Pro nahlášení chyb nebo návrhů na nové funkce prosím využijte záložku 'Issues' na GitHubu projektu: https://github.com/stepanbri/uwb-scheduler.",
+    "a7": "Super! Jelikož se jedná o studentský projekt, zpětná vazba je velmi vítána. Pro nahlášení chyb nebo návrhů na nové funkce prosím využijte záložku 'Issues' na GitHubu projektu: https://github.com/stepanbri/uwb-schedule-editor/issues.",
     "q8": "Proč se musím přihlašovat přes externí stránku ZČU?",
     "a8": "Tento postup se nazývá OAuth 2.0 a je to standardní a bezpečný způsob, jak udělit aplikaci třetí straně (jako je tato) omezený přístup k vašim datům, aniž byste jí museli sdělovat své heslo. Tím, že zadáváte heslo na stránkách ZČU, máte jistotu, že ho naše aplikace nikdy neuvidí. Aplikace obdrží pouze dočasný klíč (ticket), který ji opravňuje k načtení vašich studijních dat ze STAGu. Je to stejný princip, jako když se pomocí účtu Google nebo Facebook přihlašujete do jiných služeb.",
     "q9": "Co znamenají barvy v rozvrhu?",

@@ -406,7 +406,7 @@
     "q6": "Can I officially enroll in courses through this application?",
     "a6": "No. This application is solely for visualizing and planning your schedule. Official enrollment in courses and schedule events must be done through the standard STAG/Portal UWB system within the designated periods.",
     "q7": "I found a bug or have an idea for an improvement. What should I do?",
-    "a7": "Great! As this is a student project, feedback is very welcome. To report bugs or suggest new features, please use the 'Issues' tab on the project's GitHub: https://github.com/stepanbri/uwb-scheduler/issues.",
+    "a7": "Great! As this is a student project, feedback is very welcome. To report bugs or suggest new features, please use the 'Issues' tab on the project's GitHub: https://github.com/stepanbri/uwb-schedule-editor/issues.",
     "q8": "Why do I have to log in through an external UWB page?",
     "a8": "This process is called OAuth 2.0 and it is a standard and secure way to grant a third-party application (like this one) limited access to your data without having to share your password with it. By entering your password on the UWB pages, you can be sure that our application will never see it. The application only receives a temporary, limited-validity 'ticket' that authorizes it to retrieve your study data from STAG. It's the same principle as when you log into other services using your Google or Facebook account.",
     "q9": "What do the colors in the schedule mean?",

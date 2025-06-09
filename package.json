@@ -1,6 +1,6 @@
 {
   "name": "uur-final-refactor",
-  "homepage": "https://stepanbri.github.io/uwb-schedule-editor",
+  "homepage": "rozvrh.stepanbri.cz",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -8,6 +8,7 @@
     "dev": "vite --host",
     "build": "vite build",
     "lint": "eslint .",
+    "format": "prettier --write \"src/**/*.{js,jsx,json,css}\"",
     "preview": "vite preview"
   },
   "dependencies": {
