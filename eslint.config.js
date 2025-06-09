@@ -2,6 +2,7 @@ import js from '@eslint/js'
 import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
+import prettier from 'eslint-config-prettier'
 
 export default [
   { ignores: ['dist'] },
@@ -29,5 +30,6 @@ export default [
         { allowConstantExport: true },
       ],
     },
+    extends: [...prettier],
   },
 ]
