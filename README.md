@@ -60,7 +60,7 @@ This Schedule Planner was created as a semester project for the KIV/UUR (User In
 
 ---
 
-# UWB Schedule Editor (Česky)
+## UWB Schedule Editor (Česky)
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/f875eae7-dfdb-41e9-a915-1e4895ab7d07/deploy-status)](https://app.netlify.com/projects/curious-zabaione-0a80f5/deploys)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)

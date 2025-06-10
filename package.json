@@ -1,5 +1,10 @@
 {
-  "name": "uur-final-refactor",
+  "name": "uwb-schedule-editor",
+  "description": "UWB Schedule Editor is a web application for creating and managing schedules for the University of West Bohemia in Pilsen.",
+  "author": {
+    "name": "Štěpán Bříza",
+    "email": "stepanbri@gmail.com",
+    "url": "https://stepanbri.cz"},
   "homepage": "rozvrh.stepanbri.cz",
   "private": true,
   "version": "0.0.0",
