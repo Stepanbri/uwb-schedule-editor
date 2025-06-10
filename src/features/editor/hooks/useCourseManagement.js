@@ -24,6 +24,7 @@ export const useCourseManagement = () => {
     const toggleEventInSchedule = useCallback(
         (eventToToggle, isCurrentlyEnrolled, courseContext) => {
             if (isCurrentlyEnrolled) {
+                // When un-enrolling, we always allow it
                 toggleEventInScheduleContext(eventToToggle, true);
                 showSnackbar(
                     t('alerts.eventUnenrolled', {
@@ -33,6 +34,7 @@ export const useCourseManagement = () => {
                     'info'
                 );
             } else {
+                // For enrolling, we need to check if the requirements are met
                 let canEnroll = true;
                 let alertMsg = '';
 
