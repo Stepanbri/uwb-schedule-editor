@@ -41,6 +41,7 @@ function FAQPage() {
         { id: 'q6', question: t('faqPage.q6'), answer: t('faqPage.a6') },
         { id: 'q7', question: t('faqPage.q7'), answer: t('faqPage.a7') },
         { id: 'q8', question: t('faqPage.q8'), answer: t('faqPage.a8') },
+        { id: 'q11', question: t('faqPage.q11'), answer: t('faqPage.a11') },
         // Zde můžete přidat další otázky a odpovědi
     ];
 
