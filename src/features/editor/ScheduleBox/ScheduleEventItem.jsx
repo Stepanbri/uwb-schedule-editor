@@ -1,5 +1,6 @@
 import {
     Box,
+    Checkbox,
     Divider,
     Paper,
     Popover,
@@ -29,7 +30,7 @@ const getEventTypeThemeColor = (eventType, theme, variant = 'background') => {
 // Zobrazí informace o rozvrhové akce, včetně názvu předmětu, času, místnosti a vyučujícího
 // Umožňuje interakci s rozvrhovou akcí a zobrazuje podrobnosti v popoveru
 // Používá se v komponentě ScheduleBox pro zobrazení jednotlivých rozvrhových akcí v rozvrhu
-const EventWrapper = styled(Box)(({ theme, eventcolor, notchcolor, patternimage }) => ({
+const EventWrapper = styled(Box)(({ theme, eventcolor, notchcolor, patternimage, isenrolled }) => ({
     backgroundColor: eventcolor,
     backgroundImage: patternimage,
     backgroundBlendMode: 'overlay',
@@ -45,11 +46,15 @@ const EventWrapper = styled(Box)(({ theme, eventcolor, notchcolor, patternimage 
     position: 'relative',
     color: theme.palette.getContrastText(eventcolor),
     transition: 'transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out',
+    opacity: isenrolled === 'true' ? 1 : 0.85,
+    filter: isenrolled === 'true' ? 'none' : 'grayscale(20%)',
     '&:hover': {
         borderColor: theme.palette.primary.main,
         boxShadow: theme.shadows[2],
         transform: 'scale(1.02)',
         zIndex: 10,
+        opacity: 1,
+        filter: 'none',
     },
     '&::before': {
         content: '""',
@@ -67,15 +72,28 @@ const EventWrapper = styled(Box)(({ theme, eventcolor, notchcolor, patternimage 
 // Komponenta ScheduleEventItem zobrazuje jednotlivé akce v rozvrhu
 // Používá se v komponentě ScheduleBox pro zobrazení jednotlivých akcí v rozvrhu
 // Přijímá data rozvrhových akcí, předměty a další stylování jako props
-function ScheduleEventItem({ eventData, course, style, scheduleColorMode }) {
+function ScheduleEventItem({ eventData, course, style, scheduleColorMode, isEnrolled, onToggleEvent }) {
     const { t } = useTranslation();
     const theme = useTheme();
     const [anchorEl, setAnchorEl] = useState(null);
 
-    const handleClick = event => setAnchorEl(event.currentTarget);
+    const handleClick = event => {
+        // Prevent click event from propagating to checkbox
+        if (event.target.closest('.event-checkbox')) {
+            return;
+        }
+        setAnchorEl(event.currentTarget);
+    };
     const handleClose = () => setAnchorEl(null);
     const open = Boolean(anchorEl);
     const popoverId = open ? `event-popover-${eventData.id}` : undefined;
+    
+    const handleToggle = (event) => {
+        event.stopPropagation();
+        if (onToggleEvent) {
+            onToggleEvent(eventData, isEnrolled);
+        }
+    };
 
     if (!eventData || !course) return null;
 
@@ -127,6 +145,7 @@ function ScheduleEventItem({ eventData, course, style, scheduleColorMode }) {
                     eventcolor={backgroundColor}
                     notchcolor={notchColor}
                     patternimage={patternImage}
+                    isenrolled={isEnrolled ? 'true' : 'false'}
                 >
                     <Typography variant="caption" fontWeight="bold" noWrap sx={{ lineHeight: 1.2 }}>
                         {courseShortCode}
@@ -139,14 +158,39 @@ function ScheduleEventItem({ eventData, course, style, scheduleColorMode }) {
                         {roomText || '-'} {recurrenceDisplay && `(${recurrenceDisplay})`}
                     </Typography>
 
-                    <Box display="flex" justifyContent="space-between" alignItems="center">
-                        <Typography
-                            variant="caption"
-                            noWrap
-                            sx={{ fontSize: '0.7rem', lineHeight: 1.1 }}
-                        >
-                            {(displayInstructorName || '-').substring(0, 15)}
-                        </Typography>
+                    <Typography
+                        variant="caption"
+                        noWrap
+                        sx={{ fontSize: '0.7rem', lineHeight: 1.1 }}
+                    >
+                        {(displayInstructorName || '-').substring(0, 15)}
+                    </Typography>
+                    
+                    <Box 
+                        className="event-checkbox"
+                        onClick={e => e.stopPropagation()}
+                        sx={{
+                            position: 'absolute',
+                            bottom: '2px',
+                            right: '2px',
+                            zIndex: 5
+                        }}
+                    >
+                        <Checkbox
+                            size="small"
+                            checked={isEnrolled}
+                            onChange={handleToggle}
+                            sx={{
+                                color: alpha(theme.palette.common.white, 0.9),
+                                padding: 0,
+                                '&.Mui-checked': {
+                                    color: theme.palette.common.white,
+                                },
+                                '&:hover': {
+                                    backgroundColor: alpha(theme.palette.common.white, 0.1),
+                                }
+                            }}
+                        />
                     </Box>
                 </EventWrapper>
             </Tooltip>
@@ -167,6 +211,9 @@ function ScheduleEventItem({ eventData, course, style, scheduleColorMode }) {
                         {t(`courseEvent.${eventTypeKey}`, eventData.type)}
                     </Typography>
                     <Divider sx={{ my: 1 }} />
+                    <Typography variant="body2" color={isEnrolled ? "success.main" : "text.primary"} fontWeight={isEnrolled ? "bold" : "normal"}>
+                        {isEnrolled ? t('labels.enrolledStatus', 'Zapsáno') : t('labels.notEnrolledStatus', 'Nezapsáno')}
+                    </Typography>
                     <Typography variant="body2">
                         {t('labels.time', 'Čas')}: {`${eventData.startTime} - ${eventData.endTime}`}
                     </Typography>

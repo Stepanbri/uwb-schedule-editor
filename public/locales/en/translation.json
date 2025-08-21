@@ -139,7 +139,9 @@
     "unknownDepartment": "Unknown Department",
     "noCoursesToDisplay": "No courses to display. Add a course or load a saved state.",
     "noEventsForCourse": "This course has no schedule events.",
-    "time": "Time"
+    "time": "Time",
+    "enrolledStatus": "Enrolled",
+    "notEnrolledStatus": "Not enrolled"
   },
   "tooltips": {
     "removeCourse": "Remove course {{courseName}} from workspace",

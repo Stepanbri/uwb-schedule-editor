@@ -142,7 +142,9 @@
     "unknownDepartment": "Neznámá katedra",
     "noCoursesToDisplay": "Žádné předměty k zobrazení. Přidejte předmět nebo načtěte uložený stav.",
     "noEventsForCourse": "Tento předmět nemá žádné rozvrhové akce.",
-    "time": "Čas"
+    "time": "Čas",
+    "enrolledStatus": "Zapsáno",
+    "notEnrolledStatus": "Nezapsáno"
   },
   "tooltips": {
     "removeCourse": "Odstranit předmět {{courseName}} z pracovní plochy",
